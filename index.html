@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset=" UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="Ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Prueba Uno JSS</title>
+    </head>
+
+    <body>
+        Contador
+        <span id="contador"> 0 </span>
+        <br>
+        <button id="boton" onclick="agregar()"> agregar </button>
+       
+        <div id="contenedorReact"></div>
+
+    </body>
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <script src="like_button.js"></script>
+  
+    <script>
+        const domContainer = document.querySelector('#like_button_container');
+        const root = ReactDOM.createRoot(domContainer);
+        root.render(e(LikeButton));
+
+    </script>
+</html>
