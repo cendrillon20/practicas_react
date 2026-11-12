@@ -201,7 +201,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 <section id="scenarioPanel" class="studio-drawer" hidden aria-label="Escenarios industriales interactivos">
  <div class="studio-drawer-top studio-move-handle"><strong>Scene Builder</strong><div class="studio-actions tiny"><button id="scenarioFloat">Float</button><button id="scenarioMax">Max</button><button id="closeScenarios" title="Cerrar panel">×</button></div></div>
  <p class="studio-lead">Construye una escena 2D y vincula sus elementos a entradas y salidas del PLC. Las señales virtuales son didácticas; no sustituyen el cableado real.</p>
- <label>Escenario inicial<select id="sceneTemplate"><option value="conveyor">Cinta transportadora</option><option value="traffic">Semáforo de tres luces</option><option value="robot">Brazo robótico y estación</option><option value="lights">Iluminación industrial</option></select></label>
+ <label>Escenario inicial<select id="sceneTemplate"><option value="conveyor">Cinta transportadora</option><option value="traffic">Semáforo de tres luces</option><option value="robot">Brazo robótico y estación</option><option value="lights">Iluminación industrial</option><option value="pneumatic">Pneumatics · Neumática</option></select></label>
  <div class="studio-actions"><button id="loadSceneTemplate">Crear escenario</button><button id="clearScene">Vaciar escena</button></div>
  <svg id="sceneCanvas" viewBox="0 0 800 480" aria-label="Escena industrial construible"></svg>
  <div class="studio-actions"><select id="sceneAddType"><option value="belt">Cinta</option><option value="box">Caja</option><option value="sensor">Sensor</option><option value="traffic">Semáforo</option><option value="arm">Brazo</option><option value="lamp">Lámpara</option><option value="motor">Motor</option><option value="switch">Interruptor</option><option value="cylinder">Pneumatic Cylinder · Cilindro</option><option value="valve">Solenoid Valve 5/2 · Válvula</option><option value="air">Air Supply · Suministro de aire</option></select><button id="addSceneObject">＋ Agregar objeto</button></div>
@@ -1305,7 +1305,7 @@ const sceneTypes={
  arm:{name:'Brazo robótico',io:'output',width:115},
  lamp:{name:'Lámpara',io:'output',width:46},
  motor:{name:'Motor',io:'output',width:55},
- switch:{name:'Pulsador / interruptor',io:'input',width:42}
+ switch:{name:'Pulsador / interruptor',io:'input',width:42},cylinder:{name:'Pneumatic Cylinder · Cilindro',io:'output',width:145},valve:{name:'Solenoid Valve 5/2 · Válvula',io:'output',width:122},air:{name:'Air Supply · Suministro',io:'none',width:55}
 };
 let sceneState={template:'conveyor',objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0},sceneNext=1,sceneDrag=null;
 function sceneSignalPins(type){
@@ -1343,7 +1343,7 @@ function normalizeScene(raw){
  renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
 }
 function configureSceneTemplate(which){
- if(!['conveyor','traffic','robot','lights'].includes(which))which='conveyor';
+ if(!['conveyor','traffic','robot','lights','pneumatic'].includes(which))which='conveyor';
  sceneState={template:which,objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0};sceneNext=1;
  const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
  const ip=plcInputPins(plc),op=plcOutputPins(plc);
@@ -1351,7 +1351,8 @@ function configureSceneTemplate(which){
  ['conveyor',[['belt',165,270,{label:'Transportador M1',pin:op[0]}],['box',210,238,{label:'Pieza A'}],['sensor',490,238,{label:'Fotocelda S1',pin:ip[0]}],['motor',78,315,{label:'Motor M1',pin:op[0]}]]],
  ['traffic',[['traffic',345,90,{label:'Semáforo 1',pin:op[0],pin2:op[1],pin3:op[2]}],['switch',195,318,{label:'Solicitud peatón',pin:ip[0]}],['lamp',550,318,{label:'Piloto auxiliar',pin:op[3]}]]],
  ['robot',[['arm',180,125,{label:'Brazo A1',pin:op[0]}],['box',520,305,{label:'Pieza B'}],['sensor',560,250,{label:'Presencia S1',pin:ip[0]}],['lamp',620,100,{label:'Pinza / estado',pin:op[1]}]]],
- ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]]
+ ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]],
+ ['pneumatic',[['cylinder',440,215,{label:'Cylinder A',pin:op[0]}],['valve',240,240,{label:'Valve Y1',pin:op[0]}],['air',100,250,{label:'Air Supply'}],['switch',370,375,{label:'Start S1',pin:ip[0]}]]]
  ];
  for(const item of labels.find(x=>x[0]===which)[1])addSceneObject(...item);
  E('sceneTemplate').value=which;E('sceneEnabled').checked=true;E('sceneAutoSensor').checked=false;
@@ -1367,7 +1368,23 @@ function drawScenarioObject(o){
  const rect=(x,y,w,height,fill,extra={})=>sceneSVGEl('rect',{x,y,width:w,height,rx:5,fill,stroke,...extra},g);
  const circ=(x,y,r,fill,extra={})=>sceneSVGEl('circle',{cx:x,cy:y,r,fill,stroke,...extra},g);
  const line=(x1,y1,x2,y2,extra={})=>sceneSVGEl('line',{x1,y1,x2,y2,stroke:'#bad4f3','stroke-width':5,'stroke-linecap':'round',...extra},g);
- if(o.type==='belt'){
+ if(o.type==='cylinder'){
+  rect(-75,-32,148,64,'#31506d',{'stroke-width':3});
+  rect(-62,-24,100,48,signal?'#16785f':'#638ba8',{'stroke-width':1});
+  line(38,0,signal?136:81,0,{'stroke-width':10,stroke:'#cee5f5'});
+  rect(signal?126:72,-19,16,38,'#accae0');
+  sceneLabel(g,0,-49,'CYLINDER '+(signal?'EXTEND':'RETRACT'),{fill:signal?'#6df3bf':'#c3d9ed','font-size':12});
+ }else if(o.type==='valve'){
+  rect(-62,-29,124,58,'#294f6b',{'stroke-width':3});
+  sceneSVGEl('rect',{x:0,y:-27,width:60,height:54,fill:signal?'#177f60':'#3c617c',stroke:'#accae4'},g);
+  line(-52,0,-8,0,{'stroke-width':4});
+  line(5,-19,48,19,{'stroke-width':4,stroke:signal?'#67fcc4':'#bcd9f1'});
+  sceneLabel(g,0,-47,'5/2 VALVE · '+(signal?'COIL ON':'COIL OFF'),{'font-size':12});
+ }else if(o.type==='air'){
+  circ(0,0,25,'#33556f',{'stroke-width':3});
+  sceneLabel(g,0,4,'AIR',{'font-size':15,'font-weight':'bold'});
+  sceneLabel(g,0,45,'Fuente simbólica');
+ }else if(o.type==='belt'){
   rect(-140,-28,280,58,signal?'#145c5a':'#28445e');
   for(let i=-112;i<=112;i+=40)circ(i,0,12,'#102e44',{'stroke-width':2});
   line(-140,30,140,30,{'stroke-width':6});
@@ -1436,6 +1453,7 @@ const sceneChallenges={
  conveyor:{goal:'Control de cinta: crea una banda, una caja y un sensor. Relaciona sensor I/0 con una salida de motor y comprueba su movimiento.',steps:['Coloca cinta, caja y sensor','Configura I/O','Crea Ladder directo o con enclavamiento','Activa entrada y comprueba movimiento']},
  traffic:{goal:'Semáforo: coloca un señalizador con tres salidas distintas. Documenta fases rojo–verde–ámbar y sus condiciones; esta edición no ejecuta automáticamente la secuencia multisalida.',steps:['Coloca un semáforo','Asigna tres salidas diferentes','Define estados y tiempos','Reconoce el límite actual del Ladder de una sola salida']},
  robot:{goal:'Brazo: coloca brazo y detector. Haz que la señal de presencia active su salida. La animación solo representa movimiento lógico, no cinemática.',steps:['Coloca brazo y sensor','Asigna una entrada y salida','Genera una red de control','Simula presencia y observa el brazo']},
+ pneumatic:{goal:'Pneumatics: controla el avance de un cilindro con una electroválvula y una entrada digital. El aire es simbólico y no se calculan caudales.',steps:['Coloca Air Supply, Valve y Cylinder','Asigna la misma salida a válvula y cilindro','Añade Start Switch en una entrada','Prueba extensión y retorno']},
  lights:{goal:'Luces: coloca lámparas e interruptor. Relaciona entrada y salida para un control digital y verifica sus estados.',steps:['Coloca luces e interruptor','Asigna pines válidos','Genera Ladder de activación','Comprueba lámpara apagada y encendida']}
 };
 function evaluateSceneChallenge(){
@@ -1447,6 +1465,7 @@ function evaluateSceneChallenge(){
  let tests=[];
  if(state.template==='conveyor')tests=[['Hay cinta, caja y sensor',exists('belt')&&exists('box')&&exists('sensor')],['Existe programa Ladder',!!plan],['La salida Ladder controla la cinta',!!(plan&&scene.some(o=>o.type==='belt'&&Number(o.pin)===Number(plan.output)))],['La entrada Ladder corresponde al sensor',!!inputMatch()]];
  else if(state.template==='robot')tests=[['Hay brazo y sensor',exists('arm')&&exists('sensor')],['Hay Ladder aplicado',!!plan],['La salida controla el brazo',!!(plan&&scene.some(o=>o.type==='arm'&&Number(o.pin)===Number(plan.output)))],['La entrada corresponde al sensor',!!inputMatch()]];
+ else if(state.template==='pneumatic')tests=[['Hay Air Supply, Valve y Cylinder',exists('air')&&exists('valve')&&exists('cylinder')],['Hay Ladder aplicado',!!plan],['La bobina de válvula y el cilindro comparten la salida Ladder',!!(plan&&scene.some(o=>o.type==='valve'&&Number(o.pin)===Number(plan.output))&&scene.some(o=>o.type==='cylinder'&&Number(o.pin)===Number(plan.output)))],['Hay sensor o interruptor en la entrada Ladder',!!inputMatch()]];
  else if(state.template==='lights')tests=[['Hay lámpara e interruptor',exists('lamp')&&exists('switch')],['Hay Ladder aplicado',!!plan],['La salida corresponde a una lámpara',!!pinMatch()],['La entrada corresponde al interruptor',!!inputMatch()]];
  else {
   const traffic=scene.find(o=>o.type==='traffic');
@@ -1525,6 +1544,7 @@ function sceneFeedback(){
   if(kind==='traffic'&&(!plcOutputPins(plc).includes(Number(o.pin2))||!plcOutputPins(plc).includes(Number(o.pin3))))out.push(o.label+': faltan salidas para ámbar o verde.');
  }
  if(sceneState.template==='traffic')out.push('El semáforo completo requiere varias salidas y lógica de secuencia; el motor Ladder actual solo programa una salida a la vez.');
+ if(sceneState.template==='pneumatic')out.push('La neumática es una animación de estados, no una simulación del aire comprimido, de las fuerzas ni del circuito 5/2 real.');
  if(sceneState.template==='robot')out.push('El brazo visualiza una condición digital, no simula control de servo, cinemática, límites o trayectorias.');
  if(!ladderPlan)out.push('No hay Ladder generado o importado. Abre Programa escalera y asocia una salida.');
  else if(!objs.some(o=>o.pin===ladderPlan.output&&sceneTypes[o.type]?.io!=='input'))out.push('La salida Ladder elegida no está asignada a ningún actuador de la escena.');
