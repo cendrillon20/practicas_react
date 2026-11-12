@@ -161,7 +161,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 @media(max-width:1000px){.layout.ladder-visible{grid-template-columns:175px minmax(0,1fr)}}
 
 .aura-fox{transition:opacity .3s ease,filter .3s ease;--aura-tail-angle:0deg}
-.aura-fox.aura-hidden{opacity:0;visibility:hidden;pointer-events:none}.aura-fox.aura-at-target{animation:none!important}
+.aura-fox.aura-hidden{opacity:0;visibility:hidden;pointer-events:none}.aura-fox.aura-sitting{animation:none!important}.aura-fox.aura-sitting svg{animation:none!important}.aura-fox.aura-dragging{animation:none!important;cursor:grabbing;z-index:150}.aura-fox{touch-action:none}.aura-fox.aura-at-target{animation:none!important}
 .aura-fox.aura-catching{animation:none!important;cursor:crosshair;transition:left .18s ease,bottom .18s ease}
 .aura-fox.aura-biting{animation:none!important;z-index:130}
 .aura-fox.aura-biting svg{animation:aura-bite .32s ease-in-out infinite alternate}
@@ -277,7 +277,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div id="tutorChat" class="tutor-chat" aria-live="polite"></div>
  <label>Pregunta al tutor<textarea id="tutorQuestion" rows="3" placeholder="Ej.: ¿Por qué no enciende la lámpara? ¿Cómo funciona TON?"></textarea></label>
  <button id="tutorAsk" class="studio-accent">Enviar pregunta</button>
- <div class="studio-actions"><button id="auraPlay">Fox Chase · Mini Game</button><button id="auraHide">Hide Aura · Ocultar</button><button id="auraShow">Call Aura · Llamar</button></div>
+ <div class="studio-actions"><button id="auraPlay">Fox Chase · Mini Game</button><button id="auraHide">Hide Aura · Ocultar</button><button id="auraShow">Call Aura · Llamar</button><button id="auraSit">Sit / Play · Sentarse</button></div>
  <label class="scene-toggle"><input id="auraHintsToggle" type="checkbox" checked> Contextual Tips · Avisos de Aura</label>
  <button id="auraFixLadder" class="studio-accent">Tail Magic · Revisar/Recrear Ladder</button>
  <small>Las correcciones de programa requieren autorización antes de sustituir contenido. Aura no altera cables físicos automáticamente.</small>
@@ -689,7 +689,7 @@ groupDrag=nodes.filter(x=>multi.has(x.id)).map(x=>({id:x.id,x:x.x,y:x.y}));
 canvas.setPointerCapture(e.pointerId);draw();
 }
 canvas.onpointermove=e=>{if(pan){manualZoom=true;const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){if(!Array.isArray(w.waypoints))w.waypoints=[];w.waypoints[wireDrag.index]=[Math.round(p.x/10)*10,Math.round(p.y/10)*10];draw()}return}if(drag&&!simulation){const dx=Math.round((p.x-drag.p.x)/10)*10,dy=Math.round((p.y-drag.p.y)/10)*10;for(const original of groupDrag||[]){const n=find(original.id);if(n){n.x=original.x+dx;n.y=original.y+dy}}drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
-canvas.onpointerup=e=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw();return}if(pan){pan=null;return}if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved&&multi.size<2){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null;groupDrag=null};
+canvas.onpointerup=e=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw();return}if(pan){pan=null;return}if(wireDrag){wireDrag=null;draw();return}if(drag?.moved&&auraDropOnFox(e,drag)){drag=null;groupDrag=null;return}if(drag&&!drag.moved&&multi.size<2){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null;groupDrag=null};
 canvas.onpointerdown=e=>{e.preventDefault();
  if(placingJunction&&!simulation){const at=pointer(e);const n=newJunction(at.x,at.y);placingJunction=false;chosen={kind:'node',id:n.id};refreshInspector();draw();E('junctionInstructions').textContent='Unión '+n.id+' creada. Conecta varios terminales al punto.';return}
  if(e.button===1||e.shiftKey){e.preventDefault();pan={x:e.clientX,y:e.clientY,view:{...view}};canvas.setPointerCapture(e.pointerId);return}closeMenu();chosen=null;multi.clear();refreshInspector();draw()};
@@ -736,7 +736,7 @@ function showMenu(e,obj,kind){
  if(kind==='node'){
   if(obj.type==='plc'&&!simulation)button('Etiquetar entradas/salidas',()=>{chosen={kind:'node',id:obj.id};refreshInspector();E('inspector').scrollIntoView({block:'nearest',behavior:'smooth'})});
   if(simulation){if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap','pressure','level','breaker','emergency'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});return}
-  button('Cambiar nombre',()=>{chosen={kind:'node',id:obj.id};renameChosen()});
+  button('Give to Aura · Eliminar',()=>auraEat('node',obj.id));button('Cambiar nombre',()=>{chosen={kind:'node',id:obj.id};renameChosen()});
   button('↶ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(-90)});
   button('↷ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(90)});
   if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap','pressure','level','breaker','emergency'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});
@@ -2002,7 +2002,7 @@ window.setInterval(waveSample,150);
 renderWaveform();
 
 
-const auraRuntime={visible:true,gameActive:false,score:0,best:0,time:30,hints:true,paused:false,gameTimer:null,jumpTimer:null,speechTimer:null,reactionTimer:null,lastReact:0,explicitHide:false};
+const auraRuntime={visible:true,gameActive:false,score:0,best:0,time:30,hints:true,paused:false,gameTimer:null,jumpTimer:null,speechTimer:null,reactionTimer:null,lastReact:0,explicitHide:false,sitting:false,dragging:null,suppressClick:false};
 function auraSay(message,duration=5500){
  const bubble=E('auraSpeech');if(!bubble||!auraRuntime.hints)return;
  bubble.textContent=String(message).slice(0,360);bubble.hidden=false;
@@ -2016,6 +2016,7 @@ function auraPlace(screenX,screenY){
  fox.classList.add('aura-at-target');fox.style.left=Math.round(x)+'px';fox.style.bottom=Math.round(window.innerHeight-y-87)+'px';
 }
 function auraResetPosition(){
+ if(auraRuntime.sitting&&!auraRuntime.gameActive)return;
  const fox=E('auraFox');fox.classList.remove('aura-at-target');fox.style.left='';fox.style.bottom='';
 }
 function auraVisible(value,reason=''){
@@ -2114,7 +2115,7 @@ function auraStopGame(message='Juego finalizado.'){
  auraResetPosition();auraGameStatus(message);
 }
 function auraStartGame(){
- auraStopGame('');
+ auraRuntime.sitting=false;E('auraFox').classList.remove('aura-sitting');auraStopGame('');
  auraRuntime.gameActive=true;auraRuntime.score=0;auraRuntime.time=30;
  auraVisible(true);
  const fox=E('auraFox');fox.classList.add('aura-catching','aura-game-bounce');fox.classList.remove('aura-biting','aura-tail-magic');
@@ -2129,6 +2130,7 @@ function auraStartGame(){
  },1000);
 }
 function auraCatch(){
+ if(auraRuntime.suppressClick){auraRuntime.suppressClick=false;return}
  if(!auraRuntime.gameActive){openTutor();return}
  auraRuntime.score+=1;
  if(auraRuntime.score>auraRuntime.best){auraRuntime.best=auraRuntime.score;auraSaveBest()}
@@ -2137,7 +2139,7 @@ function auraCatch(){
 }
 function auraToggleGame(){E('auraGame').hidden=false;if(!auraRuntime.gameActive)auraGameStatus('Pulsa Start para jugar.')}
 function auraWanderTick(){
- if(auraRuntime.gameActive||auraRuntime.explicitHide||E('auraFox').classList.contains('aura-biting'))return;
+ if(auraRuntime.gameActive||auraRuntime.explicitHide||auraRuntime.sitting||E('auraFox').classList.contains('aura-biting'))return;
  if(Math.random()<0.3){
   auraVisible(false);
   setTimeout(()=>{if(auraRuntime.gameActive||auraRuntime.explicitHide)return;auraVisible(true);auraResetPosition();auraSay('¡Puf! Ya regresé. ¿Quieres una pista o una práctica?')},2700);
@@ -2146,10 +2148,92 @@ function auraWanderTick(){
   auraSay(tips[Math.floor(Math.random()*tips.length)],4300);
  }
 }
+
+function auraSaveSeat(){
+ try{
+  const fox=E('auraFox'),b=fox.getBoundingClientRect();
+  localStorage.setItem('plc-aura-seat-v1',JSON.stringify({sitting:auraRuntime.sitting,x:Math.round(b.left/window.innerWidth*1000)/1000,y:Math.round(b.top/window.innerHeight*1000)/1000}));
+ }catch{}
+}
+function auraSetSitting(state){
+ auraRuntime.sitting=!!state;
+ const fox=E('auraFox');
+ fox.classList.toggle('aura-sitting',auraRuntime.sitting);
+ fox.classList.remove('aura-dragging');
+ if(auraRuntime.sitting)auraSay('¡Me quedo aquí sentadita! Arrástrame a otra esquina cuando quieras.',4700);
+ else{auraSay('¡Hora de pasear! Voy a recorrer el tablero.',4000);auraResetPosition()}
+ auraSaveSeat();
+}
+function auraDragStart(e){
+ if(e.button!==0||auraRuntime.gameActive)return;
+ e.preventDefault();e.stopPropagation();
+ const b=E('auraFox').getBoundingClientRect();
+ auraRuntime.dragging={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,offsetX:e.clientX-b.left,offsetY:e.clientY-b.top,moved:false};
+ E('auraFox').setPointerCapture(e.pointerId);
+}
+function auraDragMove(e){
+ const move=auraRuntime.dragging;if(!move||move.pointerId!==e.pointerId)return;
+ const changed=Math.hypot(e.clientX-move.startX,e.clientY-move.startY)>7;
+ if(changed)move.moved=true;
+ if(!move.moved)return;
+ E('auraFox').classList.add('aura-dragging');
+ auraPlace(e.clientX-move.offsetX,e.clientY-move.offsetY);
+}
+function auraDragEnd(e){
+ const move=auraRuntime.dragging;if(!move||move.pointerId!==e.pointerId)return;
+ auraRuntime.dragging=null;
+ E('auraFox').classList.remove('aura-dragging');
+ if(move.moved){
+  auraRuntime.suppressClick=true;
+  auraRuntime.sitting=true;
+  E('auraFox').classList.add('aura-sitting');
+  auraSaveSeat();auraSay('¡Este será mi lugar! Puedes darme un componente que quieras eliminar.',5500);
+ }else auraCatch();
+}
+function auraRestoreSeat(){
+ try{
+  const raw=localStorage.getItem('plc-aura-seat-v1'),seat=raw&&JSON.parse(raw);
+  if(seat?.sitting&&Number.isFinite(seat.x)&&Number.isFinite(seat.y)){
+   auraRuntime.sitting=true;E('auraFox').classList.add('aura-sitting');
+   auraPlace(window.innerWidth*Math.max(0,Math.min(1,seat.x)),window.innerHeight*Math.max(0,Math.min(1,seat.y)));
+  }
+ }catch{}
+}
+function auraCanEat(type){return type==='wire'||type==='node'}
+function auraEat(kind,id){
+ if(simulation){auraSay('Para borrar componentes primero entra en Edit Mode.');return false}
+ if(kind==='node'){
+  const node=find(id);
+  if(!node||['railplus','railzero','plc'].includes(node.type)){auraSay('¡Ese elemento es parte de la base! No me lo puedo comer.');return false}
+  if(!confirm('¿Dar '+nameOf(node)+' a Aura? Se eliminará el componente y sus cables conectados.'))return false;
+  nodes=nodes.filter(n=>n.id!==node.id);wires=wires.filter(w=>w.a!==node.id&&w.b!==node.id);
+ }else if(kind==='wire'){
+  const wire=wires.find(w=>w.id===id);
+  if(!wire||!confirm('¿Dar cable #'+wire.id+' a Aura? Se eliminará del circuito.'))return false;
+  wires=wires.filter(w=>w.id!==wire.id);
+ }else return false;
+ multi.clear();chosen=null;refreshInspector();draw();
+ E('auraFox').classList.remove('aura-tail-magic');void E('auraFox').offsetWidth;E('auraFox').classList.add('aura-biting');
+ auraSay('¡Ñam ñam! Componente eliminado con tu permiso. Revisa si quedó algún borne sin cable.',5000);
+ clearTimeout(auraRuntime.reactionTimer);
+ auraRuntime.reactionTimer=setTimeout(()=>E('auraFox').classList.remove('aura-biting'),1100);
+ return true;
+}
+function auraDropOnFox(e,dragging){
+ if(!dragging?.moved||auraRuntime.gameActive)return false;
+ const fox=E('auraFox'),r=fox.getBoundingClientRect();
+ if(e.clientX<r.left-12||e.clientX>r.right+12||e.clientY<r.top-12||e.clientY>r.bottom+12)return false;
+ return auraEat('node',dragging.id);
+}
+
 function initAura(){
  try{auraRuntime.best=Math.max(0,Math.min(100000,Number(localStorage.getItem('plc-aura-game-best-v1'))||0))}catch{}
  auraGameStatus();
- E('auraFox').onclick=auraCatch;
+ E('auraFox').onclick=()=>{};
+ E('auraFox').onpointerdown=auraDragStart;
+ E('auraFox').onpointermove=auraDragMove;
+ E('auraFox').onpointerup=auraDragEnd;
+ E('auraFox').onpointercancel=e=>{auraRuntime.dragging=null;E('auraFox').classList.remove('aura-dragging')};
  E('auraFox').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();auraCatch()}};
  E('auraPlay').onclick=auraToggleGame;
  E('auraHide').onclick=()=>{if(auraRuntime.gameActive)auraStopGame('Juego detenido.');auraVisible(false,'manual')};
@@ -2158,6 +2242,8 @@ function initAura(){
  E('stopAuraGame').onclick=()=>auraStopGame('Juego detenido.');
  E('closeAuraGame').onclick=()=>{auraStopGame('Juego cerrado.');E('auraGame').hidden=true};
  E('auraHintsToggle').onchange=e=>{auraRuntime.hints=!!e.target.checked;E('auraSpeech').hidden=true};
+ E('auraSit').onclick=()=>auraSetSitting(!auraRuntime.sitting);
+ auraRestoreSeat();
  E('auraFixLadder').onclick=auraFixLadder;
  window.setInterval(auraWanderTick,24000);
 }
