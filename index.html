@@ -1488,6 +1488,8 @@ function tutorMessage(text,isUser=false){
 }
 function tutorTopicFor(query){
  const q=String(query||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const hints=[[/\b(ton|tof|rto|temporizador|timer)\b/,'timers'],[/\b(xic|xio|na|nc)\b/,'contacts'],[/\b(pnp|npn)\b/,'pnpsensors'],[/\b(pid)\b/,'pid'],[/\b(4-20|analogico|analogica)\b/,'analog'],[/\b(semaforo)\b/,'traffic'],[/\b(compactlogix|studio 5000)\b/,'compactlogix'],[/\b(micrologix|rslogix)\b/,'micrologix'],[/\b(codesys)\b/,'codesys']];
+ for(const [re,id] of hints)if(re.test(q))return tutorLibrary.find(t=>t.id===id);
  let choice=null,high=0;
  for(const topic of tutorLibrary){
   const terms=(topic.terms+' '+topic.title).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/\s+/).filter(w=>w.length>2);
