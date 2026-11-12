@@ -487,6 +487,128 @@ function refreshProjects(){
  target.value=projectId||old||'';
  if(!target.value)target.value='';
 }
+
+function ladderOption(select,label,value){const option=document.createElement('option');option.value=String(value);option.textContent=label;select.appendChild(option)}
+function populateLadderSelectors(){
+ const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
+ const inputPorts=[3,4,5,6,8,9,10,11,12,13,...Array.from({length:plc.extraInputs||0},(_,i)=>28+i)];
+ const outputPorts=[18,20,22,24,25,26,...Array.from({length:plc.extraOutputs||0},(_,i)=>34+i)];
+ const spec=[['ladderStart',inputPorts],['ladderStop',inputPorts],['ladderOutput',outputPorts]];
+ for(const [id,values] of spec){
+  const select=E(id),prev=select.value;select.replaceChildren();
+  values.forEach(i=>ladderOption(select,portName(plc,i)+(plc.ioLabels?.[i]?' — '+plc.ioLabels[i]:''),i));
+  const desired=ladderPlan?.[id==='ladderStart'?'start':id==='ladderStop'?'stop':'output'];
+  select.value=String(desired??prev??values[0]);
+  if(!select.value&&values.length)select.value=String(values[0]);
+ }
+ if(!ladderPlan&&inputPorts.length>1)E('ladderStop').value=String(inputPorts[1]);
+}
+function openLadder(){
+ const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
+ populateLadderSelectors();renderLadder();
+ E('ladderGoal').focus();
+}
+function closeLadder(){
+ E('ladderPanel').hidden=true;E('canvas').closest('.layout').classList.remove('ladder-visible');
+}
+function ladderEl(tag,attrs={},parent){
+ const el=document.createElementNS(NS,tag);
+ Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+ parent.appendChild(el);return el;
+}
+function ladderText(parent,x,y,text,props={}){
+ const el=ladderEl('text',{x,y,fill:'#d5ecff','font-size':13,'font-family':'Segoe UI,Arial,sans-serif',...props},parent);
+ el.textContent=String(text);return el;
+}
+function ladderSegment(parent,x1,y1,x2,y2,props={}){
+ ladderEl('line',{x1,y1,x2,y2,stroke:'#a5d7f4','stroke-width':3,...props},parent);
+}
+function ladderContact(root,x,y,label,nc=false){
+ ladderSegment(root,x-42,y,x-13,y);ladderSegment(root,x+13,y,x+42,y);
+ ladderSegment(root,x-13,y-20,x-13,y+20);ladderSegment(root,x+13,y-20,x+13,y+20);
+ if(nc)ladderSegment(root,x-18,y+24,x+18,y-24,{'stroke-width':2.2});
+ ladderText(root,x,y-32,label,{'text-anchor':'middle','font-size':12});
+}
+function ladderCoil(root,x,y,label){
+ ladderSegment(root,x-48,y,x-25,y);ladderSegment(root,x+25,y,x+48,y);
+ const path=ladderEl('path',{d:'M '+(x-25)+' '+(y-20)+' C '+(x-9)+' '+(y-20)+' '+(x-9)+' '+(y+20)+' '+(x-25)+' '+(y+20)+' M '+(x+25)+' '+(y-20)+' C '+(x+9)+' '+(y-20)+' '+(x+9)+' '+(y+20)+' '+(x+25)+' '+(y+20),stroke:'#a5d7f4','stroke-width':2.8,fill:'none'},root);
+ ladderText(root,x,y-32,label,{'text-anchor':'middle','font-size':12});
+ return path;
+}
+function ladderLabel(i){const plc=nodes.find(n=>n.type==='plc');return plc?portName(plc,i)+(plc.ioLabels?.[i]?' '+plc.ioLabels[i]:''):''}
+function renderLadder(){
+ const preview=E('ladderPreview');if(!preview)return;preview.replaceChildren();
+ const plan=ladderPlan;if(!plan){
+  const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
+ }
+ E('ladderGoal').value=plan.goal||'';
+ E('ladderMode').value=plan.mode||'direct';
+ populateLadderSelectors();
+ E('ladderSecondaryWrap').style.display=['direct','inverse'].includes(plan.mode)?'none':'flex';
+ const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 660 330');
+ svg.setAttribute('role','img');svg.setAttribute('aria-label','Diagrama Ladder didáctico con contactos y bobinas');
+ preview.appendChild(svg);
+ ladderEl('rect',{x:0,y:0,width:660,height:330,rx:8,fill:'#0b192a'},svg);
+ ladderText(svg,18,25,'PROGRAMA LADDER · BORRADOR',{'font-size':15,'font-weight':'bold'});
+ ladderSegment(svg,36,49,36,290,{'stroke':'#fb747c','stroke-width':4});
+ ladderSegment(svg,622,49,622,290,{'stroke':'#6393ff','stroke-width':4});
+ ladderText(svg,36,42,'L',{'text-anchor':'middle','font-size':11});
+ ladderText(svg,622,42,'N',{'text-anchor':'middle','font-size':11});
+ const inA=ladderLabel(plan.start),inB=ladderLabel(plan.stop),out=ladderLabel(plan.output);
+ const rung=105;
+ const series=(contacts)=>{
+  const num=contacts.length,xs=num===1?[240]:[173,310];
+  ladderSegment(svg,36,rung,xs[0]-42,rung);
+  for(let k=0;k<num;k++){ladderContact(svg,xs[k],rung,contacts[k].label,contacts[k].nc);if(k<num-1)ladderSegment(svg,xs[k]+42,rung,xs[k+1]-42,rung)}
+  ladderSegment(svg,xs[num-1]+42,rung,493,rung);ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ };
+ if(plan.mode==='direct')series([{label:inA}]);
+ if(plan.mode==='inverse')series([{label:inA,nc:true}]);
+ if(plan.mode==='and')series([{label:inA},{label:inB}]);
+ if(plan.mode==='or'){
+  ladderSegment(svg,36,rung,150,rung);ladderSegment(svg,150,rung,150,190);
+  ladderSegment(svg,150,rung,190,rung);ladderContact(svg,235,rung,inA);ladderSegment(svg,277,rung,365,rung);
+  ladderSegment(svg,150,190,190,190);ladderContact(svg,235,190,inB);ladderSegment(svg,277,190,365,190);
+  ladderSegment(svg,365,rung,493,rung);ladderSegment(svg,365,190,365,rung);
+  ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ }
+ if(plan.mode==='latch'){
+  // Arranque + sello en paralelo; PARO NC en serie.
+  ladderSegment(svg,36,rung,101,rung);ladderContact(svg,144,rung,inB,true);
+  ladderSegment(svg,186,rung,220,rung);ladderSegment(svg,220,rung,260,rung);
+  ladderContact(svg,305,rung,inA);ladderSegment(svg,347,rung,390,rung);
+  ladderSegment(svg,220,rung,220,190);ladderSegment(svg,220,190,260,190);
+  ladderContact(svg,305,190,out);
+  ladderSegment(svg,347,190,390,190);ladderSegment(svg,390,190,390,rung);
+  ladderSegment(svg,390,rung,493,rung);ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ }
+ ladderText(svg,36,250,'RED 1 · '+({latch:'Arranque y paro con auto-retención',direct:'Activación directa',inverse:'Condición negada',and:'Interbloqueo de dos señales',or:'Activación alternativa'}[plan.mode]||'Control básico'),{'font-size':13});
+ ladderText(svg,36,278,'Entradas: '+inA+(['direct','inverse'].includes(plan.mode)?'':' / '+inB),{'font-size':12});
+ ladderText(svg,36,300,'Salida: '+out,{'font-size':12});
+ const info=E('ladderMessage');info.textContent='Borrador generado para: '+plan.goal+'. Puedes ajustar las entradas y el tipo de control y volver a generar.';
+}
+E('showLadder').onclick=()=>openLadder();
+E('closeLadder').onclick=()=>closeLadder();
+E('ladderMode').onchange=e=>{
+ E('ladderSecondaryWrap').style.display=['direct','inverse'].includes(e.target.value)?'none':'flex';
+};
+E('ladderGoal').addEventListener('input',e=>{
+ if(ladderPlan)return;
+ const goal=e.target.value.toLowerCase();
+ const mode=/enclava|mantener|mantenga|permanec|arranque.*paro|marcha.*paro/.test(goal)?'latch':
+ /cualquiera|uno u otro|uno o el otro/.test(goal)?'or':
+ /ambas|ambos|al mismo tiempo|simultáne/.test(goal)?'and':
+ /cuando no|si no|ausencia/.test(goal)?'inverse':'direct';
+ E('ladderMode').value=mode;E('ladderMode').dispatchEvent(new Event('change'));
+});
+E('generateLadder').onclick=()=>{
+ const goal=E('ladderGoal').value.trim(),mode=E('ladderMode').value,start=Number(E('ladderStart').value),stop=Number(E('ladderStop').value),output=Number(E('ladderOutput').value);
+ if(goal.length<10){E('ladderMessage').textContent='Primero explica la tarea que debe realizar el PLC (al menos diez caracteres).';E('ladderGoal').focus();return}
+ if(['latch','and','or'].includes(mode)&&start===stop){E('ladderMessage').textContent='Selecciona dos entradas diferentes para esta lógica.';return}
+ if(!Number.isInteger(start)||!Number.isInteger(output)){E('ladderMessage').textContent='Selecciona una entrada y una salida válidas.';return}
+ ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output};renderLadder();
+};
+
 function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
