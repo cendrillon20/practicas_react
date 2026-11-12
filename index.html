@@ -1739,6 +1739,105 @@ E('ladderWidth').oninput=e=>{
 E('auraFox').onclick=()=>openTutor();
 E('auraFox').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTutor()}};
 
+
+const glossary=[
+ ['Scan Cycle','Ciclo de escaneo','Lectura de entradas, ejecución de lógica y actualización de salidas.'],
+ ['Rung','Red o peldaño','Línea de lógica en Ladder.'],
+ ['Ladder Diagram (LD)','Diagrama de escalera','Lenguaje gráfico IEC 61131-3.'],
+ ['Contact','Contacto','Condición booleana para permitir la continuidad lógica.'],
+ ['Normally Open (NO)','Normalmente abierto (NA)','Contacto físico abierto en reposo.'],
+ ['Normally Closed (NC)','Normalmente cerrado','Contacto físico cerrado en reposo.'],
+ ['XIC (Examine If Closed)','Examina si es verdadero','Instrucción Rockwell: permite continuidad cuando el bit vale 1.'],
+ ['XIO (Examine If Open)','Examina si es falso','Instrucción Rockwell: permite continuidad cuando el bit vale 0.'],
+ ['OTE (Output Energize)','Bobina de salida','Instrucción para escribir un estado booleano de salida.'],
+ ['TON (On-Delay Timer)','Temporizador de conexión','Activa Q después de que IN permanezca activo durante PT.'],
+ ['TOF (Off-Delay Timer)','Temporizador de desconexión','Mantiene Q durante el tiempo después de desactivar IN.'],
+ ['RTO (Retentive Timer)','Temporizador retentivo','Acumula tiempo y suele requerir reset; aquí solo hay información didáctica.'],
+ ['PT (Preset Time)','Tiempo preseleccionado','Duración programada para un temporizador.'],
+ ['ET (Elapsed Time)','Tiempo transcurrido','Tiempo contado hasta el momento.'],
+ ['ACC (Accumulated)','Valor acumulado','Tiempo o conteo acumulado, según instrucción y familia.'],
+ ['DN (Done Bit)','Bit de fin','Indica que la condición del temporizador/contador está completa.'],
+ ['CTU (Count Up)','Contador ascendente','Incrementa al detectar flancos positivos.'],
+ ['CTD (Count Down)','Contador descendente','Decrementa un valor precargado, según implementación.'],
+ ['CV (Current Value)','Valor actual','Conteo actual del contador.'],
+ ['PV (Preset Value)','Valor prefijado','Objetivo o valor de carga para el contador.'],
+ ['EQ (Equal)','Igual','Comparador de igualdad.'],
+ ['NE (Not Equal)','Distinto','Comparador de desigualdad.'],
+ ['GT (Greater Than)','Mayor que','Comparador >.'],
+ ['GE (Greater or Equal)','Mayor o igual','Comparador ≥.'],
+ ['LT (Less Than)','Menor que','Comparador <.'],
+ ['LE (Less or Equal)','Menor o igual','Comparador ≤.'],
+ ['Set/Reset','Activar/reiniciar','Instrucciones que mantienen un bit hasta cambio explícito.'],
+ ['Latch','Enclavamiento','Retención de una condición después del pulso inicial.'],
+ ['Interlock','Enclavamiento de seguridad/proceso','Condición que evita una operación incompatible.'],
+ ['HMI (Human Machine Interface)','Interfaz humano-máquina','Pantalla de operación y supervisión.'],
+ ['SCADA','Supervisión y adquisición de datos','Sistema de supervisión industrial.'],
+ ['Digital Input (DI)','Entrada digital','Señal discreta 0/1.'],
+ ['Digital Output (DO)','Salida digital','Orden discreta 0/1.'],
+ ['Analog Input (AI)','Entrada analógica','Señal variable: tensión o corriente.'],
+ ['Analog Output (AO)','Salida analógica','Comando variable a un actuador.'],
+ ['PNP (Sourcing)','Sensor que suministra señal positiva','Salida suministra +V cuando está activa.'],
+ ['NPN (Sinking)','Sensor que absorbe corriente','Salida conmuta hacia 0 V al activarse.'],
+ ['Common (COM)','Común','Referencia eléctrica de un grupo; no siempre equivale a 0 V.'],
+ ['Ground / PE','Tierra de protección','Conductor para seguridad eléctrica.'],
+ ['VFD (Variable Frequency Drive)','Variador de frecuencia','Controla velocidad/frecuencia de motores.'],
+ ['Encoder','Codificador de posición','Produce pulsos/posición para medir movimiento.'],
+ ['Debounce','Antirrebote','Evita múltiples eventos por oscilación del contacto.'],
+ ['Rising Edge','Flanco positivo','Cambio 0→1 de una señal.'],
+ ['Falling Edge','Flanco negativo','Cambio 1→0.'],
+ ['Fault','Falla','Condición anómala de proceso o equipo.'],
+ ['Fail-safe','Estado seguro ante falla','Diseño que busca un resultado seguro frente a fallas especificadas.'],
+ ['Solenoid Valve','Electroválvula','Actúa sobre el flujo neumático o hidráulico mediante una bobina.'],
+ ['Cylinder','Cilindro','Actuador neumático de movimiento lineal.'],
+ ['Pressure','Presión','Magnitud normalmente expresada en bar, psi o pascal.'],
+ ['Flow','Caudal','Flujo por unidad de tiempo.'],
+ ['Setpoint (SP)','Consigna','Valor objetivo de una variable de proceso.'],
+ ['Process Variable (PV)','Variable de proceso','Valor medido para control.'],
+ ['PID','Proporcional Integral Derivativo','Algoritmo de control en lazo cerrado.'],
+ ['I/O Mapping','Mapeo de entradas/salidas','Relación entre direcciones, tags y bornes físicos.'],
+ ['Online Monitoring','Monitoreo en línea','Observación de valores en un programa durante ejecución.'],
+ ['Force','Forzado','Manipulación temporal de señales; requiere procedimientos seguros.'],
+ ['Watch Table','Tabla de observación','Inspección de variables sin modificar la lógica.'],
+ ['Function Block Diagram (FBD)','Diagrama de bloques funcionales','Lenguaje IEC 61131-3.'],
+ ['Structured Text (ST)','Texto estructurado','Lenguaje IEC 61131-3 parecido a código de alto nivel.'],
+ ['Sequential Function Chart (SFC)','Diagrama secuencial de funciones','Organización en pasos y transiciones.'],
+ ['Task','Tarea de ejecución','Programa con prioridad y ciclo específicos.']
+];
+const platformGuides={
+ compactlogix:{
+ label:'Studio 5000 · CompactLogix',
+ steps:['1. Crear un proyecto Logix Designer y seleccionar el catálogo exacto de CPU y firmware.','2. Configurar módulos locales/remotos y su tipo de E/S.','3. Definir Controller Tags y Program Tags con tipos correctos.','4. Crear Routine en Ladder y añadir XIC/XIO/OTE, TON/CTU/CMP en redes verificables.','5. Configurar tareas y programas, compilar/verificar y revisar advertencias.','6. En el IDE oficial, comprobar conexión con el controlador y usar monitor/force solo con procedimiento seguro.'],
+ caution:'Esta página no exporta un proyecto .ACD ni reproduce Tasks, AOIs, Add-On Profiles, motion o toda la ejecución Logix.'},
+ micrologix:{
+ label:'RSLogix 500 · MicroLogix',
+ steps:['1. Seleccionar CPU MicroLogix y firmware compatibles.','2. Establecer configuración de E/S y canales.','3. Revisar tabla de datos: I:0, O:0, B3, T4, C5 y N7 según CPU.','4. Crear redes Ladder, comprobar ramas y orden de prioridad.','5. Usar Verify Project y herramientas de monitoreo del software oficial.','6. Probar el circuito y documentar tabla de E/S y secuencia esperada.'],
+ caution:'El lector de esta página no abre archivos .RSS binarios ni reproduce interrupt routines o todas las instrucciones.'},
+ delta:{
+ label:'WPLSoft / ISPSoft · Delta DVP',
+ steps:['1. Crear un proyecto y escoger el controlador DVP correcto.','2. Confirmar codificación de X/Y y mapa de registros M, D, T, C aplicables.','3. Diseñar Ladder con LD/LDI, OUT, AND/OR, SET/RST, TMR, CMP según disponibilidad.','4. Verificar base de tiempo y rangos del temporizador en el manual de CPU.','5. Compilar y revisar errores y restricciones de memoria.','6. En el software oficial, comprobar entradas/salidas online de manera segura.'],
+ caution:'Aquí se usa una traducción didáctica parcial de direcciones; no hay emulación del firmware DVP.'},
+ codesys:{
+ label:'CODESYS · IEC 61131-3',
+ steps:['1. Crear Device/Application según el runtime o soft-PLC que utilizarás.','2. Configurar I/O Mapping y variables globales o locales.','3. Crear POU en LD, FBD o ST según el problema.','4. Instanciar TON, TOF, CTU/CTD y comparadores con tipos IEC correctos.','5. Asociar POU a una Task periódica y revisar su tiempo de ejecución.','6. Compilar y usar Simulation / Online Monitor en el entorno oficial, verificando el mapeo.'],
+ caution:'Este editor no interpreta todos los POUs, tipos, bibliotecas o configuraciones CODESYS.'}
+};
+E('auraPlatformHelp').onclick=()=>{
+ const guide=platformGuides[E('auraPlatform').value];
+ if(guide)tutorMessage('SOFTWARE WORKFLOW: '+guide.label+'\n\n'+guide.steps.join('\n')+'\n\nLÍMITE: '+guide.caution);
+};
+function searchGlossary(){
+ const field=E('glossarySearch'),box=E('glossaryResults');if(!field||!box)return;
+ const q=String(field.value||'').trim().toLowerCase();
+ const results=q?glossary.filter(row=>row.join(' ').toLowerCase().includes(q)).slice(0,12):glossary.slice(0,8);
+ box.replaceChildren();
+ for(const [en,es,explain] of results){
+  const row=document.createElement('div');row.style.padding='5px 0';row.textContent=en+' → '+es+'. '+explain;box.appendChild(row);
+ }
+ if(!results.length)box.textContent='No se encontró el término. Prueba abreviaciones como TON, CTU, Rung o COM.';
+}
+E('glossarySearch').addEventListener('input',searchGlossary);
+searchGlossary();
+
 function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
