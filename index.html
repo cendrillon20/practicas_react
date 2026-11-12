@@ -515,7 +515,7 @@ T(g,63,-21,nameOf(n),{'text-anchor':'middle','font-size':11,fill:'#b8d7f5'});
 if(['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock'].includes(n.type)){
  const plan=ladderPlan;
  const selected=['timer','tof'].includes(plan?.mode)&&(plan.timerId===n.id||String(plan.timerId)===String(n.id));
- T(g,63,102,selected?'ET '+(ladderRuntime.elapsed/1000).toFixed(1)+'s / '+Number(plan.delaySeconds||3).toFixed(1)+'s':'TON · interno',{'text-anchor':'middle','font-size':11,fill:selected&&ladderRuntime.done?'#31e6a1':'#8baed1'});
+ T(g,63,102,selected?'ET '+(ladderRuntime.elapsed/1000).toFixed(1)+'s / '+Number(plan.delaySeconds||3).toFixed(1)+'s':({timer:'TON',tofBlock:'TOF',ctuBlock:'CTU',ctdBlock:'CTD',cmpBlock:'CMP'})[n.type]+' · Internal',{'text-anchor':'middle','font-size':11,fill:selected&&ladderRuntime.done?'#31e6a1':'#8baed1'});
  if(selected&&ladderRuntime.done)S('circle',{cx:119,cy:8,r:6,fill:'#19e49c'},g);
 }else if(n.on)S('circle',{cx:120,cy:8,r:4,fill:'#19e49c'},g);
 localPorts(n).forEach(([x,y],i)=>term(g,n,i,x,y));
@@ -1137,6 +1137,22 @@ function runLadderTests(){
   }else if(plan.mode==='timer'){
    simulate('Antes de señal',[],false);simulate('Temporizando',[a],false);
    simulate('Retardo cumplido',[a],true,true,true);simulate('Entrada desactivada',[],false,false,true);
+  }else if(plan.mode==='tof'){
+   simulate('Inicio sin entrada',[],false);simulate('Entrada activa',[a],true);
+   simulate('Salida retenida',[a],true,false,true);simulate('Entrada cae, continúa temporalmente',[],true,false,true);
+   ladderRuntime.tofStarted=Date.now()-Number(plan.delaySeconds)*1000-200;simulate('Retardo cumplido',[],false,false,true);
+  }else if(['counter','ctd'].includes(plan.mode)){
+   const pv=Math.min(8,Number(plan.counterPreset||3));
+   simulate('Sin pulsos',[],plan.mode==='ctd'?false:false);
+   for(let j=1;j<=pv;j++){
+    simulate('Contar flanco '+j,[a],j===pv,false,true);
+    if(j<pv)simulate('Soltar '+j,[],false,false,true);
+   }
+   simulate('Reset / Load',[b],false,false,true);
+  }else if(plan.mode==='compare'){
+   const op=plan.compareOp||'EQ',pv=Number(plan.compareThreshold??1);
+   const cmp=v=>({EQ:()=>v===pv,NE:()=>v!==pv,GT:()=>v>pv,GE:()=>v>=pv,LT:()=>v<pv,LE:()=>v<=pv})[op]?.()||false;
+   simulate('Bit 0',[],cmp(0));simulate('Bit 1',[a],cmp(1));
   }
  }finally{ins=oldInputs;ladderRuntime=oldRuntime}
  const good=cases.filter(x=>x.expected===x.actual).length;
@@ -1275,13 +1291,13 @@ function ladderReviewIssues(){
   if(plan.stopPolarity==='nc'&&!connected)report('warn','Paro NC: el Ladder espera I=1 en reposo y I=0 al pulsar. Verifica que el pulsador NC tenga +24 V y llegue a '+portName(plc,plan.stop)+' de forma independiente.');
   if(plan.start===plan.stop)report('error','Marcha y Paro usan la misma entrada; asigna dos bornes distintos.');
  }
- if(plan.mode==='timer'){
+ if(['timer','tof'].includes(plan.mode)){
   const ms=Number(plan.delaySeconds)*1000;
   if(!Number.isFinite(ms)||ms<100||ms>3600000)report('error','El TON debe tener un retardo entre 0.1 y 3600 segundos.');
   if(plan.timerId!=='virtual'&&!nodes.some(n=>String(n.id)===String(plan.timerId)&&n.type==='timer'))report('warn','El bloque TON asignado ya no existe. Selecciona un temporizador interno o utiliza TON virtual 1.');
  }
  const description=String(plan.goal||'').toLowerCase();
- if(/segundos?|temporiz|retardo/.test(description)&&plan.mode!=='timer')report('warn','La tarea menciona temporización, pero se seleccionó una lógica sin TON. Selecciona TON e indica el retardo.');
+ if(/segundos?|temporiz|retardo/.test(description)&&!['timer','tof'].includes(plan.mode))report('warn','La tarea menciona temporización, pero se seleccionó una lógica sin TON. Selecciona TON e indica el retardo.');
  if(/paro|detener|stop/.test(description)&&!['latch','and'].includes(plan.mode))report('warn','La tarea menciona una condición de parada, pero la lógica elegida no incorpora un paro explícito. Revisa la secuencia de seguridad.');
  if(/secuencia|etapas|contadores?|analogic|pid|comunicaci|modbus|ethernet/.test(description))report('warn','La tarea requiere funciones de secuencia, conteo, señales analógicas o comunicación que este simulador aún no ejecuta. La prueba no demuestra ese proceso completo.');
  if(!['compactlogix','micrologix','delta','codesys'].includes(plan.platform))report('error','No se eligió una familia de PLC válida.');
