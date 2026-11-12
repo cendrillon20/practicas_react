@@ -116,7 +116,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
   <option value="and">Dos entradas simultáneas (Y)</option>
   <option value="or">Cualquiera de dos entradas (O)</option><option value="timer">TON · Activar salida después de un retardo</option>
  </select>
- <div class="ladder-fields">
+ <label id="ladderStopPolarityWrap">Tipo de contacto de PARO<input type="hidden" id="ladderStopPolarity" value="nc"><select id="ladderStopPolaritySelect"><option value="nc">Paro NC · I=1 en reposo; I=0 al presionar</option><option value="no">Paro NA · I=0 en reposo; I=1 al presionar</option></select></label><div class="ladder-fields">
   <label>Entrada principal<select id="ladderStart"></select></label>
   <label id="ladderSecondaryWrap">Entrada secundaria / Paro<select id="ladderStop"></select></label>
   <label>Salida controlada<select id="ladderOutput"></select></label>
@@ -412,7 +412,7 @@ if(chosen?.kind==='wire'&&chosen.id===w.id){
 }
 }
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
-rub.setAttribute('opacity',first?1:0);renderDiagnostics()}
+rub.setAttribute('opacity',first?1:0);renderDiagnostics();updateLadderMonitor()}
 function dragStart(e,n){
 if(e.button!==0||e.target.classList.contains('port'))return;e.preventDefault();e.stopPropagation();
 if(simulation){
@@ -591,6 +591,91 @@ function refreshProjects(){
  if(!target.value)target.value='';
 }
 
+
+function ladderTag(pin,kind,platform){
+ const plc=nodes.find(n=>n.type==='plc'),list=kind==='input'?plcInputPins(plc):plcOutputPins(plc);
+ const index=Math.max(0,list.indexOf(Number(pin))),alias=plc.ioLabels?.[pin];
+ if(platform==='micrologix')return (kind==='input'?'I:0/':'O:0/')+index;
+ if(platform==='delta')return (kind==='input'?'X':'Y')+index.toString(8);
+ if(platform==='codesys')return (kind==='input'?'%IX0.':'%QX0.')+index;
+ return (alias||((kind==='input'?'Entrada_':'Salida_')+index)).replace(/[^a-zA-Z0-9_]/g,'_');
+}
+function timerTag(plan){
+ if(plan.platform==='micrologix')return 'T4:0';
+ if(plan.platform==='delta')return 'T0';
+ if(plan.platform==='codesys')return 'TON_1';
+ return 'Timer_1';
+}
+function wiringItems(pin){
+ const plc=nodes.find(n=>n.type==='plc');
+ const direct=wires.filter(w=>w.a===plc.id&&w.ap===pin||w.b===plc.id&&w.bp===pin)
+   .map(w=>find(w.a===plc.id?w.b:w.a)).filter(Boolean);
+ const second=new Map(direct.map(n=>[n.id,n]));
+ for(const n of direct){
+  for(const w of wires){
+   if(w.a===n.id||w.b===n.id){
+    const other=find(w.a===n.id?w.b:w.a);
+    if(other&&other.id!==plc.id&&!['railplus','railzero'].includes(other.type))second.set(other.id,other);
+   }
+  }
+ }
+ return [...second.values()].map(n=>nameOf(n));
+}
+function refreshLadderWiring(){
+ const plc=nodes.find(n=>n.type==='plc'),container=E('ladderWiring');if(!plc||!container)return;
+ container.replaceChildren();
+ const rows=[...plcInputPins(plc).map(i=>[i,'Entrada']),...plcOutputPins(plc).map(i=>[i,'Salida'])];
+ for(const [pin,kind] of rows){
+  const row=document.createElement('div');row.className='io-row';
+  const ident=document.createElement('span');ident.textContent=portName(plc,pin)+(plc.ioLabels?.[pin]?' · '+plc.ioLabels[pin]:'');
+  const connected=wiringItems(pin);
+  const meaning=document.createElement('span');meaning.textContent=connected.length?connected.join(', '):'Sin componente conectado';
+  if(!connected.length)meaning.style.color='#ffbc8e';
+  row.append(ident,meaning);container.appendChild(row);
+ }
+}
+function updatePlatformControls(){
+ const mode=E('ladderMode').value,requiresSecond=['latch','and','or'].includes(mode);
+ E('ladderSecondaryWrap').style.display=requiresSecond?'flex':'none';
+ E('ladderDelayWrap').style.display=mode==='timer'?'flex':'none';
+ E('ladderTimerWrap').style.display=mode==='timer'?'flex':'none';
+ E('ladderStopPolarityWrap').style.display=mode==='latch'?'flex':'none';
+}
+function platformRemark(plan){
+ const notes={
+  compactlogix:'CompactLogix: tags simbólicos de ejemplo; el direccionamiento Local:x:I/O depende de los módulos instalados.',
+  micrologix:'MicroLogix: direcciones RSLogix 500 ilustrativas I:0/x y O:0/x; cambian según CPU y módulos.',
+  delta:'Delta DVP: X/Y se muestran en octal. El tiempo base del TMR depende del PLC y temporizador.',
+  codesys:'CODESYS: variables y direcciones %IX/%QX son ilustrativas; dependen del dispositivo y su configuración.'
+ };
+ return notes[plan.platform]||'Configura el mapeo de I/O de la CPU real antes de usar este programa.';
+}
+function updateLadderMonitor(){
+ const display=E('ladderLive');if(!display)return;
+ const plan=ladderPlan,plc=nodes.find(n=>n.type==='plc');if(!plan||!plc){display.textContent='Primero describe la tarea y genera el borrador Ladder.';return}
+ const a=plcInputPins(plc).indexOf(Number(plan.start)),b=plcInputPins(plc).indexOf(Number(plan.stop));
+ const inputs=[['I principal',ins.has(a)],['I secundaria',ins.has(b)]];
+ const output=outs.has(plcOutputPins(plc).indexOf(Number(plan.output)));
+ display.replaceChildren();
+ const line=document.createElement('div');line.textContent=(simulation?'● SIMULANDO':'○ EDITANDO')+' · '+(ladderRuntime.ready?'PLC alimentado':'PLC sin alimentación válida');
+ line.style.color=ladderRuntime.ready?'#47e0a6':'#ffad84';display.appendChild(line);
+ for(const [name,isOn] of inputs){if(name==='I secundaria'&&!['latch','and','or'].includes(plan.mode))continue;
+  const row=document.createElement('div');row.textContent=name+': '+(isOn?'ACTIVA':'INACTIVA');row.className=isOn?'on':'off';display.appendChild(row)}
+ const o=document.createElement('div');o.className=output?'on':'off';o.textContent='Salida '+ladderTag(plan.output,'output',plan.platform)+': '+(output?'ENERGIZADA':'DESENERGIZADA');display.appendChild(o);
+ if(plan.mode==='timer'){const t=document.createElement('div');t.textContent=timerTag(plan)+' · TON ET '+(ladderRuntime.elapsed/1000).toFixed(1)+' / '+Number(plan.delaySeconds||3).toFixed(1)+' s · DN '+(ladderRuntime.done?'1':'0');display.appendChild(t)}
+ if(!simulation){const n=document.createElement('small');n.textContent='Entra a Simular y pulsa los dispositivos físicamente conectados para ejecutar esta lógica.';display.appendChild(n)}
+ const svg=E('ladderPreview')?.querySelector('svg');
+ if(svg){
+  for(const g of svg.querySelectorAll('g[data-contact-pin]')){
+   const pin=Number(g.getAttribute('data-contact-pin')),value=ins.has(plcInputPins(plc).indexOf(pin));
+   const nc=g.getAttribute('data-contact-nc')==='1',on=nc?!value:value;
+   for(const elem of g.querySelectorAll('line,path'))elem.setAttribute('stroke',on?'#2ded9c':'#a5d7f4');
+  }
+  for(const g of svg.querySelectorAll('g[data-coil-pin]')){
+   for(const elem of g.querySelectorAll('line,path'))elem.setAttribute('stroke',output?'#2ded9c':'#a5d7f4');
+  }
+ }
+}
 function ladderOption(select,label,value){const option=document.createElement('option');option.value=String(value);option.textContent=label;select.appendChild(option)}
 function populateLadderSelectors(){
  const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
@@ -605,6 +690,11 @@ function populateLadderSelectors(){
   if(!select.value&&values.length)select.value=String(values[0]);
  }
  if(!ladderPlan&&inputPorts.length>1)E('ladderStop').value=String(inputPorts[1]);
+ const timerSelect=E('ladderTimer'),last=timerSelect.value;
+ timerSelect.replaceChildren();ladderOption(timerSelect,'TON virtual 1','virtual');
+ for(const node of nodes.filter(n=>n.type==='timer'))ladderOption(timerSelect,nameOf(node)+' (#'+node.id+')',node.id);
+ timerSelect.value=String(ladderPlan?.timerId??last??'virtual');if(!timerSelect.value)timerSelect.value='virtual';
+ refreshLadderWiring();updatePlatformControls();
 }
 function openLadder(){
  const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
@@ -644,20 +734,20 @@ function renderLadder(){
  const plan=ladderPlan;if(!plan){
   const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
  }
- E('ladderGoal').value=plan.goal||'';
+ E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.controller||'';E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
  E('ladderMode').value=plan.mode||'direct';
  populateLadderSelectors();
- E('ladderSecondaryWrap').style.display=['direct','inverse'].includes(plan.mode)?'none':'flex';
+ updatePlatformControls();
  const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 660 330');
  svg.setAttribute('role','img');svg.setAttribute('aria-label','Diagrama Ladder didáctico con contactos y bobinas');
  preview.appendChild(svg);
  ladderEl('rect',{x:0,y:0,width:660,height:330,rx:8,fill:'#0b192a'},svg);
- ladderText(svg,18,25,'PROGRAMA LADDER · BORRADOR',{'font-size':15,'font-weight':'bold'});
+ ladderText(svg,18,25,'LADDER · '+({compactlogix:'COMPACTLOGIX',micrologix:'MICROLOGIX',delta:'DELTA DVP',codesys:'CODESYS'}[plan.platform]||'PLC'),{'font-size':15,'font-weight':'bold'});
  ladderSegment(svg,36,49,36,290,{'stroke':'#fb747c','stroke-width':4});
  ladderSegment(svg,622,49,622,290,{'stroke':'#6393ff','stroke-width':4});
  ladderText(svg,36,42,'L',{'text-anchor':'middle','font-size':11});
  ladderText(svg,622,42,'N',{'text-anchor':'middle','font-size':11});
- const inA=ladderLabel(plan.start),inB=ladderLabel(plan.stop),out=ladderLabel(plan.output);
+ const inA=ladderTag(plan.start,'input',plan.platform),inB=ladderTag(plan.stop,'input',plan.platform),out=ladderTag(plan.output,'output',plan.platform);
  const rung=105;
  const series=(contacts)=>{
   const num=contacts.length,xs=num===1?[240]:[173,310];
@@ -688,13 +778,12 @@ function renderLadder(){
  ladderText(svg,36,250,'RED 1 · '+({latch:'Arranque y paro con auto-retención',direct:'Activación directa',inverse:'Condición negada',and:'Interbloqueo de dos señales',or:'Activación alternativa'}[plan.mode]||'Control básico'),{'font-size':13});
  ladderText(svg,36,278,'Entradas: '+inA+(['direct','inverse'].includes(plan.mode)?'':' / '+inB),{'font-size':12});
  ladderText(svg,36,300,'Salida: '+out,{'font-size':12});
- const info=E('ladderMessage');info.textContent='Borrador generado para: '+plan.goal+'. Puedes ajustar las entradas y el tipo de control y volver a generar.';
+ const info=E('ladderMessage');info.textContent='Tarea documentada: '+plan.goal+'. '+platformRemark(plan)+' Configuración de ejemplo: valida las direcciones y características de tu CPU.';
+ updateLadderMonitor();
 }
 E('showLadder').onclick=()=>openLadder();
 E('closeLadder').onclick=()=>closeLadder();
-E('ladderMode').onchange=e=>{
- E('ladderSecondaryWrap').style.display=['direct','inverse'].includes(e.target.value)?'none':'flex';
-};
+E('ladderMode').onchange=updatePlatformControls;
 E('ladderGoal').addEventListener('input',e=>{
  if(ladderPlan)return;
  const goal=e.target.value.toLowerCase();
