@@ -188,6 +188,7 @@ if(chosen?.kind==='wire'&&chosen.id===w.id){
  const handle=S('circle',{cx:x,cy:y,r:9,class:'wire-handle'},wl);
  handle.onpointerdown=e=>{e.stopPropagation();e.preventDefault();closeMenu();wireDrag={id:w.id};canvas.setPointerCapture(e.pointerId)};
 }
+}
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
 rub.setAttribute('opacity',first?1:0)}
 function dragStart(e,n){if(e.button!==0||e.target.classList.contains('port'))return;e.stopPropagation();closeMenu();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
