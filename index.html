@@ -2516,6 +2516,29 @@ function graphInit(){
  graphicRefresh();
 }
 
+const uiLanguages={"language":{"es":"Idioma","en":"Language","pt":"Idioma","zh":"语言","ja":"言語","de":"Sprache"},"simulate":{"es":"▶ Simular","en":"▶ Simulate","pt":"▶ Simular","zh":"▶ 模拟","ja":"▶ シミュレート","de":"▶ Simulieren"},"edit":{"es":"■ Editar","en":"■ Edit","pt":"■ Editar","zh":"■ 编辑","ja":"■ 編集","de":"■ Bearbeiten"},"new":{"es":"＋ Nuevo","en":"＋ New","pt":"＋ Novo","zh":"＋ 新建","ja":"＋ 新規","de":"＋ Neu"},"save":{"es":"💾 Guardar","en":"💾 Save","pt":"💾 Salvar","zh":"💾 保存","ja":"💾 保存","de":"💾 Speichern"},"scenes":{"es":"Scenes","en":"Scenes","pt":"Cenários","zh":"场景","ja":"シーン","de":"Szenen"},"tutor":{"es":"Aura · Tutor","en":"Aura · Tutor","pt":"Aura · Tutor","zh":"Aura · 导师","ja":"Aura · チューター","de":"Aura · Tutor"},"ladder":{"es":"▤ Programa escalera","en":"▤ Ladder Program","pt":"▤ Programa Ladder","zh":"▤ 梯形图程序","ja":"▤ ラダー回路","de":"▤ Kontaktplan"},"check":{"es":"⚠ Revisar","en":"⚠ Check","pt":"⚠ Verificar","zh":"⚠ 检查","ja":"⚠ 確認","de":"⚠ Prüfen"},"components":{"es":"COMPONENTES ELÉCTRICOS","en":"ELECTRICAL COMPONENTS","pt":"COMPONENTES ELÉTRICOS","zh":"电气元件","ja":"電気部品","de":"ELEKTRISCHE BAUTEILE"},"sensors":{"es":"MANDOS Y SENSORES","en":"CONTROLS & SENSORS","pt":"COMANDOS E SENSORES","zh":"控制与传感器","ja":"スイッチとセンサー","de":"SCHALTER & SENSOREN"},"actuators":{"es":"ACTUADORES Y CARGAS","en":"ACTUATORS & LOADS","pt":"ATUADORES E CARGAS","zh":"执行器与负载","ja":"アクチュエータと負荷","de":"AKTOREN & LASTEN"},"junctions":{"es":"UNIONES Y RAMIFICACIONES","en":"JUNCTIONS & BRANCHES","pt":"UNIÕES E RAMIFICAÇÕES","zh":"连接点和分支","ja":"接続点と分岐","de":"VERBINDUNGEN & ABZWEIGE"},"internal":{"es":"PROGRAMACIÓN INTERNA","en":"INTERNAL PROGRAMMING","pt":"PROGRAMAÇÃO INTERNA","zh":"内部编程","ja":"内部プログラミング","de":"INTERNE PROGRAMMIERUNG"},"wiring":{"es":"SELECCIÓN / CABLES","en":"SELECTION / WIRES","pt":"SELEÇÃO / FIOS","zh":"选择与接线","ja":"選択と配線","de":"AUSWAHL / LEITUNGEN"},"selected":{"es":"COMPONENTE SELECCIONADO","en":"SELECTED COMPONENT","pt":"COMPONENTE SELECIONADO","zh":"所选元件","ja":"選択した部品","de":"AUSGEWÄHLTES BAUTEIL"},"expand":{"es":"AMPLIAR PLC Y BARRAS","en":"EXPAND PLC & RAILS","pt":"EXPANDIR PLC E BARRAS","zh":"扩展 PLC 与母线","ja":"PLC とバスの拡張","de":"SPS & SCHIENEN ERWEITERN"},"workspace":{"es":"Ladder Workspace","en":"Ladder Workspace","pt":"Área Ladder","zh":"梯形图工作区","ja":"ラダー作業領域","de":"Kontaktplan-Arbeitsbereich"},"visualEditor":{"es":"Visual Ladder Editor · Editor gráfico","en":"Visual Ladder Editor","pt":"Editor Ladder Visual","zh":"可视化梯形图编辑器","ja":"ラダー図エディタ","de":"Grafischer Kontaktplan-Editor"},"addRung":{"es":"＋ Rung · Nueva línea","en":"＋ Rung · Add line","pt":"＋ Rung · Nova linha","zh":"＋ 添加梯级","ja":"＋ ラング追加","de":"＋ Netzwerk hinzufügen"},"parallel":{"es":"＋ Parallel","en":"＋ Parallel","pt":"＋ Paralelo","zh":"＋ 并联支路","ja":"＋ 並列分岐","de":"＋ Parallelzweig"},"remove":{"es":"⌫ Quitar","en":"⌫ Remove","pt":"⌫ Remover","zh":"⌫ 删除符号","ja":"⌫ 記号削除","de":"⌫ Entfernen"},"deleteRung":{"es":"Borrar línea","en":"Delete Rung","pt":"Excluir linha","zh":"删除梯级","ja":"ラング削除","de":"Netzwerk löschen"},"clearLadder":{"es":"Vaciar Ladder","en":"Clear Ladder","pt":"Limpar Ladder","zh":"清空梯形图","ja":"ラダーを消去","de":"Kontaktplan leeren"},"checkLadder":{"es":"✓ Comprobar Ladder","en":"✓ Check Ladder","pt":"✓ Verificar Ladder","zh":"✓ 检查梯形图","ja":"✓ ラダー検証","de":"✓ Kontaktplan prüfen"},"useLadder":{"es":"▶ Usar este Ladder","en":"▶ Use This Ladder","pt":"▶ Usar este Ladder","zh":"▶ 使用此梯形图","ja":"▶ このラダーを使用","de":"▶ Diesen Kontaktplan nutzen"},"sceneBuilder":{"es":"Scene Builder · Escenarios","en":"Scene Builder","pt":"Construtor de Cenários","zh":"场景编辑器","ja":"シーンビルダー","de":"Szeneneditor"},"auraTitle":{"es":"Aura · PLC Tutor","en":"Aura · PLC Tutor","pt":"Aura · Tutora PLC","zh":"Aura · PLC 导师","ja":"Aura · PLC チューター","de":"Aura · SPS-Tutor"},"auraSit":{"es":"Sentarse / Pasear","en":"Sit / Walk","pt":"Sentar / Passear","zh":"坐下 / 散步","ja":"座る / 歩く","de":"Sitzen / Laufen"},"miniGame":{"es":"Fox Chase · Minijuego","en":"Fox Chase · Mini Game","pt":"Fox Chase · Minijogo","zh":"小狐狸追逐游戏","ja":"キツネ追いかけゲーム","de":"Fuchsjagd · Minispiel"},"ask":{"es":"Enviar pregunta","en":"Ask a Question","pt":"Enviar pergunta","zh":"发送问题","ja":"質問を送信","de":"Frage stellen"},"gameStart":{"es":"Start · Jugar","en":"Start · Play","pt":"Iniciar · Jogar","zh":"开始游戏","ja":"ゲーム開始","de":"Start · Spielen"}};
+let currentUiLanguage='es';
+function uiT(key){
+ return uiLanguages[key]?.[currentUiLanguage]||uiLanguages[key]?.es||key;
+}
+function applyLanguage(lang){
+ currentUiLanguage=['es','en','pt','zh','ja','de'].includes(lang)?lang:'es';
+ document.documentElement.lang=currentUiLanguage;
+ E('uiLanguage').value=currentUiLanguage;
+ for(const el of document.querySelectorAll('[data-i18n]')){
+  const key=el.getAttribute('data-i18n');
+  const translation=uiT(key);
+  if(translation)el.textContent=translation;
+ }
+ try{localStorage.setItem('plc-sim-ui-language-v1',currentUiLanguage)}catch{}
+ if(typeof graphicRefresh==='function')graphicRefresh();
+}
+E('uiLanguage').onchange=e=>applyLanguage(e.target.value);
+function initLanguage(){
+ let last='es';try{last=localStorage.getItem('plc-sim-ui-language-v1')||'es'}catch{}
+ applyLanguage(last);
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -2572,7 +2595,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 new ResizeObserver(entries=>{
