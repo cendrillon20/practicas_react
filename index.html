@@ -10,9 +10,38 @@
 .diagnostic strong{color:#b5dcff}.diagnostic button{border:1px solid #4d718c;background:#213b58;color:#ecf7ff;padding:4px 8px;border-radius:7px;cursor:pointer;float:right}
 .diagnostic ul{margin:7px 0;padding-left:17px}.diagnostic li{margin:7px 0;color:#bed2e8}.diagnostic li.error{color:#ff9baf}.diagnostic li.warn{color:#ffd17e}
 .diagnostic li.ok{color:#75e9bf}
+.inspector select{width:100%;padding:8px;margin:9px 0 6px;border:1px solid #466a91;border-radius:7px;background:#11253c;color:#f4f8ff}
+.inspector .io-select+input{margin-top:6px}
+@media(max-width:950px){
+ header{height:56px;overflow-x:auto;scrollbar-width:thin}
+ header .spacer{min-width:8px;flex:0}
+ header .push{flex:0 0 auto;white-space:nowrap}
+}
+@media(max-width:650px){
+ body{overflow:hidden}
+ header{height:56px;padding:5px 7px}
+ header strong{font-size:13px}header .logo{padding:6px}
+ .layout{display:flex;flex-direction:column;height:calc(100dvh - 56px)}
+ aside{height:164px;flex:0 0 164px;overflow:auto;border-right:0;border-bottom:2px solid #2d3f5a;padding:6px}
+ aside .side-title{font-size:11px;margin:3px 2px}
+ aside h4{margin:9px 4px 5px}
+ aside .cards{display:flex;gap:7px;overflow-x:auto}
+ aside .tile{flex:0 0 94px;min-height:86px;padding:3px}
+ aside .tile svg{height:49px}main{flex:1;min-height:0}
+ .diagnostic{top:8px;right:8px;width:min(270px,65%);max-height:28vh;font-size:11px}
+ .note{font-size:10px;bottom:5px;left:6px;right:6px;padding:5px}
+}
+body.phone-mode{overflow:hidden}
+body.phone-mode header{height:56px;overflow-x:auto}
+body.phone-mode .layout{display:flex;flex-direction:column;height:calc(100dvh - 56px)}
+body.phone-mode aside{height:170px;flex:0 0 170px;overflow:auto;border-right:0;border-bottom:2px solid #2d3f5a}
+body.phone-mode aside .cards{display:flex;overflow-x:auto;gap:8px}
+body.phone-mode aside .tile{flex:0 0 100px}
+body.phone-mode main{flex:1;min-height:0}
+
 @media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main></div>
 <script>
 (()=>{
@@ -268,6 +297,7 @@ function zoom(factor,mouse){
  const rx=(x-view.x)/view.w,ry=(y-view.y)/view.h;
  view={x:x-rx*w,y:y-ry*height,w,h:height};updateView()
 }
+E('phoneMode').onclick=()=>{document.body.classList.toggle('phone-mode');E('phoneMode').textContent=document.body.classList.contains('phone-mode')?'🖥 Escritorio':'📱 Móvil'};
 E('zoomIn').onclick=()=>zoom(1.2);E('zoomOut').onclick=()=>zoom(1/1.2);
 E('zoomValue').onclick=()=>{view={x:0,y:0,w:1200,h:760};updateView()};
 canvas.addEventListener('wheel',e=>{e.preventDefault();const pos=pointer(e);zoom(e.deltaY<0?1.12:1/1.12,[pos.x,pos.y])},{passive:false});
