@@ -127,10 +127,16 @@ function clearEdge(a,b,boxes){
  return true;
 }
 function pathfind(a,b,boxes){
- const xs=[...new Set([a[0],b[0],25,1175,...boxes.flatMap(r=>[r[0]-4,r[2]+4])])].filter(x=>x>0&&x<1200).sort((a,b)=>a-b);
- const ys=[...new Set([a[1],b[1],20,740,...boxes.flatMap(r=>[r[1]-4,r[3]+4])])].filter(y=>y>0&&y<760).sort((a,b)=>a-b);
+ // La ruta se calcula en coordenadas del circuito, no en un lienzo fijo de
+ // 1200 x 760. Así los cables no desaparecen al arrastrar piezas fuera de vista.
+ const allX=[a[0],b[0],view.x,view.x+view.w,...boxes.flatMap(r=>[r[0]-4,r[2]+4])];
+ const allY=[a[1],b[1],view.y,view.y+view.h,...boxes.flatMap(r=>[r[1]-4,r[3]+4])];
+ const minX=Math.min(...allX)-90,maxX=Math.max(...allX)+90;
+ const minY=Math.min(...allY)-90,maxY=Math.max(...allY)+90;
+ const xs=[...new Set([a[0],b[0],minX,maxX,...boxes.flatMap(r=>[r[0]-4,r[2]+4])])].sort((x,y)=>x-y);
+ const ys=[...new Set([a[1],b[1],minY,maxY,...boxes.flatMap(r=>[r[1]-4,r[3]+4])])].sort((x,y)=>x-y);
  const w=xs.length,code=(i,j)=>j*w+i,from=code(xs.indexOf(a[0]),ys.indexOf(a[1])),goal=code(xs.indexOf(b[0]),ys.indexOf(b[1]));
- if(from<0||goal<0||xs.indexOf(a[0])<0||ys.indexOf(a[1])<0||xs.indexOf(b[0])<0||ys.indexOf(b[1])<0)return null;
+ if(xs.indexOf(a[0])<0||ys.indexOf(a[1])<0||xs.indexOf(b[0])<0||ys.indexOf(b[1])<0)return null;
  const q=[from],dist=new Map([[from,0]]),prev=new Map(),closed=new Set(),P=id=>[xs[id%w],ys[Math.floor(id/w)]];
  while(q.length){let best=0,bestScore=Infinity;for(let z=0;z<q.length;z++){const p=P(q[z]),score=dist.get(q[z])+Math.abs(p[0]-b[0])+Math.abs(p[1]-b[1]);if(score<bestScore){best=z;bestScore=score}}
  const id=q.splice(best,1)[0];if(closed.has(id))continue;closed.add(id);
@@ -235,7 +241,11 @@ g.ondblclick=e=>{e.stopPropagation();chosen={kind:'node',id:n.id};renameChosen()
 function draw(){solve();layer.replaceChildren();wl.replaceChildren();
 for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b||!ports(a)[w.ap]||!ports(b)[w.bp])continue;
 const aPort=ports(a)[w.ap],bPort=ports(b)[w.bp];
-const routed=routeWire(w);w.unroutable=!routed;const p=S('path',{d:routed?.d||'',class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
+const routed=routeWire(w);w.unroutable=!routed;
+ // Mantener la última ruta válida visible si el usuario pasa por una posición
+ // temporalmente imposible (por ejemplo, dos piezas superpuestas).
+ if(routed)w.lastRoute=routed.d;
+ const p=S('path',{d:routed?.d||w.lastRoute||'',class:(chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':'')+(w.unroutable?' wire-blocked':'')},wl);
 p.onpointerdown=e=>{e.stopPropagation();if(simulation)return;chosen={kind:'wire',id:w.id};refreshInspector();draw();showMenu(e,w,'wire')};
 if(chosen?.kind==='wire'&&chosen.id===w.id){
  const [x,y]=routed?.handle||elbow(aPort,bPort,w);
