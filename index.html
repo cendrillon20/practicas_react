@@ -434,6 +434,52 @@ E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=(
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
 E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
 E('simulate').onclick=()=>{simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{simulation=false;refreshInspector();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
+const STORAGE_KEY='plc-sim-studio-projects-v1';
+let projectId=null;
+function listProjects(){try{const raw=localStorage.getItem(STORAGE_KEY);const data=raw?JSON.parse(raw):[];return Array.isArray(data)?data:[]}catch{return []}}
+function refreshProjects(){
+ const target=E('savedProjects'),old=target.value;target.replaceChildren();
+ const first=document.createElement('option');first.value='';first.textContent='Mis proyectos';target.appendChild(first);
+ for(const item of listProjects().sort((a,b)=>(b.updated||0)-(a.updated||0))){const op=document.createElement('option');op.value=item.id;op.textContent=item.name;target.appendChild(op)}
+ target.value=projectId||old||'';
+ if(!target.value)target.value='';
+}
+function snapshot(){return {version:5,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),name:E('projectName').value.trim()||'Proyecto sin título'}}
+function hydrate(data){
+ if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
+ const valid=data.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
+ // Exige componentes fundamentales y preserva los identificadores.
+ if(!['railplus','railzero','plc'].every(type=>valid.some(n=>n.type===type)))throw Error('El proyecto no incluye PLC y ambas barras de alimentación.');
+ nodes=valid;
+ for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));n.ioLabels=n.ioLabels&&typeof n.ioLabels==='object'?n.ioLabels:{}}n.angle=((Number(n.angle)||0)%360+360)%360;n.label=typeof n.label==='string'&&n.label?n.label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type}
+ wires=data.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
+ next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();
+}
+E('saveLocal').onclick=()=>{
+ const name=E('projectName').value.trim()||'Proyecto sin título',data=snapshot(),items=listProjects();
+ try{
+   if(!projectId)projectId='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+   const entry={id:projectId,name,updated:Date.now(),data};const i=items.findIndex(x=>x.id===projectId);
+   if(i>=0)items[i]=entry;else items.push(entry);
+   localStorage.setItem(STORAGE_KEY,JSON.stringify(items));refreshProjects();
+   alert('Proyecto "'+name+'" guardado en este navegador. También puedes exportarlo como JSON para tener una copia.');
+ }catch(e){alert('No se pudo guardar en este navegador: '+e.message+'. Exporta como JSON para evitar perder cambios.')}
+};
+E('newProject').onclick=()=>{
+ if(!confirm('¿Crear un proyecto nuevo? Los cambios no guardados del actual se perderán.'))return;
+ projectId=null;E('projectName').value='Proyecto sin título';reset('empty');simulation=false;refreshProjects();refreshInspector();expansionStatus();
+};
+E('savedProjects').onchange=e=>{
+ const selected=e.target.value;if(!selected)return;
+ const item=listProjects().find(x=>x.id===selected);if(!item)return;
+ if(!confirm('¿Abrir "'+item.name+'"? Se reemplazará el circuito actual.')){e.target.value=projectId||'';return}
+ try{hydrate(item.data);projectId=item.id;refreshProjects()}catch(err){alert(err.message)}
+};
+E('deleteLocal').onclick=()=>{
+ const id=E('savedProjects').value||projectId;if(!id){alert('Selecciona primero un proyecto guardado.');return}
+ const items=listProjects(),item=items.find(x=>x.id===id);if(!item||!confirm('¿Eliminar el proyecto guardado "'+item.name+'"?'))return;
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items.filter(x=>x.id!==id)));if(projectId===id)projectId=null;refreshProjects()}catch(err){alert(err.message)}
+};
 E('save').onclick=()=>{const blob=new Blob([JSON.stringify({version:4,nodes,wires},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 E('load').onclick=()=>{if(simulation){alert('Activa Editar para cargar un circuito.');return}E('file').click()};E('file').onchange=async e=>{if(simulation)return;try{const file=e.target.files?.[0];if(!file)return;const v=JSON.parse(await file.text());if(!Array.isArray(v.nodes)||!Array.isArray(v.wires))throw Error('Archivo inválido');
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
@@ -453,6 +499,6 @@ if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);
 if(e.key==='F2')renameChosen();
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
-reset('start');simulation=true;refreshInspector();expansionStatus();updateView();
+reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
 })();
 </script></html>
