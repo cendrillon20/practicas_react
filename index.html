@@ -31,13 +31,13 @@ function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,points:type.st
 function find(id){return nodes.find(n=>n.id===id)}
 function K(n,i){return n.id+':'+i}
 function localPorts(n){if(n.type==='railplus'||n.type==='railzero')return Array.from({length:n.points||7},(_,i)=>[i*76,0]);
-if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[25+i*43,23]),...Array.from({length:14},(_,i)=>[25+i*43,170]),...Array.from({length:n.extraInputs||0},(_,i)=>[637+i*43,23]),...Array.from({length:n.extraOutputs||0},(_,i)=>[637+i*43,170])];
+if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[25+i*43,23]),...Array.from({length:14},(_,i)=>[25+i*43,170]),...Array.from({length:6},(_,i)=>[637+i*43,23]),...Array.from({length:n.extraOutputs||0},(_,i)=>[637+i*43,170])];
 return types[n.type][2]===3?[[0,27],[0,63],[126,45]]:[[0,45],[126,45]]}
 function center(n){if(n.type.startsWith('rail'))return [((n.points||7)-1)*38,0];if(n.type==='plc')return [(610+43*Math.max(n.extraInputs||0,n.extraOutputs||0))/2,96];return [63,45]}
 function rotate(x,y,cx,cy,angle){const r=angle*Math.PI/180,dx=x-cx,dy=y-cy;return[cx+dx*Math.cos(r)-dy*Math.sin(r),cy+dx*Math.sin(r)+dy*Math.cos(r)]}
 function ports(n){const c=center(n);return localPorts(n).map(([x,y])=>{const p=rotate(x,y,c[0],c[1],n.angle||0);return[n.x+p[0],n.y+p[1]]})}
 const pnames=['+24 V','-','DC COM','I/0','I/1','I/2','I/3','DC COM','I/4','I/5','I/6','I/7','I/8','I/9','L1','L2/N','⏚','VAC/VDC','O/0','VAC/VDC','O/1','VAC/VDC','O/2','VAC/VDC','O/3','O/4','O/5',''];
-function portName(n,i){if(n.type!=='plc')return '';if(i<28)return pnames[i]||'';if(i<44)return 'I/'+(10+i-28);return 'O/'+(6+i-44)}
+function portName(n,i){if(n.type!=='plc')return '';if(i<28)return pnames[i]||'';if(i<34)return 'I/'+(10+i-28);return 'O/'+(6+i-34)}
 function connect(a,ap,b,bp){if(a===b&&ap===bp)return;if(wires.some(w=>(w.a===a&&w.ap===ap&&w.b===b&&w.bp===bp)||(w.a===b&&w.ap===bp&&w.b===a&&w.bp===ap)))return;wires.push({id:next++,a,ap,b,bp})}
 function solve(){live=new Set();zero=new Set();ins=new Set();outs=new Set();activeLoads=new Set();if(!simulation)return;
 const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');if(!plus||!minus||!plc)return;
@@ -50,7 +50,7 @@ for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&potential.ha
 potential=reach(src);
 const ready=potential.has(K(plc,0))&&zero.has(K(plc,1));
 for(let i=0;i<10+(plc.extraInputs||0);i++){const term=i<10?(i<4?i+3:i+4):28+i-10;if(ready&&potential.has(K(plc,term)))ins.add(i)}
-const op=[18,20,22,24,25,26];for(let i=0;i<6+(plc.extraOutputs||0);i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,i<6?op[i]:44+i-6))}
+const op=[18,20,22,24,25,26];for(let i=0;i<6+(plc.extraOutputs||0);i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,i<6?op[i]:34+i-6))}
 live=reach(src);
 for(const n of nodes)if(['green','red','amber','blue','white','relay','buzzer'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id);
 shortCircuit=[...zero].some(k=>live.has(k));
@@ -164,7 +164,7 @@ const strip=(y,isTop)=>{
  if(isTop){S('rect',{x:8,y:y+5,width:594+extension,height:37,fill:'#fff',stroke:'#444','stroke-width':1},g);}
  else{S('rect',{x:8,y:y+51,width:594+extension,height:37,fill:'#fff',stroke:'#444','stroke-width':1},g);}
  for(let j=0;j<14+(isTop?(n.extraInputs||0):(n.extraOutputs||0));j++){
-   const i=isTop?(j<14?j:28+j-14):(j<14?j+14:44+j-14),x=j<14?25+j*43:637+(j-14)*43,cy=isTop?y+23:y+69;
+   const i=isTop?(j<14?j:28+j-14):(j<14?j+14:34+j-14),x=j<14?25+j*43:637+(j-14)*43,cy=isTop?y+23:y+69;
    S('rect',{x:x-19,y:cy-20,width:38,height:40,fill:'#fafafa',stroke:'#3b3b3b','stroke-width':1.2},g);
    S('circle',{cx:x,cy,r:15.5,fill:'#fff',stroke:'#333','stroke-width':1.2},g);
    S('circle',{cx:x,cy,r:12.3,fill:'none',stroke:'#888','stroke-width':.8},g);
@@ -242,9 +242,9 @@ function changePLC(which,delta){
  if(simulation){alert('Activa Editar antes de ampliar el PLC.');return}
  const n=nodes.find(n=>n.type==='plc');if(!n)return;
  const field=which==='input'?'extraInputs':'extraOutputs';
- const start=which==='input'?28:44;
+ const start=which==='input'?28:34;
  const before=n[field]||0,count=Math.max(0,Math.min(6,before+delta));
- if(count<before&&wires.some(w=>(w.a===n.id&&w.ap>=start+count&&w.ap<start+16)||(w.b===n.id&&w.bp>=start+count&&w.bp<start+16))){alert('Desconecta los cables de los bornes adicionales antes de eliminarlos.');return}
+ if(count<before&&wires.some(w=>(w.a===n.id&&w.ap>=start+count&&w.ap<start+6)||(w.b===n.id&&w.bp>=start+count&&w.bp<start+6))){alert('Desconecta los cables de los bornes adicionales antes de eliminarlos.');return}
  n[field]=count;draw();expansionStatus();
 }
 function expansionStatus(){
