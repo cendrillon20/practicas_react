@@ -40,9 +40,52 @@ body.phone-mode aside .tile{flex:0 0 100px}
 body.phone-mode main{flex:1;min-height:0}
 
 @media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
+.layout.ladder-visible{grid-template-columns:237px minmax(0,1fr) minmax(330px,430px)}
+.ladder-panel{background:#0e1b2c;border-left:1px solid #365373;padding:14px;overflow:auto;min-width:0;display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.ladder-panel[hidden]{display:none}
+.ladder-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #344b6b;padding-bottom:10px;gap:10px}
+.ladder-top strong{font-size:14px}
+.ladder-top button{background:#1c3453;border:1px solid #476383;color:#fff;border-radius:7px;font-size:19px;padding:3px 10px;cursor:pointer}
+.ladder-panel label{display:flex;flex-direction:column;gap:5px;color:#b9cee7;font-size:12px}
+.ladder-panel textarea,.ladder-panel select{background:#142841;color:#f3f7ff;border:1px solid #3b5c80;border-radius:8px;padding:9px;font:inherit;width:100%;max-width:100%;box-sizing:border-box}
+.ladder-fields{display:grid;gap:9px}
+.ladder-generate{border:1px solid #1abf97;border-radius:8px;background:#086d59;color:#fff;padding:10px 12px;font-weight:700;cursor:pointer}
+.ladder-message{font-size:11px;color:#b1cde9;line-height:1.5}
+.ladder-preview{min-height:125px;overflow-x:auto;background:#091523;border:1px solid #314c6a;border-radius:10px;padding:8px}
+.ladder-preview svg{width:100%;min-width:360px;height:auto;touch-action:auto;user-select:none}
+.ladder-panel small{font-size:11px;color:#91aac8;line-height:1.5}
+@media(max-width:1000px){
+ .layout.ladder-visible{grid-template-columns:190px minmax(0,1fr)}
+ .layout.ladder-visible .ladder-panel{position:absolute;right:0;top:56px;bottom:0;width:min(440px,75vw);z-index:9;box-shadow:-10px 0 32px #000a}
+}
+@media(max-width:650px){
+ .layout.ladder-visible .ladder-panel,body.phone-mode .layout.ladder-visible .ladder-panel{position:absolute;top:56px;right:0;bottom:0;width:100%;z-index:9;box-shadow:none}
+}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
-<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main></div>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
+<section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
+ <div class="ladder-top"><strong>▤ Programa escalera (Ladder)</strong><button id="closeLadder" title="Cerrar panel">×</button></div>
+ <label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
+ <textarea id="ladderGoal" rows="3" placeholder="Ejemplo: Al pulsar Marcha se enciende el motor y permanece encendido hasta pulsar Paro."></textarea>
+ <label for="ladderMode">Comportamiento a implementar</label>
+ <select id="ladderMode">
+  <option value="latch">Arranque/paro con enclavamiento</option>
+  <option value="direct">Activación mientras llega señal</option>
+  <option value="inverse">Activación cuando NO hay señal</option>
+  <option value="and">Dos entradas simultáneas (Y)</option>
+  <option value="or">Cualquiera de dos entradas (O)</option>
+ </select>
+ <div class="ladder-fields">
+  <label>Entrada principal<select id="ladderStart"></select></label>
+  <label id="ladderSecondaryWrap">Entrada secundaria / Paro<select id="ladderStop"></select></label>
+  <label>Salida controlada<select id="ladderOutput"></select></label>
+ </div>
+ <button id="generateLadder" class="ladder-generate">Generar programa escalera</button>
+ <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
+ <div id="ladderPreview" class="ladder-preview"></div>
+ <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
+</section></div>
 <script>
 (()=>{
 'use strict';
@@ -53,7 +96,7 @@ ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:
 green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2]
 };
 const nameOf=n=>n.label||({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type][0];
-let copied=null,pasteNumber=0,multi=new Set(),groupDrag=null,nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,pan=null,pressedButton=null,view={x:0,y:0,w:1200,h:760},simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
+let ladderPlan=null,copied=null,pasteNumber=0,multi=new Set(),groupDrag=null,nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,pan=null,pressedButton=null,view={x:0,y:0,w:1200,h:760},simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
 function S(tag,attrs={},parent=layer){const a=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))a.setAttribute(k,v);parent.appendChild(a);return a}
 function T(g,x,y,str,attrs={}){const a=S('text',{x,y,...attrs},g);a.textContent=str;return a}
 function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,ioLabels:type==='plc'?{}:undefined,points:type.startsWith('rail')?7:undefined,extraInputs:type==='plc'?0:undefined,extraOutputs:type==='plc'?0:undefined,label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[type]||types[type][0]};nodes.push(n);return n}
@@ -444,7 +487,129 @@ function refreshProjects(){
  target.value=projectId||old||'';
  if(!target.value)target.value='';
 }
-function snapshot(){return {version:5,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),name:E('projectName').value.trim()||'Proyecto sin título'}}
+
+function ladderOption(select,label,value){const option=document.createElement('option');option.value=String(value);option.textContent=label;select.appendChild(option)}
+function populateLadderSelectors(){
+ const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
+ const inputPorts=[3,4,5,6,8,9,10,11,12,13,...Array.from({length:plc.extraInputs||0},(_,i)=>28+i)];
+ const outputPorts=[18,20,22,24,25,26,...Array.from({length:plc.extraOutputs||0},(_,i)=>34+i)];
+ const spec=[['ladderStart',inputPorts],['ladderStop',inputPorts],['ladderOutput',outputPorts]];
+ for(const [id,values] of spec){
+  const select=E(id),prev=select.value;select.replaceChildren();
+  values.forEach(i=>ladderOption(select,portName(plc,i)+(plc.ioLabels?.[i]?' — '+plc.ioLabels[i]:''),i));
+  const desired=ladderPlan?.[id==='ladderStart'?'start':id==='ladderStop'?'stop':'output'];
+  select.value=String(desired??prev??values[0]);
+  if(!select.value&&values.length)select.value=String(values[0]);
+ }
+ if(!ladderPlan&&inputPorts.length>1)E('ladderStop').value=String(inputPorts[1]);
+}
+function openLadder(){
+ const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
+ populateLadderSelectors();renderLadder();
+ E('ladderGoal').focus();
+}
+function closeLadder(){
+ E('ladderPanel').hidden=true;E('canvas').closest('.layout').classList.remove('ladder-visible');
+}
+function ladderEl(tag,attrs={},parent){
+ const el=document.createElementNS(NS,tag);
+ Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+ parent.appendChild(el);return el;
+}
+function ladderText(parent,x,y,text,props={}){
+ const el=ladderEl('text',{x,y,fill:'#d5ecff','font-size':13,'font-family':'Segoe UI,Arial,sans-serif',...props},parent);
+ el.textContent=String(text);return el;
+}
+function ladderSegment(parent,x1,y1,x2,y2,props={}){
+ ladderEl('line',{x1,y1,x2,y2,stroke:'#a5d7f4','stroke-width':3,...props},parent);
+}
+function ladderContact(root,x,y,label,nc=false){
+ ladderSegment(root,x-42,y,x-13,y);ladderSegment(root,x+13,y,x+42,y);
+ ladderSegment(root,x-13,y-20,x-13,y+20);ladderSegment(root,x+13,y-20,x+13,y+20);
+ if(nc)ladderSegment(root,x-18,y+24,x+18,y-24,{'stroke-width':2.2});
+ ladderText(root,x,y-32,label,{'text-anchor':'middle','font-size':12});
+}
+function ladderCoil(root,x,y,label){
+ ladderSegment(root,x-48,y,x-25,y);ladderSegment(root,x+25,y,x+48,y);
+ const path=ladderEl('path',{d:'M '+(x-25)+' '+(y-20)+' C '+(x-9)+' '+(y-20)+' '+(x-9)+' '+(y+20)+' '+(x-25)+' '+(y+20)+' M '+(x+25)+' '+(y-20)+' C '+(x+9)+' '+(y-20)+' '+(x+9)+' '+(y+20)+' '+(x+25)+' '+(y+20),stroke:'#a5d7f4','stroke-width':2.8,fill:'none'},root);
+ ladderText(root,x,y-32,label,{'text-anchor':'middle','font-size':12});
+ return path;
+}
+function ladderLabel(i){const plc=nodes.find(n=>n.type==='plc');return plc?portName(plc,i)+(plc.ioLabels?.[i]?' '+plc.ioLabels[i]:''):''}
+function renderLadder(){
+ const preview=E('ladderPreview');if(!preview)return;preview.replaceChildren();
+ const plan=ladderPlan;if(!plan){
+  const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
+ }
+ E('ladderGoal').value=plan.goal||'';
+ E('ladderMode').value=plan.mode||'direct';
+ populateLadderSelectors();
+ E('ladderSecondaryWrap').style.display=['direct','inverse'].includes(plan.mode)?'none':'flex';
+ const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 660 330');
+ svg.setAttribute('role','img');svg.setAttribute('aria-label','Diagrama Ladder didáctico con contactos y bobinas');
+ preview.appendChild(svg);
+ ladderEl('rect',{x:0,y:0,width:660,height:330,rx:8,fill:'#0b192a'},svg);
+ ladderText(svg,18,25,'PROGRAMA LADDER · BORRADOR',{'font-size':15,'font-weight':'bold'});
+ ladderSegment(svg,36,49,36,290,{'stroke':'#fb747c','stroke-width':4});
+ ladderSegment(svg,622,49,622,290,{'stroke':'#6393ff','stroke-width':4});
+ ladderText(svg,36,42,'L',{'text-anchor':'middle','font-size':11});
+ ladderText(svg,622,42,'N',{'text-anchor':'middle','font-size':11});
+ const inA=ladderLabel(plan.start),inB=ladderLabel(plan.stop),out=ladderLabel(plan.output);
+ const rung=105;
+ const series=(contacts)=>{
+  const num=contacts.length,xs=num===1?[240]:[173,310];
+  ladderSegment(svg,36,rung,xs[0]-42,rung);
+  for(let k=0;k<num;k++){ladderContact(svg,xs[k],rung,contacts[k].label,contacts[k].nc);if(k<num-1)ladderSegment(svg,xs[k]+42,rung,xs[k+1]-42,rung)}
+  ladderSegment(svg,xs[num-1]+42,rung,493,rung);ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ };
+ if(plan.mode==='direct')series([{label:inA}]);
+ if(plan.mode==='inverse')series([{label:inA,nc:true}]);
+ if(plan.mode==='and')series([{label:inA},{label:inB}]);
+ if(plan.mode==='or'){
+  ladderSegment(svg,36,rung,150,rung);ladderSegment(svg,150,rung,150,190);
+  ladderSegment(svg,150,rung,190,rung);ladderContact(svg,235,rung,inA);ladderSegment(svg,277,rung,365,rung);
+  ladderSegment(svg,150,190,190,190);ladderContact(svg,235,190,inB);ladderSegment(svg,277,190,365,190);
+  ladderSegment(svg,365,rung,493,rung);ladderSegment(svg,365,190,365,rung);
+  ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ }
+ if(plan.mode==='latch'){
+  // Arranque + sello en paralelo; PARO NC en serie.
+  ladderSegment(svg,36,rung,101,rung);ladderContact(svg,144,rung,inB,true);
+  ladderSegment(svg,186,rung,220,rung);ladderSegment(svg,220,rung,260,rung);
+  ladderContact(svg,305,rung,inA);ladderSegment(svg,347,rung,390,rung);
+  ladderSegment(svg,220,rung,220,190);ladderSegment(svg,220,190,260,190);
+  ladderContact(svg,305,190,out);
+  ladderSegment(svg,347,190,390,190);ladderSegment(svg,390,190,390,rung);
+  ladderSegment(svg,390,rung,493,rung);ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ }
+ ladderText(svg,36,250,'RED 1 · '+({latch:'Arranque y paro con auto-retención',direct:'Activación directa',inverse:'Condición negada',and:'Interbloqueo de dos señales',or:'Activación alternativa'}[plan.mode]||'Control básico'),{'font-size':13});
+ ladderText(svg,36,278,'Entradas: '+inA+(['direct','inverse'].includes(plan.mode)?'':' / '+inB),{'font-size':12});
+ ladderText(svg,36,300,'Salida: '+out,{'font-size':12});
+ const info=E('ladderMessage');info.textContent='Borrador generado para: '+plan.goal+'. Puedes ajustar las entradas y el tipo de control y volver a generar.';
+}
+E('showLadder').onclick=()=>openLadder();
+E('closeLadder').onclick=()=>closeLadder();
+E('ladderMode').onchange=e=>{
+ E('ladderSecondaryWrap').style.display=['direct','inverse'].includes(e.target.value)?'none':'flex';
+};
+E('ladderGoal').addEventListener('input',e=>{
+ if(ladderPlan)return;
+ const goal=e.target.value.toLowerCase();
+ const mode=/enclava|mantener|mantenga|permanec|arranque.*paro|marcha.*paro/.test(goal)?'latch':
+ /cualquiera|uno u otro|uno o el otro/.test(goal)?'or':
+ /ambas|ambos|al mismo tiempo|simultáne/.test(goal)?'and':
+ /cuando no|si no|ausencia/.test(goal)?'inverse':'direct';
+ E('ladderMode').value=mode;E('ladderMode').dispatchEvent(new Event('change'));
+});
+E('generateLadder').onclick=()=>{
+ const goal=E('ladderGoal').value.trim(),mode=E('ladderMode').value,start=Number(E('ladderStart').value),stop=Number(E('ladderStop').value),output=Number(E('ladderOutput').value);
+ if(goal.length<10){E('ladderMessage').textContent='Primero explica la tarea que debe realizar el PLC (al menos diez caracteres).';E('ladderGoal').focus();return}
+ if(['latch','and','or'].includes(mode)&&start===stop){E('ladderMessage').textContent='Selecciona dos entradas diferentes para esta lógica.';return}
+ if(!Number.isInteger(start)||!Number.isInteger(output)){E('ladderMessage').textContent='Selecciona una entrada y una salida válidas.';return}
+ ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output};renderLadder();
+};
+
+function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
  const valid=data.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
@@ -453,7 +618,7 @@ function hydrate(data){
  nodes=valid;
  for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));n.ioLabels=n.ioLabels&&typeof n.ioLabels==='object'?n.ioLabels:{}}n.angle=((Number(n.angle)||0)%360+360)%360;n.label=typeof n.label==='string'&&n.label?n.label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type}
  wires=data.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
- next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();
+ next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
 }
 E('saveLocal').onclick=()=>{
  const name=E('projectName').value.trim()||'Proyecto sin título',data=snapshot(),items=listProjects();
@@ -467,7 +632,7 @@ E('saveLocal').onclick=()=>{
 };
 E('newProject').onclick=()=>{
  if(!confirm('¿Crear un proyecto nuevo? Los cambios no guardados del actual se perderán.'))return;
- projectId=null;E('projectName').value='Proyecto sin título';reset('empty');simulation=false;refreshProjects();refreshInspector();expansionStatus();
+ projectId=null;E('projectName').value='Proyecto sin título';reset('empty');ladderPlan=null;renderLadder();simulation=false;refreshProjects();refreshInspector();expansionStatus();
 };
 E('savedProjects').onchange=e=>{
  const selected=e.target.value;if(!selected)return;
@@ -480,12 +645,12 @@ E('deleteLocal').onclick=()=>{
  const items=listProjects(),item=items.find(x=>x.id===id);if(!item||!confirm('¿Eliminar el proyecto guardado "'+item.name+'"?'))return;
  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items.filter(x=>x.id!==id)));if(projectId===id)projectId=null;refreshProjects()}catch(err){alert(err.message)}
 };
-E('save').onclick=()=>{const blob=new Blob([JSON.stringify({version:4,nodes,wires},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+E('save').onclick=()=>{const blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 E('load').onclick=()=>{if(simulation){alert('Activa Editar para cargar un circuito.');return}E('file').click()};E('file').onchange=async e=>{if(simulation)return;try{const file=e.target.files?.[0];if(!file)return;const v=JSON.parse(await file.text());if(!Array.isArray(v.nodes)||!Array.isArray(v.wires))throw Error('Archivo inválido');
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
 for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));if(!n.ioLabels||typeof n.ioLabels!=='object')n.ioLabels={}}n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type;}
-next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;draw()}catch(err){alert(err.message)}e.target.value=''};
+next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
 window.onkeydown=e=>{
 const tag=document.activeElement?.tagName;
 if(['INPUT','TEXTAREA','SELECT'].includes(tag)||document.activeElement?.isContentEditable)return;
