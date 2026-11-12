@@ -91,6 +91,7 @@ function validate(){
   const x=a.type==='plc'?{n:a,i:w.ap}:b.type==='plc'?{n:b,i:w.bp}:null;
   if(x&&[14,15,16,17,19,21,23].includes(x.i))warn('PLC: la terminal '+pnames[x.i]+' pertenece a una sección de alimentación/VAC no modelada. No conectes 24 V DC suponiendo que se comporta como una salida digital.');
  }
+ if(wires.some(w=>w.unroutable))warn('Existen cables sin una ruta libre alrededor de los objetos. Mueve los componentes para dejar espacio; esos cables no se dibujan sobre los objetos.');
  if(!issues.some(i=>i.severity==='error')&&wires.length)issues.unshift({severity:'ok',message:'No se detectaron cortocircuitos ni fallas básicas en los bornes revisados.'});
  issues.push({severity:'warn',message:'Modelo didáctico: las salidas O/0–O/5 siguen I/0–I/5 por demostración; no equivale al programa real del PLC ni valida las secciones 85–264 VAC de la referencia.'});
  return issues;
@@ -101,7 +102,53 @@ function renderDiagnostics(){
  const ul=document.createElement('ul');for(const item of issues.slice(0,18)){const li=document.createElement('li');li.className=item.severity;li.textContent=item.message;ul.appendChild(li)}list.appendChild(ul);
 }
 function pointer(ev){const p=canvas.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(canvas.getScreenCTM().inverse())}
-function elbow(a,b,w){const mx=Number.isFinite(w?.bendX)?w.bendX:(a[0]+b[0])/2;const my=Number.isFinite(w?.bendY)?w.bendY:(a[1]+b[1])/2;return [mx,my]}
+function elbow(a,b,w){return [Number.isFinite(w?.bendX)?w.bendX:(a[0]+b[0])/2,Number.isFinite(w?.bendY)?w.bendY:(a[1]+b[1])/2]}
+function block(n){
+ let r=n.type==='plc'?[0,0,610+43*Math.max(n.extraInputs||0,n.extraOutputs||0),192]:n.type.startsWith('rail')?[-22,-8,((n.points||7)-1)*76+22,8]:[-12,-14,138,97];
+ const c=center(n),pts=[[r[0],r[1]],[r[0],r[3]],[r[2],r[1]],[r[2],r[3]]].map(p=>rotate(p[0],p[1],c[0],c[1],n.angle||0));
+ return [Math.min(...pts.map(p=>p[0]))+n.x-8,Math.min(...pts.map(p=>p[1]))+n.y-8,Math.max(...pts.map(p=>p[0]))+n.x+8,Math.max(...pts.map(p=>p[1]))+n.y+8];
+}
+function exitPort(n,i){
+ const p=ports(n)[i],box=block(n);let dx=0,dy=0;
+ if(n.type==='plc')dy=(i<14||i>=28&&i<34)?-1:1;
+ else if(n.type==='railplus')dy=1;else if(n.type==='railzero')dy=-1;
+ else dx=(types[n.type]?.[2]===3?i===2:i===1)?1:-1;
+ const v=rotate(dx,dy,0,0,n.angle||0);dx=Math.round(v[0]);dy=Math.round(v[1]);
+ let x=p[0],y=p[1];for(let j=0;j<40;j++){x+=dx*10;y+=dy*10;if(x<box[0]||x>box[2]||y<box[1]||y>box[3])break}
+ return [x,y];
+}
+function clearEdge(a,b,boxes){
+ if(a[0]!==b[0]&&a[1]!==b[1])return false;
+ for(const r of boxes){
+  if(a[0]===b[0]&&a[0]>r[0]&&a[0]<r[2]&&Math.max(a[1],b[1])>r[1]&&Math.min(a[1],b[1])<r[3])return false;
+  if(a[1]===b[1]&&a[1]>r[1]&&a[1]<r[3]&&Math.max(a[0],b[0])>r[0]&&Math.min(a[0],b[0])<r[2])return false;
+ }
+ return true;
+}
+function pathfind(a,b,boxes){
+ const xs=[...new Set([a[0],b[0],25,1175,...boxes.flatMap(r=>[r[0]-4,r[2]+4])])].filter(x=>x>0&&x<1200).sort((a,b)=>a-b);
+ const ys=[...new Set([a[1],b[1],20,740,...boxes.flatMap(r=>[r[1]-4,r[3]+4])])].filter(y=>y>0&&y<760).sort((a,b)=>a-b);
+ const w=xs.length,code=(i,j)=>j*w+i,from=code(xs.indexOf(a[0]),ys.indexOf(a[1])),goal=code(xs.indexOf(b[0]),ys.indexOf(b[1]));
+ if(from<0||goal<0||xs.indexOf(a[0])<0||ys.indexOf(a[1])<0||xs.indexOf(b[0])<0||ys.indexOf(b[1])<0)return null;
+ const q=[from],dist=new Map([[from,0]]),prev=new Map(),closed=new Set(),P=id=>[xs[id%w],ys[Math.floor(id/w)]];
+ while(q.length){let best=0,bestScore=Infinity;for(let z=0;z<q.length;z++){const p=P(q[z]),score=dist.get(q[z])+Math.abs(p[0]-b[0])+Math.abs(p[1]-b[1]);if(score<bestScore){best=z;bestScore=score}}
+ const id=q.splice(best,1)[0];if(closed.has(id))continue;closed.add(id);
+ if(id===goal){let result=[P(id)],current=id;while(prev.has(current)){current=prev.get(current);result.push(P(current))}return result.reverse()}
+ const i=id%w,j=Math.floor(id/w);
+ for(const [ix,iy] of [[i-1,j],[i+1,j],[i,j-1],[i,j+1]]){if(ix<0||ix>=w||iy<0||iy>=ys.length)continue;const k=code(ix,iy),u=P(id),v=P(k);if(closed.has(k)||!clearEdge(u,v,boxes))continue;const alt=dist.get(id)+Math.abs(u[0]-v[0])+Math.abs(u[1]-v[1]);if(alt<(dist.get(k)??Infinity)){dist.set(k,alt);prev.set(k,id);q.push(k)}}
+ }
+ return null;
+}
+function routeWire(w){
+ const a=find(w.a),b=find(w.b);if(!a||!b)return null;
+ const p=ports(a)[w.ap],q=ports(b)[w.bp],start=exitPort(a,w.ap),end=exitPort(b,w.bp),boxes=nodes.map(block);
+ let legs=[start];if(Number.isFinite(w.bendX)&&Number.isFinite(w.bendY))legs.push([w.bendX,w.bendY]);legs.push(end);
+ let pts=[p,start];
+ for(let i=0;i<legs.length-1;i++){const segment=pathfind(legs[i],legs[i+1],boxes);if(!segment){if(legs.length===3)return routeWire({...w,bendX:null,bendY:null});return null}pts.push(...segment.slice(1))}
+ pts.push(q);
+ const compact=[];for(const point of pts){const n=compact.length;if(n>=2&&(compact[n-1][0]-compact[n-2][0])*(point[1]-compact[n-1][1])===(compact[n-1][1]-compact[n-2][1])*(point[0]-compact[n-1][0]))compact.pop();compact.push(point)}
+ return {d:'M'+compact.map(x=>x[0]+' '+x[1]).join(' L'),handle:compact[Math.floor(compact.length/2)]};
+}
 function route(a,b,w){const [x,y]=elbow(a,b,w);return 'M'+a[0]+' '+a[1]+'H'+x+'V'+y+'H'+b[0]+'V'+b[1]}
 function line(g,d,more={}){return S('path',{d,class:'symbol',...more},g)}
 function term(g,n,i,x,y,r=7){const p=S('circle',{cx:x,cy:y,r,class:'port'+(live.has(K(n,i))?' on':'')+(first&&first.id===n.id&&first.i===i?' pending':'')},g);
@@ -180,19 +227,19 @@ S('path',{d:'M10 78 H284 M314 78 H600',stroke:'#555','stroke-width':1.1,fill:'no
 g.onpointerdown=e=>dragStart(e,n);
 g.ondblclick=e=>{e.stopPropagation();chosen={kind:'node',id:n.id};renameChosen()};
 }
-function draw(){solve();layer.replaceChildren();wl.replaceChildren();renderDiagnostics();
+function draw(){solve();layer.replaceChildren();wl.replaceChildren();
 for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b||!ports(a)[w.ap]||!ports(b)[w.bp])continue;
 const aPort=ports(a)[w.ap],bPort=ports(b)[w.bp];
-const p=S('path',{d:route(aPort,bPort,w),class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
+const routed=routeWire(w);w.unroutable=!routed;const p=S('path',{d:routed?.d||'',class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
 p.onpointerdown=e=>{e.stopPropagation();if(simulation)return;chosen={kind:'wire',id:w.id};refreshInspector();draw();showMenu(e,w,'wire')};
 if(chosen?.kind==='wire'&&chosen.id===w.id){
- const [x,y]=elbow(aPort,bPort,w);
+ const [x,y]=routed?.handle||elbow(aPort,bPort,w);
  const handle=S('circle',{cx:x,cy:y,r:9,class:'wire-handle'},wl);
  handle.onpointerdown=e=>{e.stopPropagation();e.preventDefault();if(simulation)return;closeMenu();wireDrag={id:w.id};canvas.setPointerCapture(e.pointerId)};
 }
 }
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
-rub.setAttribute('opacity',first?1:0)}
+rub.setAttribute('opacity',first?1:0);renderDiagnostics()}
 function dragStart(e,n){if(e.button!==0||e.target.classList.contains('port'))return;if(simulation){e.stopPropagation();chosen={kind:'node',id:n.id};refreshInspector();showMenu(e,n,'node');return}e.stopPropagation();closeMenu();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
 canvas.onpointermove=e=>{const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag&&!simulation){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
 canvas.onpointerup=e=>{if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null};
