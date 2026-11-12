@@ -30,10 +30,11 @@ function T(g,x,y,str,attrs={}){const a=S('text',{x,y,...attrs},g);a.textContent=
 function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,points:type.startsWith('rail')?7:undefined,extraInputs:type==='plc'?0:undefined,extraOutputs:type==='plc'?0:undefined,label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[type]||types[type][0]};nodes.push(n);return n}
 function find(id){return nodes.find(n=>n.id===id)}
 function K(n,i){return n.id+':'+i}
-function localPorts(n){if(n.type==='railplus'||n.type==='railzero')return Array.from({length:n.points||7},(_,i)=>[i*76,0]);
+function railGap(n){return Math.min(76,760/Math.max(1,(n.points||7)-1))}
+function localPorts(n){if(n.type==='railplus'||n.type==='railzero')return Array.from({length:n.points||7},(_,i)=>[i*railGap(n),0]);
 if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[25+i*43,23]),...Array.from({length:14},(_,i)=>[25+i*43,170]),...Array.from({length:6},(_,i)=>[637+i*43,23]),...Array.from({length:n.extraOutputs||0},(_,i)=>[637+i*43,170])];
 return types[n.type][2]===3?[[0,27],[0,63],[126,45]]:[[0,45],[126,45]]}
-function center(n){if(n.type.startsWith('rail'))return [((n.points||7)-1)*38,0];if(n.type==='plc')return [(610+43*Math.max(n.extraInputs||0,n.extraOutputs||0))/2,96];return [63,45]}
+function center(n){if(n.type.startsWith('rail'))return [((n.points||7)-1)*railGap(n)/2,0];if(n.type==='plc')return [(610+43*Math.max(n.extraInputs||0,n.extraOutputs||0))/2,96];return [63,45]}
 function rotate(x,y,cx,cy,angle){const r=angle*Math.PI/180,dx=x-cx,dy=y-cy;return[cx+dx*Math.cos(r)-dy*Math.sin(r),cy+dx*Math.sin(r)+dy*Math.cos(r)]}
 function ports(n){const c=center(n);return localPorts(n).map(([x,y])=>{const p=rotate(x,y,c[0],c[1],n.angle||0);return[n.x+p[0],n.y+p[1]]})}
 const pnames=['+24 V','-','DC COM','I/0','I/1','I/2','I/3','DC COM','I/4','I/5','I/6','I/7','I/8','I/9','L1','L2/N','⏚','VAC/VDC','O/0','VAC/VDC','O/1','VAC/VDC','O/2','VAC/VDC','O/3','O/4','O/5',''];
@@ -104,7 +105,7 @@ function renderDiagnostics(){
 function pointer(ev){const p=canvas.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(canvas.getScreenCTM().inverse())}
 function elbow(a,b,w){return [Number.isFinite(w?.bendX)?w.bendX:(a[0]+b[0])/2,Number.isFinite(w?.bendY)?w.bendY:(a[1]+b[1])/2]}
 function block(n){
- let r=n.type==='plc'?[0,0,610+43*Math.max(n.extraInputs||0,n.extraOutputs||0),192]:n.type.startsWith('rail')?[-22,-8,((n.points||7)-1)*76+22,8]:[-12,-14,138,97];
+ let r=n.type==='plc'?[0,0,610+43*Math.max(n.extraInputs||0,n.extraOutputs||0),192]:n.type.startsWith('rail')?[-22,-8,((n.points||7)-1)*railGap(n)+22,8]:[-12,-14,138,97];
  const c=center(n),pts=[[r[0],r[1]],[r[0],r[3]],[r[2],r[1]],[r[2],r[3]]].map(p=>rotate(p[0],p[1],c[0],c[1],n.angle||0));
  return [Math.min(...pts.map(p=>p[0]))+n.x-8,Math.min(...pts.map(p=>p[1]))+n.y-8,Math.max(...pts.map(p=>p[0]))+n.x+8,Math.max(...pts.map(p=>p[1]))+n.y+8];
 }
@@ -193,7 +194,7 @@ g.onpointerdown=e=>dragStart(e,n);g.ondblclick=e=>{e.stopPropagation();chosen={k
 function renderRail(n){
 const g=S('g',{class:'device'+(chosen?.kind==='node'&&chosen.id===n.id?' selected':'')});
 g.setAttribute('transform','translate('+n.x+' '+n.y+') rotate('+(n.angle||0)+' '+center(n)[0]+' 0)');
-const positive=n.type==='railplus',color=positive?'#ff648b':'#648efb';const L=((n.points||7)-1)*76;
+const positive=n.type==='railplus',color=positive?'#ff648b':'#648efb';const L=((n.points||7)-1)*railGap(n);
 S('rect',{x:-30,y:-28,width:L+60,height:56,class:'hit'},g);
 S('path',{d:'M-20 0 H'+(L+20),stroke:color,'stroke-width':5,fill:'none'},g);
 T(g,-16,-14,nameOf(n),{'font-size':15,'font-weight':'bold',fill:color});
@@ -271,7 +272,7 @@ function renameChosen(){if(simulation)return;const n=chosen?.kind==='node'?find(
 function rotateChosen(delta){if(simulation)return;if(chosen?.kind!=='node')return;const n=find(chosen.id);if(!n)return;n.angle=((n.angle||0)+delta+360)%360;refreshInspector();draw()}
 function remove(){if(simulation)return;if(!chosen)return;if(chosen.kind==='wire')wires=wires.filter(w=>w.id!==chosen.id);else{const n=find(chosen.id);if(n&&!['railplus','railzero','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}chosen=null;refreshInspector();draw()}
 function reset(type){simulation=false;nodes=[];wires=[];next=1;first=null;chosen=null;closeMenu();
-const positive=A('railplus',295,106),negative=A('railzero',295,671),plc=A('plc',335,454);
+const positive=A('railplus',295,106),negative=A('railzero',295,671),plc=A('plc',335,399);
 if(type!=='empty'){connect(positive.id,0,plc.id,0);connect(negative.id,0,plc.id,1);
 if(type==='start'){const stop=A('nc',337,230),start=A('no',510,230),lamp=A('green',830,255);
 connect(positive.id,1,stop.id,0);connect(stop.id,1,start.id,0);connect(start.id,1,plc.id,3);connect(plc.id,18,lamp.id,0);connect(negative.id,1,lamp.id,1)
@@ -307,7 +308,7 @@ E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=(
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
 E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
 E('simulate').onclick=()=>{simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{simulation=false;refreshInspector();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;
-E('save').onclick=()=>{const blob=new Blob([JSON.stringify({version:3,nodes,wires},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+E('save').onclick=()=>{const blob=new Blob([JSON.stringify({version:4,nodes,wires},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 E('load').onclick=()=>{if(simulation){alert('Activa Editar para cargar un circuito.');return}E('file').click()};E('file').onchange=async e=>{if(simulation)return;try{const file=e.target.files?.[0];if(!file)return;const v=JSON.parse(await file.text());if(!Array.isArray(v.nodes)||!Array.isArray(v.wires))throw Error('Archivo inválido');
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
