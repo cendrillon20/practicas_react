@@ -156,8 +156,8 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">Scenes</button><button class="push" id="showTutor">Aura · Tutor</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>UNIONES Y RAMIFICACIONES</h4><div class="cards" id="junctions"></div><div class="palette-caption" id="junctionInstructions">Pulsa Punto de unión y haz clic en el espacio donde quieras colocar la conexión.</div><h4>PROGRAMACIÓN INTERNA</h4><div class="cards" id="timers"></div><div class="palette-caption">TON es una instrucción interna: no se conecta con cables físicos.</div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
 <section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
- <div class="ladder-top studio-move-handle"><strong>Ladder Workspace</strong><div class="studio-actions tiny"><button id="ladderDock" title="Panel lateral o flotante">Float</button><button id="ladderMax" title="Maximizar o restaurar">Max</button><button id="closeLadder" title="Cerrar panel">×</button></div></div><nav class="ladder-tabs"><button data-ladder-tab="config" class="active">Program</button><button data-ladder-tab="editor">Ladder Editor</button><button data-ladder-tab="monitor">Monitor</button></nav>
- <label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
+ <div class="ladder-top studio-move-handle"><strong>Ladder Workspace</strong><div class="studio-actions tiny"><button id="ladderDock" title="Panel lateral o flotante">Float</button><button id="ladderMax" title="Maximizar o restaurar">Max</button><button id="closeLadder" title="Cerrar panel">×</button></div></div><nav class="ladder-tabs"><button data-ladder-tab="config" class="active">Program</button><button data-ladder-tab="editor">Ladder Editor</button><button data-ladder-tab="monitor">Monitor</button><button data-ladder-tab="all">All</button></nav>
+ <div data-ladder-section="config"><label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
  <textarea id="ladderGoal" rows="3" placeholder="Ejemplo: Al pulsar Marcha se enciende el motor y permanece encendido hasta pulsar Paro."></textarea>
  <label for="ladderPlatform">Plataforma de programación</label><select id="ladderPlatform"><option value="compactlogix">CompactLogix · Studio 5000</option><option value="micrologix">MicroLogix · RSLogix 500</option><option value="delta">Delta DVP · WPLSoft / ISPSoft</option><option value="codesys">CODESYS · IEC 61131-3</option></select><label class="simulation-model"><input id="virtualCPU" type="checkbox" checked> Virtual PLC (Simulation Only)</label><label for="ladderController">CPU Model (optional) · Modelo físico</label><input id="ladderController" placeholder="Opcional, ej. 1769-L24ER / DVP-SS2" maxlength="90"><label for="ladderMode">Comportamiento a implementar</label>
  <select id="ladderMode">
@@ -178,7 +178,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  </div>
  <label id="ladderDelayWrap">Preset Time (PT) · segundos<input id="ladderDelay" type="number" min="0.1" max="3600" step="0.1" value="3"></label>
  <label id="ladderCounterWrap">Preset Count (PV) · ciclos<input id="ladderCounterPreset" type="number" min="1" max="100000" step="1" value="3"></label>
- <label id="ladderCompareWrap">Compare condition (CMP)<select id="ladderCompareOp"><option value="EQ">EQ · Equal (=)</option><option value="NE">NE · Not Equal (≠)</option><option value="GT">GT · Greater Than (&gt;)</option><option value="GE">GE · Greater or Equal (≥)</option><option value="LT">LT · Less Than (&lt;)</option><option value="LE">LE · Less or Equal (≤)</option></select><input id="ladderCompareThreshold" type="number" step="1" value="1" aria-label="Compare threshold"><small>En este simulador compara el valor 0/1 de la entrada elegida con una constante.</small></label><label id="ladderTimerWrap">Temporizador interno<select id="ladderTimer"></select></label><div class="ladder-wiring"><strong>Datos detectados en el diagrama eléctrico</strong><div id="ladderWiring"></div></div><button id="generateLadder" class="ladder-generate">Validar datos y generar programa Ladder</button><div id="ladderLive" class="ladder-live" aria-live="polite">Aquí aparecerán los estados de las entradas y salidas.</div><strong class="ladder-code-title">Signal Timing · Ondas de funcionamiento</strong><svg id="waveCanvas" viewBox="0 0 700 220" aria-label="Gráfica temporal de entradas y salidas"></svg><div class="studio-actions"><button id="clearWaves">Clear Traces</button><button id="wavePause">Pause / Resume</button></div>
+ <label id="ladderCompareWrap">Compare condition (CMP)<select id="ladderCompareOp"><option value="EQ">EQ · Equal (=)</option><option value="NE">NE · Not Equal (≠)</option><option value="GT">GT · Greater Than (&gt;)</option><option value="GE">GE · Greater or Equal (≥)</option><option value="LT">LT · Less Than (&lt;)</option><option value="LE">LE · Less or Equal (≤)</option></select><input id="ladderCompareThreshold" type="number" step="1" value="1" aria-label="Compare threshold"><small>En este simulador compara el valor 0/1 de la entrada elegida con una constante.</small></label><label id="ladderTimerWrap">Temporizador interno<select id="ladderTimer"></select></label><div class="ladder-wiring"><strong>Datos detectados en el diagrama eléctrico</strong><div id="ladderWiring"></div></div><button id="generateLadder" class="ladder-generate">Validar datos y generar programa Ladder</button></div><div data-ladder-section="monitor"><div id="ladderLive" class="ladder-live" aria-live="polite">Aquí aparecerán los estados de las entradas y salidas.</div><strong class="ladder-code-title">Signal Timing · Ondas de funcionamiento</strong><svg id="waveCanvas" viewBox="0 0 700 220" aria-label="Gráfica temporal de entradas y salidas"></svg><div class="studio-actions"><button id="clearWaves">Clear Traces</button><button id="wavePause">Pause / Resume</button></div>
  <div class="ladder-message">El texto describe el objetivo; para ejecutarlo debes elegir una lógica compatible. Solo se simulan las cinco lógicas básicas y TON indicadas. No interpreta automáticamente cualquier proceso industrial.</div>
  <button id="runLadderTests" class="ladder-generate" title="Comprobar comportamiento lógico sin modificar el circuito">▶ Probar lógica Ladder</button>
  <button id="reviewLadder" class="ladder-generate">⚠ Analizar programa y cableado</button>
@@ -186,10 +186,10 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div id="ladderTests" class="ladder-message"></div><div id="ladderReview" class="ladder-review"></div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
- <strong class="ladder-code-title">Editor Ladder / instrucciones de referencia</strong><label>Modifica el programa de texto compatible con el editor; después pulsa «Aplicar y simular».<textarea id="ladderEditor" rows="8" spellcheck="false" placeholder="Ejemplo: XIC(Entrada_0) OTE(Salida_0);"></textarea></label><div class="ladder-editor-actions"><button id="applyLadder" class="ladder-generate">✓ Aplicar y simular código</button><button id="importLadder" class="ladder-generate">↑ Importar Ladder de texto</button><input type="file" id="ladderFile" accept=".txt,.st,.il,.lad,.xml,.l5x" hidden></div><div id="ladderImportFeedback" class="ladder-message">Compatible con las instrucciones básicas incluidas en este editor. No admite proyectos binarios ni programas completos de los fabricantes.</div><strong class="ladder-code-title">Código de referencia
+ </div><div data-ladder-section="editor"><strong class="ladder-code-title">Ladder Editor / instrucciones de referencia</strong><label>Modifica el programa de texto compatible con el editor; después pulsa «Aplicar y simular».<textarea id="ladderEditor" rows="8" spellcheck="false" placeholder="Ejemplo: XIC(Entrada_0) OTE(Salida_0);"></textarea></label><div class="ladder-editor-actions"><button id="applyLadder" class="ladder-generate">✓ Aplicar y simular código</button><button id="importLadder" class="ladder-generate">↑ Importar Ladder de texto</button><input type="file" id="ladderFile" accept=".txt,.st,.il,.lad,.xml,.l5x" hidden></div><div id="ladderImportFeedback" class="ladder-message">Compatible con las instrucciones básicas incluidas en este editor. No admite proyectos binarios ni programas completos de los fabricantes.</div><strong class="ladder-code-title">Código de referencia</strong>
  <pre id="ladderCode" class="ladder-code">Genera el programa para ver las instrucciones.</pre>
  <button id="exportLadder" class="ladder-generate" title="Descargar instrucciones de referencia">↓ Exportar borrador Ladder (.txt)</button>
- <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
+ <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small></div>
 </section>
 <section id="scenarioPanel" class="studio-drawer" hidden aria-label="Escenarios industriales interactivos">
  <div class="studio-drawer-top studio-move-handle"><strong>Scene Builder</strong><div class="studio-actions tiny"><button id="scenarioFloat">Float</button><button id="scenarioMax">Max</button><button id="closeScenarios" title="Cerrar panel">×</button></div></div>
@@ -792,10 +792,11 @@ function refreshLadderWiring(){
  }
 }
 function updatePlatformControls(){
- const mode=E('ladderMode').value,requiresSecond=['latch','and','or'].includes(mode);
+ const mode=E('ladderMode').value,requiresSecond=['latch','and','or','counter','ctd'].includes(mode);
  E('ladderSecondaryWrap').style.display=requiresSecond?'flex':'none';
- E('ladderDelayWrap').style.display=mode==='timer'?'flex':'none';
- E('ladderTimerWrap').style.display=mode==='timer'?'flex':'none';
+ E('ladderDelayWrap').style.display=['timer','tof'].includes(mode)?'flex':'none';
+ E('ladderTimerWrap').style.display=['timer','tof'].includes(mode)?'flex':'none';
+ E('ladderCounterWrap').style.display=['counter','ctd'].includes(mode)?'flex':'none';E('ladderCompareWrap').style.display=mode==='compare'?'flex':'none';
  E('ladderStopPolarityWrap').style.display=mode==='latch'?'flex':'none';
 }
 function platformRemark(plan){
@@ -893,9 +894,17 @@ function populateLadderSelectors(){
  timerSelect.value=String(ladderPlan?.timerId??last??'virtual');if(!timerSelect.value)timerSelect.value='virtual';
  refreshLadderWiring();updatePlatformControls();
 }
+function ladderTab(tab){
+ const panel=E('ladderPanel');panel.dataset.activeTab=tab;
+ for(const button of panel.querySelectorAll('[data-ladder-tab]'))button.classList.toggle('active',button.dataset.ladderTab===tab);
+}
+E('ladderPanel').addEventListener('click',e=>{
+ const button=e.target.closest('[data-ladder-tab]');
+ if(button)ladderTab(button.dataset.ladderTab);
+});
 function openLadder(){
  const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
- populateLadderSelectors();renderLadder();scheduleFit();
+ populateLadderSelectors();renderLadder();if(!E('ladderPanel').dataset.activeTab)ladderTab('config');scheduleFit();
  E('ladderGoal').focus();
 }
 function closeLadder(){
@@ -942,7 +951,7 @@ function renderLadder(){
   const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
  }
  E('ladderCode').textContent=ladderPseudoCode(plan);E('ladderEditor').value=plan.source||ladderPseudoCode(plan);
- E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.controller||'';E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
+ E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.virtualCPU?'':(plan.controller||'');E('virtualCPU').checked=plan.virtualCPU!==false;E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
  E('ladderMode').value=plan.mode||'direct';
  populateLadderSelectors();
  updatePlatformControls();
@@ -1011,6 +1020,8 @@ E('exportLadder').onclick=()=>{
 };
 E('showLadder').onclick=()=>openLadder();
 E('closeLadder').onclick=()=>closeLadder();
+E('virtualCPU').onchange=e=>{E('ladderController').disabled=e.target.checked;E('ladderController').placeholder=e.target.checked?'Virtual PLC / SIM':'Ej. 1769-L24ER o DVP-SS2';};
+E('virtualCPU').dispatchEvent(new Event('change'));
 E('ladderMode').onchange=updatePlatformControls;
 E('ladderGoal').addEventListener('input',e=>{
  if(ladderPlan)return;
@@ -1032,13 +1043,13 @@ E('generateLadder').onclick=()=>{
  const msg=E('ladderMessage'),plc=nodes.find(n=>n.type==='plc');
  if(goal.length<10){msg.textContent='Describe qué debe hacer el PLC (mínimo 10 caracteres).';E('ladderGoal').focus();return}
  if(!['compactlogix','micrologix','delta','codesys'].includes(platform)){msg.textContent='Selecciona una plataforma válida.';return}
- if(!controller){msg.textContent='Indica la familia o modelo de CPU utilizado.';E('ladderController').focus();return}
+ if(!controller&&!E('virtualCPU').checked){msg.textContent='Indica modelo físico o activa Virtual PLC para trabajar solo en simulación.';E('ladderController').focus();return}
  if(!plc||!plcInputPins(plc).includes(start)||!plcOutputPins(plc).includes(output)){msg.textContent='Selecciona bornes de entrada y salida existentes.';return}
  if(['latch','and','or'].includes(mode)&&(!plcInputPins(plc).includes(stop)||start===stop)){msg.textContent='Selecciona dos entradas distintas.';return}
  if(mode==='timer'&&(!Number.isFinite(delaySeconds)||delaySeconds<0.1||delaySeconds>3600)){msg.textContent='El retardo debe estar entre 0.1 y 3600 segundos.';return}
  const checked=[start,...(['latch','and','or'].includes(mode)?[stop]:[]),output];
  const missing=checked.filter(pin=>!wires.some(w=>w.a===plc.id&&w.ap===pin||w.b===plc.id&&w.bp===pin));
- ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output,platform,controller:controller.slice(0,90),delaySeconds:mode==='timer'?delaySeconds:0,timerId,stopPolarity,source:null};
+ ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output,platform,controller:(controller||'Virtual PLC / SIM').slice(0,90),virtualCPU:!!E('virtualCPU').checked,delaySeconds:mode==='timer'?delaySeconds:0,timerId,stopPolarity,source:null};
  resetLadderRuntime();renderLadder();draw();
  if(missing.length)msg.textContent+=' ATENCIÓN: faltan conexiones en '+missing.map(i=>portName(plc,i)).join(', ')+'. El programa se ha generado, pero no actuará hasta tener las señales necesarias.';
 };
@@ -1150,7 +1161,7 @@ function parseLadderSource(source,platform){
 }
 function applyLadderText(raw){
  const platform=E('ladderPlatform').value,parsed=parseLadderSource(raw,platform);
- const controller=E('ladderController').value.trim()||'CPU por configurar';
+ const controller=E('ladderController').value.trim()||'Virtual PLC / SIM';
  ladderPlan={...parsed,platform,controller,goal:E('ladderGoal').value.trim()||'Programa Ladder editado o importado: comprobar el comportamiento',timerId:E('ladderTimer').value||'virtual',source:String(raw).slice(0,25000)};
  resetLadderRuntime();renderLadder();draw();
  const plc=nodes.find(n=>n.type==='plc'),required=[parsed.start,...(['and','or','latch'].includes(parsed.mode)?[parsed.stop]:[]),parsed.output];
