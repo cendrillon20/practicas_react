@@ -12,7 +12,7 @@
 .diagnostic li.ok{color:#75e9bf}
 @media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main></div>
 <script>
 (()=>{
@@ -24,7 +24,7 @@ ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:
 green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2]
 };
 const nameOf=n=>n.label||({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type][0];
-let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
+let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,pan=null,pressedButton=null,view={x:0,y:0,w:1200,h:760},simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
 function S(tag,attrs={},parent=layer){const a=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))a.setAttribute(k,v);parent.appendChild(a);return a}
 function T(g,x,y,str,attrs={}){const a=S('text',{x,y,...attrs},g);a.textContent=str;return a}
 function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,points:type.startsWith('rail')?7:undefined,extraInputs:type==='plc'?0:undefined,extraOutputs:type==='plc'?0:undefined,label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[type]||types[type][0]};nodes.push(n);return n}
@@ -222,7 +222,11 @@ const strip=(y,isTop)=>{
  }
 };
 strip(0,true);strip(101,false);
-T(g,305+extension/2,98,nameOf(n),{'font-size':12,'text-anchor':'middle',fill:'#cde6ff'});
+S('rect',{x:6,y:-44,width:600+extension,height:35,rx:4,fill:'#183954',stroke:'#547796','stroke-width':1},g);
+T(g,20,-21,nameOf(n),{'font-size':16,'font-weight':'bold',fill:'#e3f5ff'});
+T(g,120,80,'ALIMENTACIÓN DC   │   ENTRADAS DIGITALES',{'font-size':11,'font-weight':'bold',fill:'#d2e7fb'});
+T(g,305+extension/2,97,'CONTROLADOR LÓGICO PROGRAMABLE  ·  24 V DC',{'font-size':11,'text-anchor':'middle',fill:'#beddf7'});
+T(g,315,124,'ALIMENTACIÓN / COMUNES   │   SALIDAS DIGITALES',{'font-size':11,'font-weight':'bold',fill:'#d2e7fb'});
 // Conexiones internas ilustrativas de la foto: agrupación de comunes y alimentación
 S('path',{d:'M10 78 H284 M314 78 H600',stroke:'#555','stroke-width':1.1,fill:'none'},g);
 g.onpointerdown=e=>dragStart(e,n);
@@ -241,10 +245,22 @@ if(chosen?.kind==='wire'&&chosen.id===w.id){
 }
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
 rub.setAttribute('opacity',first?1:0);renderDiagnostics()}
-function dragStart(e,n){if(e.button!==0||e.target.classList.contains('port'))return;if(simulation){e.stopPropagation();chosen={kind:'node',id:n.id};refreshInspector();showMenu(e,n,'node');return}e.stopPropagation();closeMenu();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
-canvas.onpointermove=e=>{const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag&&!simulation){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
-canvas.onpointerup=e=>{if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null};
-canvas.onpointerdown=()=>{closeMenu();chosen=null;refreshInspector();draw()};
+function dragStart(e,n){if(e.button!==0||e.target.classList.contains('port'))return;if(simulation){e.stopPropagation();chosen={kind:'node',id:n.id};refreshInspector();if(['no','nc','limit','rollerNC','rollerLever'].includes(n.type)){n.on=true;pressedButton={id:n.id};draw();return}if(['selector','selectorNC','selector3','ind','opt','cap'].includes(n.type)){n.on=!n.on;draw();return}return}e.stopPropagation();closeMenu();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
+canvas.onpointermove=e=>{if(pan){const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag&&!simulation){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
+canvas.onpointerup=e=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw();return}if(pan){pan=null;return}if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null};
+canvas.onpointerdown=e=>{if(e.button===1||e.shiftKey){e.preventDefault();pan={x:e.clientX,y:e.clientY,view:{...view}};canvas.setPointerCapture(e.pointerId);return}closeMenu();chosen=null;refreshInspector();draw()};
+function updateView(){canvas.setAttribute('viewBox',[view.x,view.y,view.w,view.h].join(' '));E('zoomValue').textContent=Math.round(1200/view.w*100)+'%'}
+function zoom(factor,mouse){
+ const x=mouse?.[0]??(view.x+view.w/2),y=mouse?.[1]??(view.y+view.h/2);
+ const w=Math.max(350,Math.min(2400,view.w/factor)),height=w*760/1200;
+ const rx=(x-view.x)/view.w,ry=(y-view.y)/view.h;
+ view={x:x-rx*w,y:y-ry*height,w,h:height};updateView()
+}
+E('zoomIn').onclick=()=>zoom(1.2);E('zoomOut').onclick=()=>zoom(1/1.2);
+E('zoomValue').onclick=()=>{view={x:0,y:0,w:1200,h:760};updateView()};
+canvas.addEventListener('wheel',e=>{e.preventDefault();const pos=pointer(e);zoom(e.deltaY<0?1.12:1/1.12,[pos.x,pos.y])},{passive:false});
+canvas.addEventListener('pointercancel',()=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw()}pan=null;drag=null;wireDrag=null});
+window.addEventListener('pointerup',()=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw()}});
 function closeMenu(){E('menu').hidden=true}
 function showMenu(e,obj,kind){
  const m=E('menu'),base=canvas.getBoundingClientRect();
@@ -315,6 +331,6 @@ wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInt
 for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0))}n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type;}
 next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;draw()}catch(err){alert(err.message)}e.target.value=''};
 window.onkeydown=e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='Escape'){first=null;closeMenu();draw()}if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);if(e.key==='F2')renameChosen();if(e.key==='Delete'||e.key==='Backspace')remove()};
-reset('start');simulation=true;refreshInspector();expansionStatus();
+reset('start');simulation=true;refreshInspector();expansionStatus();updateView();
 })();
 </script></html>
