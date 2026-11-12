@@ -36,7 +36,7 @@ return types[n.type][2]===3?[[0,27],[0,63],[126,45]]:[[0,45],[126,45]]}
 function center(n){if(n.type.startsWith('rail'))return [309,0];if(n.type==='plc')return [305,96];return [63,45]}
 function rotate(x,y,cx,cy,angle){const r=angle*Math.PI/180,dx=x-cx,dy=y-cy;return[cx+dx*Math.cos(r)-dy*Math.sin(r),cy+dx*Math.sin(r)+dy*Math.cos(r)]}
 function ports(n){const c=center(n);return localPorts(n).map(([x,y])=>{const p=rotate(x,y,c[0],c[1],n.angle||0);return[n.x+p[0],n.y+p[1]]})}
-const pnames=['+24 V','-','DC COM','I/0','I/1','I/2','I/3','DC COM','I/4','I/5','I/6','I/7','I/8','I/9','L1','L2/N','⏚','VAC/VDC','O/0','VAC/VDC','O/1','VAC/VDC','O/2','VAC/VDC','O/3','O/4','O/5','COM'];
+const pnames=['+24 V','-','DC COM','I/0','I/1','I/2','I/3','DC COM','I/4','I/5','I/6','I/7','I/8','I/9','L1','L2/N','⏚','VAC/VDC','O/0','VAC/VDC','O/1','VAC/VDC','O/2','VAC/VDC','O/3','O/4','O/5',''];
 function connect(a,ap,b,bp){if(a===b&&ap===bp)return;if(wires.some(w=>(w.a===a&&w.ap===ap&&w.b===b&&w.bp===bp)||(w.a===b&&w.ap===bp&&w.b===a&&w.bp===ap)))return;wires.push({id:next++,a,ap,b,bp})}
 function solve(){live=new Set();zero=new Set();ins=new Set();outs=new Set();activeLoads=new Set();if(!simulation)return;
 const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');if(!plus||!minus||!plc)return;
@@ -224,7 +224,7 @@ if(type!=='empty'){connect(positive.id,0,plc.id,0);connect(negative.id,0,plc.id,
 if(type==='start'){const stop=A('nc',337,230),start=A('no',510,230),lamp=A('green',830,255);
 connect(positive.id,1,stop.id,0);connect(stop.id,1,start.id,0);connect(start.id,1,plc.id,3);connect(plc.id,18,lamp.id,0);connect(negative.id,1,lamp.id,1)
 }else{const sn=A('ind',440,223),lamp=A('red',830,260);sn.on=true;
-connect(positive.id,1,sn.id,0);connect(negative.id,1,sn.id,1);connect(sn.id,2,plc.id,3);connect(plc.id,19,lamp.id,0);connect(negative.id,2,lamp.id,1)}}
+connect(positive.id,1,sn.id,0);connect(negative.id,1,sn.id,1);connect(sn.id,2,plc.id,3);connect(plc.id,18,lamp.id,0);connect(negative.id,2,lamp.id,1)}}
 draw()}
 function icon(tgt,kind){const d=types[kind],b=document.createElement('button');b.className='tile';const art=document.createElementNS(NS,'svg');art.setAttribute('viewBox','-10 -14 146 103');art.style.width='100%';art.style.height='65px';
 drawSymbol(art,kind,false,false);const label=document.createElement('span');label.textContent=d[0];b.append(art,label);b.title=d[0]+' · '+d[1];b.onclick=()=>{const n=A(kind,430+Math.floor(Math.random()*300),235+Math.floor(Math.random()*100));chosen={kind:'node',id:n.id};draw()};tgt.appendChild(b)}
