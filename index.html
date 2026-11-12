@@ -1838,6 +1838,52 @@ function searchGlossary(){
 E('glossarySearch').addEventListener('input',searchGlossary);
 searchGlossary();
 
+
+let waveHistory=[],wavePaused=false,lastWavePlan=null;
+function waveTrace(kind,pin,plc){
+ if(kind==='I')return ins.has(plcInputPins(plc).indexOf(Number(pin)))?1:0;
+ if(kind==='Q')return outs.has(plcOutputPins(plc).indexOf(Number(pin)))?1:0;
+ if(kind==='T')return ladderRuntime.active?1:0;
+ return 0;
+}
+function waveSample(){
+ if(!simulation||wavePaused||!ladderPlan||!nodes.some(n=>n.type==='plc'))return;
+ const plc=nodes.find(n=>n.type==='plc');
+ const key=[ladderPlan.start,ladderPlan.stop,ladderPlan.output,ladderPlan.mode].join('-');
+ if(key!==lastWavePlan){waveHistory=[];lastWavePlan=key}
+ const sample={t:Date.now(),a:waveTrace('I',ladderPlan.start,plc),b:waveTrace('I',ladderPlan.stop,plc),q:waveTrace('Q',ladderPlan.output,plc),done:ladderRuntime.done?1:0};
+ waveHistory.push(sample);if(waveHistory.length>140)waveHistory.shift();
+ renderWaveform();
+}
+function renderWaveform(){
+ const svg=E('waveCanvas');if(!svg)return;
+ svg.replaceChildren();
+ const root=(type,attrs={})=>{const el=document.createElementNS(NS,type);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);svg.appendChild(el);return el};
+ root('rect',{width:700,height:220,fill:'#07182a'});
+ const tracks=[['IN 1','a','#66c2ff'],['IN 2','b','#e7bd69'],['OUT','q','#63e5ad'],['DONE','done','#ff8aa6']];
+ for(let i=0;i<tracks.length;i++){
+  const [label,key,color]=tracks[i],top=17+i*49;
+  root('text',{x:7,y:top+12,fill:'#bdcfe9','font-size':11,'font-family':'monospace'}).textContent=label;
+  root('line',{x1:72,y1:top+39,x2:690,y2:top+39,stroke:'#36516e','stroke-width':1});
+  root('line',{x1:72,y1:top+9,x2:690,y2:top+9,stroke:'#263e57','stroke-width':1,'stroke-dasharray':'3 6'});
+  if(!waveHistory.length)continue;
+  let d='',last=null;
+  for(let j=0;j<waveHistory.length;j++){
+   const x=72+j*(615/139),y=top+(waveHistory[j][key]?10:38);
+   if(j===0)d+='M'+x.toFixed(1)+' '+y;
+   else d+=' H'+x.toFixed(1)+' V'+y;
+   last=[x,y];
+  }
+  if(last)d+=' H690';
+  root('path',{d,fill:'none',stroke:color,'stroke-width':2.3,'stroke-linejoin':'round'});
+ }
+ root('text',{x:680,y:215,'text-anchor':'end',fill:'#9eb8d1','font-size':10}).textContent='Time →  |  ~0.15 s/sample';
+}
+E('clearWaves').onclick=()=>{waveHistory=[];renderWaveform()};
+E('wavePause').onclick=()=>{wavePaused=!wavePaused;E('wavePause').textContent=wavePaused?'Resume':'Pause'};
+window.setInterval(waveSample,150);
+renderWaveform();
+
 function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
