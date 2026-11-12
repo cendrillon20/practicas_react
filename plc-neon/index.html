@@ -1,95 +1,79 @@
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PLC Neon Lab — Simulador de cableado PLC</title>
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PLC-Sim Studio</title>
 <style>
-:root{font:14px system-ui,Segoe UI,Arial;color-scheme:dark;--bg:#07101f;--panel:#111f35;--line:#314860;--fg:#e6f6ff;--sub:#9eb5cb;--neon:#18e8ff;--active:#54ffa8;--wire:#ffc64a;--pink:#ff56c7}*{box-sizing:border-box}body{background:var(--bg);color:var(--fg);margin:0}body.light{color-scheme:light;--bg:#edf5fa;--panel:white;--line:#b5c9da;--fg:#153049;--sub:#5c748a;--neon:#0083a7;--active:#008a51;--wire:#bc8400;--pink:#af168c}header{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 15px;border-bottom:1px solid var(--line);background:var(--panel)}h1{margin:0;font-size:19px;color:var(--neon)}small,p{color:var(--sub)}header .grow{flex:1}button{border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--panel);color:var(--fg);cursor:pointer;font:inherit}button:hover{border-color:var(--neon)}.primary{background:var(--neon);color:#091625;font-weight:700}.layout{height:calc(100vh - 65px);display:grid;grid-template-columns:230px minmax(0,1fr)210px}aside{padding:15px;background:var(--panel);overflow:auto}aside:first-child{border-right:1px solid var(--line)}aside:last-child{border-left:1px solid var(--line)}h3{text-transform:uppercase;letter-spacing:1.5px;font-size:11px;color:var(--sub)}.palette{display:grid;grid-template-columns:1fr 1fr;gap:8px}.palette button{min-height:80px;width:100%;text-align:center;margin:0;font-size:12px;background:#1a2a42;border-radius:10px}.palette button:hover{box-shadow:0 0 12px var(--neon)}main{position:relative;overflow:hidden;background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:22px 22px}svg{display:block;width:100%;height:100%;touch-action:none}.toolbar{position:absolute;left:10px;top:10px;display:flex;gap:7px;flex-wrap:wrap;z-index:2}.notice{position:absolute;left:12px;bottom:9px;color:var(--sub);font-size:12px}.wire{fill:none;stroke:var(--wire);stroke-width:3;cursor:pointer}.wire.selected{stroke:var(--pink);stroke-width:5}.unit rect{fill:var(--panel);stroke:var(--neon);stroke-width:1.8}.unit.selected rect{stroke:var(--pink);stroke-width:3}.unit text{fill:var(--fg);font-size:12px;pointer-events:none}.unit .muted{fill:var(--sub);font-size:10px}.unit .rail-label{fill:var(--fg);font-size:15px;font-weight:700}.unit:has(.rail-label) .port{stroke-width:3}.port{fill:var(--panel);stroke:var(--neon);stroke-width:2;cursor:crosshair}.port.live{fill:var(--active);stroke:var(--active)}.port.wait{stroke:var(--pink);stroke-width:4}.led{fill:var(--line)}.led.live{fill:var(--active)}.state{padding:5px 0;border-bottom:1px solid var(--line)}.state b{color:var(--active)}input{width:100%;padding:7px;background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--fg)}@media(max-width:1000px){.layout{grid-template-columns:185px 1fr}.info{display:none}}@media(max-width:600px){.layout{grid-template-columns:1fr;grid-template-rows:155px minmax(500px,1fr);height:auto}.palette{display:flex;overflow:auto;gap:8px}.palette button{min-width:140px}.layout aside:first-child{overflow:auto}.layout main{height:70vh}}
-</style></head><body><header><h1>◈ PLC NEON LAB</h1><small>Simulador de conexiones físicas PLC · 24 V DC · No Ladder</small><span class="grow"></span><button id="theme">☀ Modo claro</button><button id="save">Guardar circuito</button><button id="open">Abrir JSON</button><input type="file" id="file" accept=".json" hidden><button id="reset">Ejemplo</button></header><div class="layout"><aside><h3>Biblioteca eléctrica</h3><div class="palette" id="palette"></div><h3>Instrucciones</h3><p>Agrega componentes. Haz clic en dos bornes para conectarlos. Arrastra el cuerpo para moverlo. Pulsa un sensor o interruptor para cambiar su estado.</p><p>Simulación didáctica de continuidad digital, no modelado analógico ni cortocircuitos.</p></aside><main><div class="toolbar"><button id="run" class="primary">▶ Simulación activa</button><button id="remove">Eliminar selección</button><button id="wclear">Borrar cables</button></div><svg id="svg" viewBox="0 0 1200 780" preserveAspectRatio="xMidYMid meet"><g id="wires"></g><g id="units"></g><path id="rubber" stroke="var(--pink)" stroke-dasharray="6 4" stroke-width="2" fill="none"/></svg><div class="notice">Clic en dos bornes = conectar · Esc = cancelar · Supr = eliminar</div></main><aside class="info"><h3>Inspector</h3><div id="inspector">Selecciona un componente.</div><h3>Monitor de entradas/salidas</h3><div id="monitor"></div><p>Los indicadores verdes representan señal activa. Las salidas Q0–Q5 siguen respectivamente I0–I5 en este modelo de demostración.</p></aside></div>
+:root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#080e19;--side:#101b30;--card:#1b2941;--edge:#324663;--fg:#eef5ff;--mut:#90a8ca;--cyan:#35d4ff;--green:#00d78f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg)}button,select{font:inherit;cursor:pointer;color:inherit}header{height:55px;display:flex;align-items:center;gap:9px;padding:5px 12px;background:#0c1730;border-bottom:1px solid #24334d}header strong{font-size:18px;line-height:1}header small{display:block;font-size:11px;color:#91afd5}.logo{background:#2a78ed;padding:9px;border-radius:9px}.v{font-size:10px;color:#79d8ff;border:1px solid #285995;background:#132b4d;border-radius:5px;padding:3px}.push{border:1px solid #35506e;background:#1b2b46;padding:9px 13px;border-radius:9px}.run{background:#007f60;border-color:#00aa7d}.edit{background:#725010;border-color:#ad7e20}.spacer{flex:1}select{background:#192941;border:1px solid #2b4264;border-radius:8px;padding:9px;max-width:260px}.layout{height:calc(100vh - 55px);display:grid;grid-template-columns:237px 1fr}aside{background:linear-gradient(180deg,#101e35,#0d1729);border-right:2px solid #2d3f5a;overflow:auto;padding:10px 8px}.side-title{font-weight:800;font-size:13px;color:#a9c4e8;margin:6px 2px 20px}aside h4{font-size:10px;color:#7899c7;letter-spacing:.7px;margin:16px 4px 9px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{min-height:80px;border:1px solid #354866;background:#1a273e;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:5px}.tile:hover{border-color:var(--cyan)}.tile em{font:normal 23px Georgia;color:#b5d2f7}.tile b{font-size:11px}.tile span{font:10px monospace;color:#85a5d8}main{position:relative;overflow:hidden;background:radial-gradient(circle at center,#0b1625,#070b13 78%)}svg{width:100%;height:100%;touch-action:none}#wireLayer path{stroke:#ffc844;stroke-width:3.2;fill:none;cursor:pointer}.device rect{fill:var(--card);stroke:var(--edge);stroke-width:2}.device text{fill:var(--fg);font-size:12px;pointer-events:none}.port{stroke:#9db1ca;stroke-width:2;fill:#0d1b2b;cursor:crosshair}.port.on{fill:var(--green);stroke:var(--green)}.port.pending{stroke:#ff57be;stroke-width:4}.selected rect{stroke:var(--cyan)}.note{position:absolute;bottom:13px;left:15px;border:1px solid #31435e;color:#9cb5d8;background:#101c2de6;padding:9px;border-radius:9px;font-size:11px}.plc text{fill:#d8e9ff}.screw{fill:#e7edf2;stroke:#556979}.screw-inner{fill:#172435;stroke:#64788e}.wire-selected{stroke:#ff63c4!important}@media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
+</style>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Línea +24 V arriba, línea 0 V abajo. Selecciona dos bornes para conectarlos.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div class="note">Conecta dos terminales con un clic · Pulsa un sensor para activarlo · Arrastra componentes · Supr elimina</div></main></div>
 <script>
-(function(){
-'use strict';
-var SVG='http://www.w3.org/2000/svg',by=function(s){return document.getElementById(s)};
-var types={
-supply:{name:'Barras +24 V / 0 V',w:1080,h:550,p:[['+24V',0,0],['0V',0,550]]},
-plc:{name:'PLC INDUSTRIAL · 24 V DC',w:550,h:240,p:[
-['L+',26,18],['M',68,18],['I0',110,18],['I1',152,18],['I2',194,18],['I3',236,18],['I4',278,18],['I5',320,18],['I6',362,18],['I7',404,18],
-['Q0',220,222],['Q1',262,222],['Q2',304,222],['Q3',346,222],['Q4',388,222],['Q5',430,222],['COM',178,222],
-['I8',446,18],['I9',488,18],['DC COM',530,18],['L1',26,222],['L2/N',68,222],['PE',110,222],['VAC/VDC',136,222],['VAC',472,222],['VAC',514,222]]},
-switch:{name:'Interruptor',w:150,h:92,p:[['IN',0,60],['OUT',150,60]]},
-push:{name:'Pulsador NA',w:150,h:92,p:[['IN',0,60],['OUT',150,60]]},
-sensor:{name:'Sensor PNP',w:164,h:120,p:[['BN +',0,51],['BU 0V',0,81],['BK OUT',164,67]]},
-lamp:{name:'Lámpara',w:150,h:92,p:[['+',0,60],['-',150,60]]},
-coil:{name:'Bobina de relé',w:150,h:92,p:[['A1',0,60],['A2',150,60]]},
-ground:{name:'Borne común',w:130,h:80,p:[['0V',0,55]]}
-};
-var nodes=[],wires=[],seq=0,chosen=null,waiting=null,drag=null,on=true,live=new Set(),inputs=new Set(),outputs=new Set(),loads=new Set();
-function add(t,x,y){var n={id:++seq,t:t,x:x,y:y,label:types[t].name,on:false};nodes.push(n);return n}
-Object.keys(types).forEach(function(t){var b=document.createElement('button');b.textContent='＋ '+types[t].name;b.onclick=function(){chosen={kind:'n',id:add(t,300+Math.floor(Math.random()*100),180+Math.floor(Math.random()*100)).id};render()};by('palette').appendChild(b)});
-function node(id){return nodes.find(function(n){return n.id===id})}
-function k(id,p){return id+':'+p}
-function xy(n,i){var a=types[n.t].p[i];return{x:n.x+a[1],y:n.y+a[2]}}
-function svg(tag,attrs,par){var e=document.createElementNS(SVG,tag);Object.keys(attrs||{}).forEach(function(x){e.setAttribute(x,attrs[x])});(par||by('units')).appendChild(e);return e}
-function txt(parent,x,y,s,cl){var t=svg('text',{x:x,y:y,'class':cl||''},parent);t.textContent=s;return t}
-function connect(a,ap,b,bp){wires.push({id:++seq,a:a.id,ap:ap,b:b.id,bp:bp})}
-function solve(){
-live=new Set();inputs=new Set();outputs=new Set();loads=new Set();if(!on)return;
-var links=new Map(),plus=[],zero=[];
-function edge(a,b){if(!links.has(a))links.set(a,[]);links.get(a).push(b)}
-wires.forEach(function(w){if(!node(w.a)||!node(w.b))return;var a=k(w.a,w.ap),b=k(w.b,w.bp);edge(a,b);edge(b,a)});
-nodes.forEach(function(n){if((n.t==='switch'||n.t==='push')&&n.on){edge(k(n.id,0),k(n.id,1));edge(k(n.id,1),k(n.id,0))}if(n.t==='supply'){plus.push(k(n.id,0));zero.push(k(n.id,1))}});
-function reach(seeds){var set=new Set(seeds),q=seeds.slice();for(var i=0;i<q.length;i++)(links.get(q[i])||[]).forEach(function(b){if(!set.has(b)){set.add(b);q.push(b)}});return set}
-var z=reach(zero),p=reach(plus);
-nodes.forEach(function(n){if(n.t==='sensor'&&n.on&&p.has(k(n.id,0))&&z.has(k(n.id,1)))plus.push(k(n.id,2))});
+(()=>{'use strict';
+const ns='http://www.w3.org/2000/svg',E=id=>document.getElementById(id),canvas=E('canvas'),layer=E('devices'),wl=E('wireLayer'),rub=E('rubber');
+const types={
+no:['Pulsador NA','NO (3-4)','↗',2],nc:['Pulsador NC','NC (1-2)','↙',2],selector:['Selector NA','Enclavado','⚿',2],ind:['Inductivo PNP','3 Hilos','◇',3],opt:['Sensor Óptico','Fotoeléctrico','◈',3],cap:['Capacitivo','Nivel / Objeto','⬡',3],limit:['Final Carrera','Rodillo NA','⚑',2],
+green:['Piloto Verde','H1 (X1-X2)','◉',2],red:['Piloto Rojo','H2 (X1-X2)','◉',2],amber:['Piloto Ámbar','H3 (X1-X2)','◉',2],relay:['Bobina Relé','K1 (A1-A2)','▣',2]};
+let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,simulate=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set();
+function s(tag,props,parent=layer){const a=document.createElementNS(ns,tag);Object.entries(props||{}).forEach(([k,v])=>a.setAttribute(k,v));parent.appendChild(a);return a}
+function t(g,x,y,str,props={}){const e=s('text',{x,y,...props},g);e.textContent=str;return e}
+function add(type,x,y){const a={id:next++,type,x,y,on:false};nodes.push(a);return a}
+function key(n,i){return n.id+':'+i}
+function ports(n){if(n.type==='rail')return [[315,105],[420,105],[525,105],[630,105],[735,105],[840,105],[945,105],[315,670],[420,670],[525,670],[630,670],[735,670],[840,670],[945,670]];
+if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[n.x+23+i*43,n.y+23]),...Array.from({length:13},(_,i)=>[n.x+23+i*43,n.y+169])];
+return types[n.type][3]===3?[[n.x,n.y+27],[n.x,n.y+63],[n.x+126,n.y+45]]:[[n.x,n.y+45],[n.x+126,n.y+45]]}
+const pnames=['L+','M','I0','I1','I2','I3','DC COM','I4','I5','I6','I7','I8','I9','COM','L1','L2/N','PE','VAC/VDC','COM','Q0','Q1','Q2','Q3','Q4','Q5','Q6','Q7'];
+function connect(a,ap,b,bp){if(a===b&&ap===bp)return;if(wires.some(w=>(w.a===a&&w.ap===ap&&w.b===b&&w.bp===bp)||(w.a===b&&w.ap===bp&&w.b===a&&w.bp===ap)))return;wires.push({id:next++,a,ap,b,bp})}
+function circuit(){live=new Set();zero=new Set();ins=new Set();outs=new Set();activeLoads=new Set();if(!simulate)return;
+const edges=new Map(),link=(a,b)=>{if(!edges.has(a))edges.set(a,[]);edges.get(a).push(b)},reach=seeds=>{const st=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const x of edges.get(q[i])||[])if(!st.has(x)){st.add(x);q.push(x)}return st};
+const rail=nodes.find(n=>n.type==='rail'),plc=nodes.find(n=>n.type==='plc');if(!rail||!plc)return;
+for(let i=0;i<7;i++)for(let j=0;j<7;j++){link(key(rail,i),key(rail,j));link(key(rail,i+7),key(rail,j+7))}
+for(const w of wires){const a=nodes.find(n=>n.id===w.a),b=nodes.find(n=>n.id===w.b);if(!a||!b)continue;link(key(a,w.ap),key(b,w.bp));link(key(b,w.bp),key(a,w.ap))}
+for(const n of nodes){const closed=n.type==='nc'?!n.on:['no','selector','limit'].includes(n.type)&&n.on;if(closed){link(key(n,0),key(n,1));link(key(n,1),key(n,0))}}
+const plus=Array.from({length:7},(_,i)=>key(rail,i)),minus=Array.from({length:7},(_,i)=>key(rail,i+7));
+zero=reach(minus);let p=reach(plus);
+for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&p.has(key(n,0))&&zero.has(key(n,1)))plus.push(key(n,2));
 p=reach(plus);
-nodes.forEach(function(n){if(n.t!=='plc')return;var ready=p.has(k(n.id,0))&&z.has(k(n.id,1));for(var i=0;i<8;i++)if(ready&&p.has(k(n.id,i+2)))inputs.add(k(n.id,i+2));if(ready&&p.has(k(n.id,16)))for(var j=0;j<6;j++)if(inputs.has(k(n.id,j+2)))outputs.add(k(n.id,j+10))});
-live=reach(plus.concat(Array.from(outputs)));
-nodes.forEach(function(n){if((n.t==='lamp'||n.t==='coil')&&live.has(k(n.id,0))&&z.has(k(n.id,1)))loads.add(n.id)})
+const ready=p.has(key(plc,0))&&zero.has(key(plc,1));
+for(let i=0;i<10;i++){const pi=i<4?i+2:i+3;if(ready&&p.has(key(plc,pi)))ins.add(i)}
+for(let i=0;i<6;i++)if(ready&&ins.has(i)){outs.add(i);plus.push(key(plc,19+i))}
+live=reach(plus);
+for(const n of nodes)if(['green','red','amber','relay'].includes(n.type)&&live.has(key(n,0))&&zero.has(key(n,1)))activeLoads.add(n.id)}
+function pointer(ev){const a=canvas.createSVGPoint();a.x=ev.clientX;a.y=ev.clientY;return a.matrixTransform(canvas.getScreenCTM().inverse())}
+function wirepath(a,b){let m=(a[1]+b[1])/2;return 'M'+a[0]+' '+a[1]+'V'+m+'H'+b[0]+'V'+b[1]}
+function terminal(g,n,i,cx,cy,r=7){const c=s('circle',{cx,cy,r,class:'port'+(live.has(key(n,i))?' on':'')+(first&&first.id===n.id&&first.i===i?' pending':'')},g);c.onpointerdown=ev=>{ev.preventDefault();ev.stopPropagation();if(first){connect(first.id,first.i,n.id,i);first=null}else first={id:n.id,i};draw()};}
+function draw(){
+circuit();layer.replaceChildren();wl.replaceChildren();
+for(const w of wires){const a=nodes.find(n=>n.id===w.a),b=nodes.find(n=>n.id===w.b);if(!a||!b)continue;const path=s('path',{d:wirepath(ports(a)[w.ap],ports(b)[w.bp]),class:chosen&&chosen.id===w.id&&chosen.kind==='wire'?'wire-selected':''},wl);path.onclick=e=>{e.stopPropagation();chosen={kind:'wire',id:w.id};draw()}}
+for(const n of nodes){
+if(n.type==='rail'){const g=s('g',{});s('path',{d:'M275 105 H1020',stroke:'#fc5d86','stroke-width':5},g);s('path',{d:'M275 670 H1020',stroke:'#5e91ff','stroke-width':5},g);t(g,278,85,'+24 V DC',{fill:'#f7b2cb','font-size':17,'font-weight':'bold'});t(g,278,695,'0 V DC',{fill:'#91b8ff','font-size':17,'font-weight':'bold'});ports(n).forEach(([x,y],i)=>terminal(g,n,i,x,y));continue}
+if(n.type==='plc'){
+const g=s('g',{class:'device plc'+(chosen&&chosen.kind==='node'&&chosen.id===n.id?' selected':'')});
+s('rect',{x:n.x,y:n.y,width:610,height:192,rx:5,fill:'#e5e9ec',stroke:'#6b7d91','stroke-width':2},g);
+s('rect',{x:n.x+7,y:n.y+7,width:596,height:39,fill:'#f7f7f7',stroke:'#a2a8ad'},g);
+s('rect',{x:n.x+7,y:n.y+148,width:596,height:39,fill:'#f7f7f7',stroke:'#a2a8ad'},g);
+t(g,n.x+15,n.y+91,'PLC INDUSTRIAL · TERMINALES DE ENTRADAS Y SALIDAS',{fill:'#c9e8fc','font-size':15,'font-weight':'bold'});
+t(g,n.x+15,n.y+116,'24 V DC • simulación didáctica',{fill:'#93aec7','font-size':12});
+ports(n).forEach(([x,y],i)=>{s('rect',{x:x-20,y:y-18,width:40,height:37,fill:'#fafafa',stroke:'#7c858d'},g);s('circle',{cx:x,cy:y,r:15,class:'screw'},g);s('circle',{cx:x,cy:y,r:11,class:'screw-inner'},g);t(g,x,y+(i<14?34:-25),pnames[i]||'',{fill:'#9eb9d5','font-size':10,'text-anchor':'middle'},g);terminal(g,n,i,x,y,8)});
+g.onpointerdown=e=>startDrag(e,n);continue}
+const d=types[n.type],g=s('g',{class:'device'+(chosen&&chosen.kind==='node'&&chosen.id===n.id?' selected':'')});
+s('rect',{x:n.x,y:n.y,width:126,height:88,rx:9,class:'body'},g);
+t(g,n.x+10,n.y+19,d[0],{'font-size':12,'font-weight':'bold'});t(g,n.x+10,n.y+33,d[1],{'font-size':10,fill:'#8faacf'});
+const color={green:'#06df91',red:'#fb597b',amber:'#ffc445'}[n.type]||'#b8d4f5';
+t(g,n.x+63,n.y+65,d[2],{'font-size':27,fill:color,'text-anchor':'middle'});
+if(activeLoads.has(n.id))s('circle',{cx:n.x+100,cy:n.y+15,r:5,fill:color},g);else if(n.on)s('circle',{cx:n.x+105,cy:n.y+15,r:5,fill:'#00d88d'},g);
+ports(n).forEach(([x,y],i)=>terminal(g,n,i,x,y));
+g.onpointerdown=e=>startDrag(e,n);
+g.onpointerup=()=>{if(drag&&!drag.moved&&['no','nc','selector','ind','opt','cap','limit'].includes(n.type)){n.on=!n.on;draw()}};
 }
-function point(e){var p=by('svg').createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(by('svg').getScreenCTM().inverse())}
-function path(a,b){var mid=(a.y+b.y)/2;return 'M'+a.x+' '+a.y+' V'+mid+' H'+b.x+' V'+b.y}
-function render(){solve();by('wires').replaceChildren();by('units').replaceChildren();
-wires.forEach(function(w){var a=node(w.a),b=node(w.b);if(!a||!b)return;var e=svg('path',{d:path(xy(a,w.ap),xy(b,w.bp)),'class':'wire'+(chosen&&chosen.kind==='w'&&chosen.id===w.id?' selected':'')},by('wires'));e.onclick=function(ev){ev.stopPropagation();chosen={kind:'w',id:w.id};render()}});
-nodes.forEach(function(n){var def=types[n.t],g=svg('g',{transform:'translate('+n.x+' '+n.y+')','class':'unit'+(chosen&&chosen.kind==='n'&&chosen.id===n.id?' selected':'')});
-if(n.t==='supply'){
-svg('path',{d:'M0 0 H1080 M0 550 H1080',stroke:'var(--line)', 'stroke-width':9,fill:'none'},g);
-svg('path',{d:'M0 0 H1080',stroke:'#fa527a','stroke-width':4,fill:'none'},g);
-svg('path',{d:'M0 550 H1080',stroke:'#37b9f7','stroke-width':4,fill:'none'},g);
-txt(g,18,-15,'L+  ·  +24 V DC','rail-label');txt(g,18,580,'M  ·  0 V DC','rail-label');
-}else{
-svg('rect',{width:def.w,height:def.h,rx:10},g);txt(g,12,23,n.label);svg('path',{d:'M0 34H'+def.w,stroke:'var(--line)'},g);
-}
-if(n.t==='plc'){
-svg('rect',{x:7,y:49,width:536,height:144,rx:6,fill:'var(--bg)',stroke:'var(--line)'},g);
-txt(g,23,72,'PLC NEON · CONTROLADOR 24 V DC');
-txt(g,23,92,'ENTRADAS DIGITALES');
-txt(g,23,175,'SALIDAS DIGITALES · Q0 – Q5','muted');
-for(var i=0;i<10;i++){svg('circle',{cx:110+i*42,cy:124,r:7,'class':'led'+(i<8&&inputs.has(k(n.id,i+2))?' live':'')},g);txt(g,99+i*42,145,'I'+i,'muted')}
-for(var j=0;j<6;j++){svg('circle',{cx:220+j*42,cy:173,r:6,'class':'led'+(outputs.has(k(n.id,j+10))?' live':'')},g)}
-svg('path',{d:'M6 47H544 M6 197H544',stroke:'var(--line)','stroke-width':2},g);
-}
-else if(n.t==='switch'||n.t==='push'||n.t==='sensor'){txt(g,13,48,n.on?'ACTIVADO':'DESACTIVADO','muted');svg('circle',{cx:def.w-19,cy:46,r:8,'class':'led'+(n.on?' live':'')},g)}
-else if(n.t==='lamp'||n.t==='coil'){svg('circle',{cx:75,cy:60,r:16,stroke:'var(--neon)','class':'led'+(loads.has(n.id)?' live':'')},g)}
-else if(n.t==='supply'){}
-def.p.forEach(function(a,i){if(n.t==='plc'){svg('rect',{x:a[1]-18,y:a[2]-16,width:36,height:34,fill:'var(--panel)',stroke:'var(--line)','stroke-width':1.3,rx:2},g);svg('circle',{cx:a[1],cy:a[2],r:12,fill:'none',stroke:'var(--sub)','stroke-width':1},g)}
-var c=svg('circle',{cx:a[1],cy:a[2],r:n.t==='plc'?9:7,'class':'port'+(live.has(k(n.id,i))?' live':'')+(waiting&&waiting.id===n.id&&waiting.p===i?' wait':'')},g);c.onpointerdown=function(ev){ev.preventDefault();ev.stopPropagation();if(waiting){if(waiting.id!==n.id||waiting.p!==i){var exists=wires.some(function(w){return w.a===waiting.id&&w.ap===waiting.p&&w.b===n.id&&w.bp===i||w.b===waiting.id&&w.bp===waiting.p&&w.a===n.id&&w.ap===i});if(!exists)connect(node(waiting.id),waiting.p,n,i)}waiting=null}else waiting={id:n.id,p:i};render()};var ly=n.t==='plc'?(a[2]<100?44:208):a[2]-9;
-var lx=n.t==='plc'?a[1]:(a[1]===0?12:def.w-12);
-var t=txt(g,lx,ly,a[0],'muted');t.setAttribute('text-anchor',n.t==='plc'?'middle':(a[1]===0?'start':'end'))});
-g.onpointerdown=function(ev){if(ev.target.classList.contains('port'))return;chosen={kind:'n',id:n.id};drag={id:n.id,p:point(ev),x:n.x,y:n.y,moved:false};by('svg').setPointerCapture(ev.pointerId);inspect()};
-g.onpointerup=function(){if(drag&&!drag.moved&&['switch','push','sensor'].includes(n.t)){n.on=!n.on;render()}drag=null}
-});
-inspect();monitor();by('rubber').style.display=waiting?'':'none'
-}
-function inspect(){var pane=by('inspector'),n=chosen&&chosen.kind==='n'?node(chosen.id):null;pane.replaceChildren();if(!n){pane.textContent=chosen?'Cable seleccionado':'Selecciona un componente.';return}var label=document.createElement('p');label.textContent='Etiqueta';pane.appendChild(label);var input=document.createElement('input');input.value=n.label;input.onchange=function(){n.label=input.value.substring(0,25);render()};pane.appendChild(input);var p=document.createElement('p');p.textContent='Bornes: '+types[n.t].p.map(function(p){return p[0]}).join(', ');pane.appendChild(p);if(['switch','push','sensor'].includes(n.t)){var b=document.createElement('button');b.textContent=n.on?'Desactivar':'Activar';b.onclick=function(){n.on=!n.on;render()};pane.appendChild(b)}}
-function monitor(){var pane=by('monitor'),plc=nodes.find(function(n){return n.t==='plc'});pane.replaceChildren();if(!plc){pane.textContent='Agrega un PLC';return}for(var i=0;i<8;i++){var e=document.createElement('div');e.className='state';e.textContent='I'+i+'  '+(inputs.has(k(plc.id,i+2))?'● ON':'○ OFF');pane.appendChild(e)}for(var j=0;j<6;j++){var q=document.createElement('div');q.className='state';q.textContent='Q'+j+'  '+(outputs.has(k(plc.id,j+10))?'● ON':'○ OFF');pane.appendChild(q)}}
-by('svg').addEventListener('pointermove',function(e){var p=point(e);if(drag){var n=node(drag.id),dx=p.x-drag.p.x,dy=p.y-drag.p.y;n.x=Math.round((drag.x+dx)/10)*10;n.y=Math.round((drag.y+dy)/10)*10;if(Math.abs(dx)+Math.abs(dy)>5)drag.moved=true;render()}if(waiting){by('rubber').setAttribute('d',path(xy(node(waiting.id),waiting.p),p))}});
-by('svg').addEventListener('pointerup',function(){drag=null});
-function remove(){if(!chosen)return;if(chosen.kind==='w')wires=wires.filter(function(w){return w.id!==chosen.id});else{nodes=nodes.filter(function(n){return n.id!==chosen.id});wires=wires.filter(function(w){return w.a!==chosen.id&&w.b!==chosen.id})}chosen=null;render()}
-by('remove').onclick=remove;by('wclear').onclick=function(){if(confirm('¿Borrar todos los cables?')){wires=[];render()}};
-window.onkeydown=function(e){if(e.key==='Escape'){waiting=null;render()}if((e.key==='Delete'||e.key==='Backspace')&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName))remove()};
-by('run').onclick=function(){on=!on;by('run').textContent=on?'▶ Simulación activa':'⏸ Simulación pausada';render()};
-by('theme').onclick=function(){document.body.classList.toggle('light');by('theme').textContent=document.body.classList.contains('light')?'☾ Modo oscuro':'☀ Modo claro'};
-by('save').onclick=function(){var blob=new Blob([JSON.stringify({version:1,nodes:nodes,wires:wires},null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-neon-circuito.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)};
-by('open').onclick=function(){by('file').click()};
-by('file').onchange=async function(e){try{var f=e.target.files[0];if(!f)return;var data=JSON.parse(await f.text());if(!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('JSON inválido');nodes=data.nodes.filter(function(n){return types[n.t]&&Number.isFinite(n.x)&&Number.isFinite(n.y)}).slice(0,250);wires=data.wires.filter(function(w){return node(w.a)&&node(w.b)&&types[node(w.a).t].p[w.ap]&&types[node(w.b).t].p[w.bp]}).slice(0,1000);seq=Math.max(0,...nodes.map(function(n){return n.id}),...wires.map(function(w){return w.id}));chosen=null;waiting=null;render()}catch(err){alert('Error: '+err.message)}e.target.value=''};
-function demo(){nodes=[];wires=[];seq=0;var s=add('supply',72,115),p=add('plc',390,405),sw=add('switch',200,235),sen=add('sensor',420,220),lamp=add('lamp',790,240),coil=add('coil',970,380);connect(s,0,p,0);connect(s,1,p,1);connect(s,0,sw,0);connect(sw,1,p,2);connect(s,0,sen,0);connect(s,1,sen,1);connect(sen,2,p,3);connect(s,0,p,16);connect(p,10,lamp,0);connect(s,1,lamp,1);connect(p,11,coil,0);connect(s,1,coil,1);chosen=null;waiting=null;render()}
-by('reset').onclick=function(){if(confirm('¿Restaurar ejemplo?'))demo()};demo();
+rub.setAttribute('opacity',first?1:0)}
+function startDrag(e,n){if(e.target.classList.contains('port'))return;e.stopPropagation();chosen={kind:'node',id:n.id};const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
+canvas.onpointermove=e=>{const p=pointer(e);if(drag){const n=nodes.find(n=>n.id===drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>4;draw()}}if(first){const n=nodes.find(n=>n.id===first.id);if(n)rub.setAttribute('d',wirepath(ports(n)[first.i],[p.x,p.y]))}};
+canvas.onpointerup=()=>{drag=null};canvas.onpointerdown=()=>{chosen=null;draw()};
+function remove(){if(!chosen)return;if(chosen.kind==='wire')wires=wires.filter(w=>w.id!==chosen.id);else{const n=nodes.find(x=>x.id===chosen.id);if(n&&!['rail','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}chosen=null;draw()}
+function reset(example){nodes=[];wires=[];next=1;first=null;const rail=add('rail',0,0),plc=add('plc',335,463);if(example!=='empty'){connect(rail.id,0,plc.id,0);connect(rail.id,7,plc.id,1);if(example==='start'){const stop=add('nc',330,236),go=add('no',510,236),led=add('green',850,250);connect(rail.id,1,stop.id,0);connect(stop.id,1,go.id,0);connect(go.id,1,plc.id,2);connect(plc.id,19,led.id,0);connect(rail.id,8,led.id,1)}else{const sensor=add('ind',360,226),light=add('red',840,260);sensor.on=true;connect(rail.id,1,sensor.id,0);connect(rail.id,8,sensor.id,1);connect(sensor.id,2,plc.id,2);connect(plc.id,19,light.id,0);connect(rail.id,9,light.id,1)}}draw()}
+function card(kind,target){const d=types[kind],b=document.createElement('button');b.className='tile';b.innerHTML='<em></em><b></b><span></span>';b.children[0].textContent=d[2];b.children[1].textContent=d[0];b.children[2].textContent=d[1];b.onclick=()=>{add(kind,400+Math.floor(Math.random()*360),215+Math.floor(Math.random()*110));draw()};target.appendChild(b)}
+['no','nc','selector','ind','opt','cap','limit'].forEach(x=>card(x,E('sensors')));['green','red','amber','relay'].forEach(x=>card(x,E('loads')));
+E('simulate').onclick=()=>{simulate=true;draw()};E('edit').onclick=()=>{simulate=false;draw()};E('examples').onchange=e=>reset(e.target.value);E('del').onclick=remove;
+E('save').onclick=()=>{const blob=new Blob([JSON.stringify({nodes,wires,next},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();URL.revokeObjectURL(a.href)};
+E('load').onclick=()=>E('file').click();E('file').onchange=async e=>{try{const v=JSON.parse(await e.target.files[0].text());if(!Array.isArray(v.nodes)||!Array.isArray(v.wires))throw Error('Archivo inválido');nodes=v.nodes.filter(n=>n.type==='rail'||n.type==='plc'||types[n.type]).slice(0,150);wires=v.wires.filter(w=>nodes.some(n=>n.id===w.a)&&nodes.some(n=>n.id===w.b)&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)).slice(0,600);next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;draw()}catch(err){alert(err.message)}};
+window.onkeydown=e=>{if(e.key==='Escape'){first=null;draw()}if((e.key==='Delete'||e.key==='Backspace')&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName))remove()};
+reset('start');
 })();
-</script></body></html>
+</script></html>
