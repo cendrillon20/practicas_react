@@ -2386,13 +2386,20 @@ function graphMakeContact(svg,item,x,y,rid,bi,ci){
  graphSvg(g,'rect',{x:x-31,y:y-34,width:62,height:65,rx:5,fill:'#102840',stroke:'transparent',class:'graphic-hit'});
  graphLine(g,x-42,y,x-14,y,'c:'+item.id);graphLine(g,x+14,y,x+42,y,'c:'+item.id);
  if(item.type==='WIRE')graphLine(g,x-14,y,x+14,y,'c:'+item.id);
- else{
+ else if(['TON','TOF','CTU','CTD','CMP','BLINK'].includes(item.type)){
+  graphSvg(g,'rect',{x:x-23,y:y-19,width:46,height:38,rx:5,fill:'#173c55',stroke:'#92bddc','stroke-width':1.8,'data-graph-powered':'c:'+item.id});
+  graphSvgText(g,x,y+6,item.type,{'font-size':13,fill:'#f1fdff','font-weight':'bold'});
+ }else{
   graphLine(g,x-13,y-17,x-13,y+17,'c:'+item.id);graphLine(g,x+13,y-17,x+13,y+17,'c:'+item.id);
   if(item.type==='NC')graphLine(g,x-17,y+20,x+17,y-20,'c:'+item.id);
  }
  let label='Wire';
  const plc=graphPLC();
- if(item.type!=='WIRE'&&plc)label=ladderTag(item.pin,item.source==='output'?'output':'input',E('ladderPlatform').value);
+ if(['NO','NC'].includes(item.type)&&plc)label=ladderTag(item.pin,item.source==='output'?'output':'input',E('ladderPlatform').value);
+ else if(['TON','TOF'].includes(item.type))label='PT '+Number(item.seconds||1)+'s';
+ else if(['CTU','CTD'].includes(item.type))label='PV '+Number(item.preset||4);
+ else if(item.type==='CMP')label=(item.compareOp||'EQ')+' '+Number(item.compareThreshold??1);
+ else if(item.type==='BLINK')label=Number(item.preset||4)+'× flash';
  graphSvgText(g,x,y-22,label,{'font-size':11,class:'graphic-label'});
  g.addEventListener('click',e=>{e.stopPropagation();graphSetSelected(rid,bi,ci)});
  g.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();graphSetSelected(rid,bi,ci)}});
@@ -2511,11 +2518,40 @@ function graphicRefreshInspector(){
   mkSelect('Output Coil · Bobina',graphPinChoices('output').map(pin=>({value:pin,text:ladderTag(pin,'output',E('ladderPlatform').value)+' · '+portName(plc,pin)})),rung.output,v=>{rung.output=Number(v);graphicRefresh();draw()});
  }else{
   const item=rung.branches[s.branch]?.[s.index];if(!item){panel.textContent='Contacto no encontrado';return}
-  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'}],item.type,v=>{item.type=v;graphicRefresh();draw()});
-  if(item.type!=='WIRE'){
+  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'},{value:'TON',text:'TON · Timer On Delay'},{value:'TOF',text:'TOF · Timer Off Delay'},{value:'CTU',text:'CTU · Counter Up'},{value:'CTD',text:'CTD · Counter Down'},{value:'CMP',text:'CMP · Compare'},{value:'BLINK',text:'BLINK · Flash and latch'}],item.type,v=>{item.type=v;graphicRefresh();draw()});
+  if(['NO','NC'].includes(item.type)){
    mkSelect('Signal Source · Origen',[{value:'input',text:'Digital Input · Entrada'},{value:'output',text:'Output Feedback · Realimentación'}],item.source,v=>{item.source=v;item.pin=graphPinChoices(v)[0]??0;graphicRefresh();draw()});
    const pins=graphPinChoices(item.source);
    mkSelect('Assigned Pin · Borne',pins.map(pin=>({value:pin,text:ladderTag(pin,item.source,E('ladderPlatform').value)+' · '+portName(plc,pin)})),item.pin,v=>{item.pin=Number(v);graphicRefresh();draw()});
+  }
+  if(['TON','TOF','CTU','CTD','CMP','BLINK'].includes(item.type)){
+   const field=(labelText,key,min,max,step)=>{
+    const l=document.createElement('label');l.textContent=labelText;const input=document.createElement('input');
+    input.type='number';input.min=min;input.max=max;input.step=step;input.value=item[key];
+    input.disabled=simulation;
+    input.onchange=()=>{
+     const n=Number(input.value);
+     if(!Number.isFinite(n)||n<min||n>max){E('graphicMessage').textContent='Valor fuera de rango para '+key;return}
+     item[key]=n;graphicRuntime.delete(item.id);graphicRefresh();draw()
+    };
+    l.appendChild(input);panel.appendChild(l);
+   };
+   if(['TON','TOF'].includes(item.type))field('PT · Preset Time (segundos)','seconds',.1,120,.1);
+   if(['CTU','CTD','BLINK'].includes(item.type))field('PV · Preset Count','preset',1,100,1);
+   if(item.type==='BLINK'){
+    field('On Time · Duración encendida (s)','onSeconds',.1,20,.1);
+    field('Off Time · Duración apagada (s)','offSeconds',.1,20,.1);
+   }
+   if(item.type==='CMP'){
+    mkSelect('Operator · Operador',['EQ','NE','GT','GE','LT','LE'].map(x=>({value:x,text:x})),item.compareOp||'EQ',v=>{item.compareOp=v;graphicRefresh();draw()});
+    field('Threshold · Constante (compara EN = 0/1)','compareThreshold',-100000,100000,1);
+   }
+   if(['CTU','CTD','BLINK'].includes(item.type)){
+    const pins=graphPinChoices('input');
+    mkSelect('Reset / Load Input · Entrada de reinicio',[{value:'none',text:'None · Sin reset externo'},...pins.map(pin=>({value:pin,text:ladderTag(pin,'input',E('ladderPlatform').value)}))],item.resetPin??'none',v=>{item.resetPin=v==='none'?null:Number(v);graphicRuntime.delete(item.id);graphicRefresh();draw()});
+   }
+   const state=graphicRuntime.get(item.id);
+   if(state){const stats=document.createElement('small');stats.textContent='Monitor: '+(state.active?'ON':'OFF')+' · '+(['CTU','CTD'].includes(item.type)?'CV='+state.count:state.done?'Done':'Running');panel.appendChild(stats)}
   }
   const del=document.createElement('button');del.textContent='Remove Symbol · Quitar';del.disabled=simulation;del.onclick=graphRemoveSelected;panel.appendChild(del);
  }
@@ -2529,7 +2565,7 @@ function graphicValidate(){
   outputCount.set(rung.output,(outputCount.get(rung.output)||0)+1);
   for(const branch of rung.branches){
    if(!branch.length)problems.push('Rung '+(i+1)+': rama vacía.');
-   for(const item of branch)if(item.type!=='WIRE'){
+   for(const item of branch)if(['NO','NC'].includes(item.type)){
     const pins=item.source==='output'?plcOutputPins(plc):plcInputPins(plc);
     if(!pins.includes(Number(item.pin)))problems.push('Rung '+(i+1)+': el contacto '+item.id+' no tiene borne válido.');
    }
