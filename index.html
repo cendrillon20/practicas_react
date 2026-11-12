@@ -161,7 +161,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 @media(max-width:1000px){.layout.ladder-visible{grid-template-columns:175px minmax(0,1fr)}}
 
 .aura-fox{transition:opacity .3s ease,filter .3s ease;--aura-tail-angle:0deg}
-.aura-fox.aura-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.aura-fox.aura-hidden{opacity:0;visibility:hidden;pointer-events:none}.aura-fox.aura-at-target{animation:none!important}
 .aura-fox.aura-catching{animation:none!important;cursor:crosshair;transition:left .18s ease,bottom .18s ease}
 .aura-fox.aura-biting{animation:none!important;z-index:130}
 .aura-fox.aura-biting svg{animation:aura-bite .32s ease-in-out infinite alternate}
@@ -2178,7 +2178,7 @@ if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);
 if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placingJunction=true;E('junctionInstructions').textContent='Haz clic en el circuito para colocar un punto libre.'}
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
-reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
+reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();
 initTutor();initAura();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan?.mode==='timer'&&ladderRuntime.started&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
