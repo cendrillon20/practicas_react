@@ -805,7 +805,7 @@ E('addInput').onclick=()=>changePLC('input',1);E('dropInput').onclick=()=>change
 E('addOutput').onclick=()=>changePLC('output',1);E('dropOutput').onclick=()=>changePLC('output',-1);
 E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=()=>changeExpansion('railplus',-1);
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
-E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
+E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics();auraReactToErrors(validate())};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
 E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
 const STORAGE_KEY='plc-sim-studio-projects-v1';
 let projectId=null;
@@ -1283,7 +1283,7 @@ function applyLadderText(raw){
  E('ladderImportFeedback').textContent=message;
  return parsed;
 }
-E('applyLadder').onclick=()=>{try{applyLadderText(E('ladderEditor').value)}catch(e){E('ladderImportFeedback').textContent='No se aplicó: '+e.message}};
+E('applyLadder').onclick=()=>{try{applyLadderText(E('ladderEditor').value);auraTailMagic('¡Genial! Aplicaste una red reconocida. Ejecuta los tests para verificar el comportamiento.')}catch(e){E('ladderImportFeedback').textContent='No se aplicó: '+e.message;auraSay('Ese código no está soportado todavía: '+e.message)} };
 E('importLadder').onclick=()=>E('ladderFile').click();
 E('ladderFile').onchange=async e=>{
  const file=e.target.files?.[0];if(!file)return;
@@ -1350,7 +1350,7 @@ function showLadderReview(){
  for(const item of issues.slice(0,30)){const li=document.createElement('li');li.className=item.severity;li.textContent=item.message;ul.appendChild(li)}
  list.appendChild(ul);
 }
-E('reviewLadder').onclick=showLadderReview;
+E('reviewLadder').onclick=()=>{showLadderReview();auraReviewAndReact()};
 
 
 
@@ -1762,7 +1762,7 @@ E('showTutor').onclick=openTutor;
 E('openTutorFromLadder').onclick=openTutor;
 E('closeTutor').onclick=closeTutor;
 E('tutorExplain').onclick=()=>{const topic=tutorLibrary.find(t=>t.id===E('tutorTopic').value)||tutorLibrary[0];tutorMessage(tutorAnswer(topic.title))};
-E('tutorReview').onclick=()=>tutorMessage(tutorAudit());
+E('tutorReview').onclick=()=>{tutorMessage(tutorAudit());auraReviewAndReact()};
 E('tutorExercise').onclick=()=>{
  const selected=E('tutorTopic').value;
  const match=tutorExercises.find(x=>x[0]===selected);
@@ -1815,8 +1815,7 @@ E('ladderWidth').oninput=e=>{
  scheduleFit();
 };
 ['ladderPanel','scenarioPanel','tutorPanel'].forEach(installDragPanel);
-E('auraFox').onclick=()=>openTutor();
-E('auraFox').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTutor()}};
+/* Aura's click and keyboard controls are attached by initAura after all tutor functions exist. */
 
 
 const glossary=[
@@ -1963,6 +1962,167 @@ E('wavePause').onclick=()=>{wavePaused=!wavePaused;E('wavePause').textContent=wa
 window.setInterval(waveSample,150);
 renderWaveform();
 
+
+const auraRuntime={visible:true,gameActive:false,score:0,best:0,time:30,hints:true,paused:false,gameTimer:null,jumpTimer:null,speechTimer:null,reactionTimer:null,lastReact:0,explicitHide:false};
+function auraSay(message,duration=5500){
+ const bubble=E('auraSpeech');if(!bubble||!auraRuntime.hints)return;
+ bubble.textContent=String(message).slice(0,360);bubble.hidden=false;
+ if(auraRuntime.speechTimer)clearTimeout(auraRuntime.speechTimer);
+ auraRuntime.speechTimer=setTimeout(()=>{bubble.hidden=true},Math.max(1000,duration));
+}
+function auraPlace(screenX,screenY){
+ const fox=E('auraFox');if(!fox)return;
+ const x=Math.max(8,Math.min(window.innerWidth-95,screenX));
+ const y=Math.max(6,Math.min(window.innerHeight-100,screenY));
+ fox.classList.add('aura-at-target');fox.style.left=Math.round(x)+'px';fox.style.bottom=Math.round(window.innerHeight-y-87)+'px';
+}
+function auraResetPosition(){
+ const fox=E('auraFox');fox.classList.remove('aura-at-target');fox.style.left='';fox.style.bottom='';
+}
+function auraVisible(value,reason=''){
+ const fox=E('auraFox');
+ if(!value){fox.classList.add('aura-hidden');E('auraSpeech').hidden=true}
+ else{fox.classList.remove('aura-hidden')}
+ auraRuntime.visible=!!value;
+ if(reason==='manual')auraRuntime.explicitHide=!value;
+}
+function auraPointFromNode(nodeId,portIndex){
+ const n=find(nodeId);if(!n)return null;
+ const coord=ports(n)[portIndex]||[n.x,n.y];
+ return coord;
+}
+function auraPointFromIssue(item){
+ const msg=item?.message||'',plc=nodes.find(n=>n.type==='plc');
+ if(!plc)return null;
+ if(/cortocircuit/i.test(msg)){
+  const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero');
+  const w=wires.find(w=>w.a===plus?.id||w.b===plus?.id||w.a===minus?.id||w.b===minus?.id);
+  if(w){const a=find(w.a),b=find(w.b);if(a&&b){const pa=ports(a)[w.ap],pb=ports(b)[w.bp];if(pa&&pb)return [(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]}}
+ }
+ if(/L\+/.test(msg))return auraPointFromNode(plc.id,0);
+ if(/–\/M|0 V/.test(msg))return auraPointFromNode(plc.id,1);
+ for(const pin of [...plcInputPins(plc),...plcOutputPins(plc)]){
+  if(msg.includes(portName(plc,pin)))return auraPointFromNode(plc.id,pin);
+ }
+ const cable=wires.find(w=>w.a!==plc.id&&w.b!==plc.id)||wires[0];
+ if(cable){const a=find(cable.a),b=find(cable.b);const pa=a&&ports(a)[cable.ap],pb=b&&ports(b)[cable.bp];if(pa&&pb)return [(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]}
+ return [plc.x+200,plc.y-100];
+}
+function auraCircuitToViewport(coord){
+ if(!coord)return null;
+ const box=canvas.getBoundingClientRect();
+ const ratio=Math.min(box.width/view.w,box.height/view.h);
+ const offsetX=(box.width-view.w*ratio)/2,offsetY=(box.height-view.h*ratio)/2;
+ return [box.left+offsetX+(coord[0]-view.x)*ratio,box.top+offsetY+(coord[1]-view.y)*ratio];
+}
+function auraReactToErrors(issues){
+ if(!auraRuntime.hints||auraRuntime.gameActive||auraRuntime.explicitHide)return;
+ const errors=(issues||[]).filter(item=>item.severity==='error');
+ if(!errors.length)return;
+ const fox=E('auraFox'),issue=errors[0],point=auraCircuitToViewport(auraPointFromIssue(issue));
+ auraVisible(true);fox.classList.remove('aura-tail-magic');fox.classList.add('aura-biting');
+ if(point)auraPlace(point[0]-35,point[1]-66);
+ auraSay('¡Ñam! Detecté un error: '+issue.message+' Revisa la conexión antes de simular.',7500);
+ clearTimeout(auraRuntime.reactionTimer);
+ auraRuntime.reactionTimer=setTimeout(()=>{fox.classList.remove('aura-biting');if(!auraRuntime.gameActive)auraResetPosition()},3400);
+}
+function auraTailMagic(message){
+ if(auraRuntime.explicitHide)return;
+ const fox=E('auraFox');auraVisible(true);
+ fox.classList.remove('aura-biting','aura-tail-magic');
+ void fox.offsetWidth;
+ fox.classList.add('aura-tail-magic');
+ auraSay(message||'¡Brillitos! Revisé el programa Ladder. Comprueba los cambios antes de simular.',6000);
+ clearTimeout(auraRuntime.reactionTimer);
+ auraRuntime.reactionTimer=setTimeout(()=>fox.classList.remove('aura-tail-magic'),1800);
+}
+function auraReviewAndReact(){
+ const issues=ladderReviewIssues(),bad=issues.filter(p=>p.severity==='error');
+ if(bad.length){auraReactToErrors(bad);return}
+ if(issues.some(p=>p.severity==='warn'))auraSay('Veo algunas advertencias. Revisa el diagnóstico para aprender a corregirlas.');
+ else auraTailMagic('¡Muy bien! No detecté errores básicos en el diagrama. Sigue probando cada estado.');
+}
+function auraFixLadder(){
+ if(!ladderPlan){auraSay('Primero crea o importa un Ladder para poder revisarlo.');openLadder();return}
+ const reference=ladderPseudoCode(ladderPlan),editor=E('ladderEditor'),hasUnsaved=editor.value.trim()!==(ladderPlan.source||reference).trim();
+ if(hasUnsaved&&!confirm('Hay texto editado sin aplicar. ¿Deseas reemplazarlo por un borrador didáctico del plan actual?'))return;
+ if(!confirm('Aura regenerará el Ladder DIDÁCTICO desde los parámetros actuales. Se perderán los cambios manuales de código no aplicados. ¿Continuar?'))return;
+ ladderPlan.source=null;
+ renderLadder();draw();
+ E('ladderImportFeedback').textContent='Aura regeneró el borrador desde la configuración. No modifica físicamente el cableado ni garantiza compatibilidad con el PLC comercial. Usa «Probar lógica Ladder» antes de simular.';
+ auraTailMagic('¡Fiuu! Moví la cola y regeneré el borrador. Revisa ahora entradas, salidas y parámetros.');
+}
+function auraGamePosition(){
+ if(!auraRuntime.gameActive)return;
+ const x=20+Math.random()*Math.max(40,window.innerWidth-140);
+ const y=110+Math.random()*Math.max(60,window.innerHeight-250);
+ auraPlace(x,y);
+}
+function auraGameStatus(message){
+ E('auraGameScore').textContent=auraRuntime.score;
+ E('auraGameTime').textContent=auraRuntime.time;
+ E('auraGameBest').textContent=auraRuntime.best;
+ if(message)E('auraGameFeedback').textContent=message;
+}
+function auraSaveBest(){
+ try{localStorage.setItem('plc-aura-game-best-v1',String(auraRuntime.best))}catch{}
+}
+function auraStopGame(message='Juego finalizado.'){
+ clearInterval(auraRuntime.gameTimer);clearInterval(auraRuntime.jumpTimer);
+ auraRuntime.gameTimer=null;auraRuntime.jumpTimer=null;
+ auraRuntime.gameActive=false;
+ const fox=E('auraFox');fox.classList.remove('aura-catching','aura-game-bounce');
+ auraResetPosition();auraGameStatus(message);
+}
+function auraStartGame(){
+ auraStopGame('');
+ auraRuntime.gameActive=true;auraRuntime.score=0;auraRuntime.time=30;
+ auraVisible(true);
+ const fox=E('auraFox');fox.classList.add('aura-catching','aura-game-bounce');fox.classList.remove('aura-biting','aura-tail-magic');
+ E('auraGame').hidden=false;
+ auraGameStatus('Encuentra a Aura y haz clic en ella. Puedes usar Enter si la enfocas.');
+ auraGamePosition();
+ auraRuntime.jumpTimer=setInterval(auraGamePosition,1250);
+ auraRuntime.gameTimer=setInterval(()=>{
+  if(!auraRuntime.gameActive)return;
+  auraRuntime.time-=1;auraGameStatus();
+  if(auraRuntime.time<=0)auraStopGame('¡Tiempo! Lograste '+auraRuntime.score+' puntos. ¿Repetimos?');
+ },1000);
+}
+function auraCatch(){
+ if(!auraRuntime.gameActive){openTutor();return}
+ auraRuntime.score+=1;
+ if(auraRuntime.score>auraRuntime.best){auraRuntime.best=auraRuntime.score;auraSaveBest()}
+ auraGameStatus('¡Te atrapé! Aura brinca hacia otro lugar.');
+ auraGamePosition();
+}
+function auraToggleGame(){E('auraGame').hidden=false;if(!auraRuntime.gameActive)auraGameStatus('Pulsa Start para jugar.')}
+function auraWanderTick(){
+ if(auraRuntime.gameActive||auraRuntime.explicitHide||E('auraFox').classList.contains('aura-biting'))return;
+ if(Math.random()<0.3){
+  auraVisible(false);
+  setTimeout(()=>{if(auraRuntime.gameActive||auraRuntime.explicitHide)return;auraVisible(true);auraResetPosition();auraSay('¡Puf! Ya regresé. ¿Quieres una pista o una práctica?')},2700);
+ }else if(auraRuntime.hints&&Math.random()<0.35){
+  const tips=['¿Probaste todos los estados del pulsador?','Recuerda distinguir XIC/XIO del contacto físico NO/NC.','Puedes abrir Signal Timing para ver los cambios de entradas.','Busca Run Tests cuando crees una nueva red.'];
+  auraSay(tips[Math.floor(Math.random()*tips.length)],4300);
+ }
+}
+function initAura(){
+ try{auraRuntime.best=Math.max(0,Math.min(100000,Number(localStorage.getItem('plc-aura-game-best-v1'))||0))}catch{}
+ auraGameStatus();
+ E('auraFox').onclick=auraCatch;
+ E('auraFox').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();auraCatch()}};
+ E('auraPlay').onclick=auraToggleGame;
+ E('auraHide').onclick=()=>{if(auraRuntime.gameActive)auraStopGame('Juego detenido.');auraVisible(false,'manual')};
+ E('auraShow').onclick=()=>{auraVisible(true,'manual');auraResetPosition();auraSay('¡Aquí estoy! Soy Aura. ¿Revisamos tu Ladder?')};
+ E('startAuraGame').onclick=auraStartGame;
+ E('stopAuraGame').onclick=()=>auraStopGame('Juego detenido.');
+ E('closeAuraGame').onclick=()=>{auraStopGame('Juego cerrado.');E('auraGame').hidden=true};
+ E('auraHintsToggle').onchange=e=>{auraRuntime.hints=!!e.target.checked;E('auraSpeech').hidden=true};
+ E('auraFixLadder').onclick=auraFixLadder;
+ window.setInterval(auraWanderTick,24000);
+}
+
 function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -2019,7 +2179,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
-initTutor();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan?.mode==='timer'&&ladderRuntime.started&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 new ResizeObserver(entries=>{
