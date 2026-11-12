@@ -267,7 +267,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div class="graphic-ladder">
   <div class="graphic-head"><strong data-i18n="visualEditor">Visual Ladder Editor · Editor gráfico</strong><span id="graphicStatus">Edit Mode</span></div>
   <p class="studio-lead">Construye la lógica haciendo clic en los símbolos. Cada rung puede tener contactos en serie y ramas en paralelo. Al simular, los conductores y contactos activos se iluminan.</p>
-  <div class="graphic-toolbar"><button id="graphicNew" data-i18n="addRung">＋ Rung</button><button id="graphicNo">—| |— NO</button><button id="graphicNc">—|/|— NC</button><button id="graphicWire">──── Wire</button><button id="graphicTon">TON · Timer</button><button id="graphicCtu">CTU · Counter</button><button id="graphicBlink">BLINK · 4×</button><button id="graphicBranch" data-i18n="parallel">＋ Parallel</button><button id="graphicCoil">—( )— Coil</button><button id="graphicDelete" data-i18n="remove">⌫ Remove</button></div>
+  <div class="graphic-toolbar"><button id="graphicNew" data-i18n="addRung">＋ Rung</button><button id="graphicNo">—| |— NO</button><button id="graphicNc">—|/|— NC</button><button id="graphicWire">──── Wire</button><button id="graphicTon">TON · Timer</button><button id="graphicTof">TOF · Timer</button><button id="graphicCtu">CTU · Counter</button><button id="graphicCtd">CTD · Counter</button><button id="graphicCmp">CMP · Compare</button><button id="graphicBlink">BLINK · 4×</button><button id="graphicBranch" data-i18n="parallel">＋ Parallel</button><button id="graphicCoil">—( )— Coil</button><button id="graphicDelete" data-i18n="remove">⌫ Remove</button></div>
   <div class="graphic-actions"><button id="graphicMoveUp">↑ Rung</button><button id="graphicMoveDown">↓ Rung</button><button id="graphicRemoveRung" data-i18n="deleteRung">Delete Rung</button><button id="graphicClear" data-i18n="clearLadder">Clear Ladder</button></div>
   <div id="graphicLadderView" class="graphic-view" aria-label="Editable graphical ladder networks"></div>
   <div id="graphicElementEditor" class="graphic-element-editor">Selecciona un contacto o bobina para configurar su entrada o salida.</div>
@@ -2280,7 +2280,7 @@ function graphId(){return graphicLadder.nextId++}
 function graphPLC(){return nodes.find(n=>n.type==='plc')}
 function graphPinChoices(kind){const plc=graphPLC();if(!plc)return [];return kind==='output'?plcOutputPins(plc):plcInputPins(plc)}
 function graphItem(type='NO'){
- return {id:graphId(),type,pin:graphPinChoices('input')[0]??3,source:'input',preset:4,seconds:1,onSeconds:0.4,offSeconds:0.4,resetPin:null};
+ return {id:graphId(),type,pin:graphPinChoices('input')[0]??3,source:'input',preset:4,seconds:1,onSeconds:0.4,offSeconds:0.4,resetPin:null,compareOp:'EQ',compareThreshold:1};
 }
 function graphNewRung(){
  if(simulation){E('graphicMessage').textContent='Cambia a Edit Mode para agregar redes.';return}
@@ -2297,28 +2297,44 @@ function graphInputValue(item,outputs,plc){
 }
 
 function graphFunctionBlock(item,incoming,plc,now){
- const key=Number(item.id),state=graphicRuntime.get(key)||{started:0,last:false,count:0,active:false,done:false};
- if(!incoming&&item.type!=='BLINK'&&item.type!=='CTU'&&item.type!=='TON'){state.active=false}
+ const key=Number(item.id),state=graphicRuntime.get(key)||{started:0,last:false,count:0,active:false,done:false,initialized:false};
+ const type=item.type,seconds=Math.max(.1,Number(item.seconds)||1),preset=Math.max(1,Math.min(100,Number(item.preset)||4));
  let output=false;
- if(item.type==='TON'){
+ if(type==='TON'){
   if(!incoming){state.started=0;state.done=false}
-  else{if(!state.started)state.started=now;state.done=now-state.started>=Math.max(100,Number(item.seconds||1)*1000)}
+  else{if(!state.started)state.started=now;state.done=now-state.started>=seconds*1000}
   output=state.done;
- }else if(item.type==='CTU'){
-  if(item.resetPin!==null&&ins.has(plcInputPins(plc).indexOf(Number(item.resetPin))))state.count=0;
-  else if(incoming&&!state.last)state.count=Math.min(100000,state.count+1);
-  output=state.count>=Math.max(1,Number(item.preset)||4);
- }else if(item.type==='BLINK'){
+ }else if(type==='TOF'){
+  if(incoming){state.tofActive=true;state.tofStart=0;output=true}
+  else if(state.tofActive){
+   if(!state.tofStart)state.tofStart=now;
+   output=now-state.tofStart<seconds*1000;
+   if(!output)state.tofActive=false;
+  }
+  state.done=output;
+ }else if(type==='CTU'||type==='CTD'){
+  if(!state.initialized){state.count=type==='CTD'?preset:0;state.initialized=true}
+  if(item.resetPin!==null&&ins.has(plcInputPins(plc).indexOf(Number(item.resetPin))))state.count=type==='CTD'?preset:0;
+  else if(incoming&&!state.last){
+   state.count=Math.max(0,Math.min(100000,state.count+(type==='CTD'?-1:1)));
+  }
+  output=type==='CTD'?state.count<=0:state.count>=preset;state.done=output;
+ }else if(type==='CMP'){
+  const a=Number(incoming),b=Number(item.compareThreshold??1),op=item.compareOp||'EQ';
+  output=!!({EQ:()=>a===b,NE:()=>a!==b,GT:()=>a>b,GE:()=>a>=b,LT:()=>a<b,LE:()=>a<=b}[op]?.());
+  state.done=output;
+ }else if(type==='BLINK'){
   if(item.resetPin!==null&&ins.has(plcInputPins(plc).indexOf(Number(item.resetPin)))){state.started=0;state.done=false}
   else if(incoming&&!state.last&&!state.started){state.started=now;state.done=false}
   if(state.started){
    const onMs=Math.max(100,Number(item.onSeconds||.4)*1000),offMs=Math.max(100,Number(item.offSeconds||.4)*1000);
-   const period=onMs+offMs,count=Math.max(1,Math.min(100,Number(item.preset)||4)),elapsed=now-state.started;
-   output=elapsed>=count*period?true:(elapsed%period)<onMs;
-   state.done=elapsed>=count*period;
+   const period=onMs+offMs,elapsed=now-state.started;
+   output=elapsed>=preset*period?true:(elapsed%period)<onMs;
+   state.done=elapsed>=preset*period;
   }
  }
- state.last=!!incoming;state.active=!!output;graphicRuntime.set(key,state);return !!output;
+ state.last=!!incoming;state.active=!!output;
+ graphicRuntime.set(key,state);return !!output;
 }
 function evaluateGraphicLadder(plc,ready){
  const results=[],outputs=new Set(),status={},now=Date.now();
@@ -2330,7 +2346,7 @@ function evaluateGraphicLadder(plc,ready){
    for(let ci=0;ci<branch.length;ci++){
     const item=branch[ci];let pass=false;
     if(item.type==='WIRE')pass=true;
-    else if(['TON','CTU','BLINK'].includes(item.type)){
+    else if(['TON','TOF','CTU','CTD','CMP','BLINK'].includes(item.type)){
      const blockOut=graphFunctionBlock(item,path,plc,now);
      pass=!!blockOut;path=!!ready&&pass;
     }else{
@@ -2540,7 +2556,7 @@ function graphLoad(raw){
  let max=0;
  for(const row of valid){
   if(!Array.isArray(row.branches)||!Number.isFinite(Number(row.output)))continue;
-  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','CTU','BLINK'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null})):[]);
+  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','TOF','CTU','CTD','CMP','BLINK'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null,compareOp:['EQ','NE','GT','GE','LT','LE'].includes(item.compareOp)?item.compareOp:'EQ',compareThreshold:Number.isFinite(Number(item.compareThreshold))?Number(item.compareThreshold):1})):[]);
   if(!branches.length)continue;
   for(const branch of branches)for(const item of branch)max=Math.max(max,item.id);
   const rid=Number(row.id)||0;max=Math.max(max,rid);
@@ -2551,8 +2567,8 @@ function graphLoad(raw){
 }
 function graphInit(){
  E('graphicNew').onclick=graphNewRung;
- for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicTon','TON'],['graphicCtu','CTU'],['graphicBlink','BLINK'],['graphicCoil','COIL']]){
-  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicTon','graphicCtu','graphicBlink','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
+ for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicTon','TON'],['graphicTof','TOF'],['graphicCtu','CTU'],['graphicCtd','CTD'],['graphicCmp','CMP'],['graphicBlink','BLINK'],['graphicCoil','COIL']]){
+  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicTon','graphicTof','graphicCtu','graphicCtd','graphicCmp','graphicBlink','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
  }
  E('graphicBranch').onclick=()=>{if(!graphicLadder.rungs.length)graphNewRung();graphAddBranch(graphicSelection?.rungId||graphicLadder.rungs.at(-1).id)};
  E('graphicDelete').onclick=graphRemoveSelected;
@@ -2687,7 +2703,7 @@ initTutor();initAura();configureSceneTemplate('conveyor');initLanguage();refresh
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
- if(simulation&&graphicLadder.enabled&&graphicLadder.rungs.some(r=>r.branches.some(b=>b.some(i=>['TON','CTU','BLINK'].includes(i.type)))))draw();
+ if(simulation&&graphicLadder.enabled&&graphicLadder.rungs.some(r=>r.branches.some(b=>b.some(i=>['TON','TOF','CTU','CTD','CMP','BLINK'].includes(i.type)))))draw();
 },150);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
