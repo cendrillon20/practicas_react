@@ -131,27 +131,85 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 .tutor-references{display:flex;flex-direction:column;gap:7px;border-top:1px solid #344b69;padding-top:11px}
 .tutor-references a{color:#82c9ff;text-decoration:underline;font-size:11px}
 @media(max-width:680px){.studio-drawer{width:100%}.studio-drawer #sceneCanvas{max-height:270px}}
+
+.ladder-panel{resize:horizontal;overflow:auto;max-width:85vw;min-width:320px}
+.ladder-panel.studio-floating,.studio-drawer.studio-floating{position:fixed!important;left:clamp(10px,34vw,680px);top:10vh;right:auto;bottom:auto;width:min(650px,85vw);height:min(80vh,830px);max-height:92vh;resize:both;z-index:110;box-shadow:0 18px 50px #000b}
+.studio-drawer.studio-max,.ladder-panel.studio-max{position:fixed!important;left:1vw!important;top:1vh!important;right:auto!important;bottom:auto!important;width:98vw!important;height:98vh!important;max-height:none!important;resize:none!important;z-index:120}
+.studio-move-handle{cursor:grab;user-select:none;touch-action:none}.studio-move-handle button{cursor:pointer}
+.studio-actions.tiny{gap:3px;flex-wrap:nowrap}.studio-actions.tiny button{flex:0 0 auto;font-size:11px;padding:4px 7px}
+.ladder-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:2px 0 5px}.ladder-tabs button{background:#1b3551;color:#bdd7ef;border:1px solid #3b5d79;border-radius:7px;padding:7px;cursor:pointer}.ladder-tabs button.active{background:#0d655c;color:#fff;border-color:#37aa96}
+.ladder-panel[data-active-tab="editor"] [data-ladder-section="config"],.ladder-panel[data-active-tab="editor"] [data-ladder-section="monitor"]{display:none}
+.ladder-panel[data-active-tab="monitor"] [data-ladder-section="config"],.ladder-panel[data-active-tab="monitor"] [data-ladder-section="editor"]{display:none}
+.ladder-panel[data-active-tab="config"] [data-ladder-section="editor"],.ladder-panel[data-active-tab="config"] [data-ladder-section="monitor"]{display:none}
+.ladder-panel[data-active-tab="all"] [data-ladder-section]{display:block}
+.ladder-panel label.simulation-model{display:flex;flex-direction:row;align-items:center}.simulation-model input{width:auto}
+#waveCanvas{display:block;width:100%;height:auto;border:1px solid #29496d;border-radius:9px;background:#07182a}
+.aura-fox{position:fixed;left:17px;bottom:14px;z-index:80;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;filter:drop-shadow(0 3px 6px #0008);animation:aura-wander 38s ease-in-out infinite alternate;user-select:none}
+.aura-fox svg{width:70px;height:65px;overflow:visible;touch-action:auto;animation:aura-bob 2.4s ease-in-out infinite}
+.aura-fox span{padding:2px 7px;border-radius:9px;background:#14314c;color:#fff;font-weight:700;font-size:11px}
+.aura-fox:hover svg{transform:scale(1.12)}
+@keyframes aura-wander{0%,13%{left:14px}31%,46%{left:calc(100vw - 105px)}58%,71%{left:19vw}86%,100%{left:68vw}}
+@keyframes aura-bob{0%,100%{translate:0 0}50%{translate:0 -6px}}
+@media(prefers-reduced-motion:reduce){.aura-fox,.aura-fox svg{animation:none}}
+@media(max-width:740px){.aura-fox svg{width:46px;height:44px}.aura-fox{bottom:8px}.ladder-panel.studio-floating,.studio-drawer.studio-floating{left:2vw;top:7vh;width:96vw;height:82vh}}
+.ladder-width-row{display:flex!important;flex-direction:row!important;gap:10px;align-items:center!important}.ladder-width-row input{flex:1}
+.layout.ladder-visible{grid-template-columns:195px minmax(0,1fr) minmax(320px,var(--ladder-width,400px))}
+.layout .ladder-panel{width:auto}
+.layout .ladder-panel.studio-floating{width:min(690px,90vw);resize:both}
+.studio-drawer#scenarioPanel.studio-floating{left:8vw;top:8vh}
+.studio-drawer#tutorPanel.studio-floating{left:42vw;top:11vh}
+@media(max-width:1000px){.layout.ladder-visible{grid-template-columns:175px minmax(0,1fr)}}
+
+.aura-fox{transition:opacity .3s ease,filter .3s ease;--aura-tail-angle:0deg}
+.aura-fox.aura-hidden{opacity:0;visibility:hidden;pointer-events:none}.aura-fox.aura-at-target{animation:none!important}
+.aura-fox.aura-catching{animation:none!important;cursor:crosshair;transition:left .18s ease,bottom .18s ease}
+.aura-fox.aura-biting{animation:none!important;z-index:130}
+.aura-fox.aura-biting svg{animation:aura-bite .32s ease-in-out infinite alternate}
+.aura-fox.aura-tail-magic svg{animation:aura-tail-wag .24s ease-in-out 8}
+.aura-fox .aura-tail{transform-origin:78px 71px;animation:aura-wag 1.2s ease-in-out infinite alternate}
+.aura-fox .aura-tail-tip{transform-origin:78px 71px;animation:aura-wag 1.2s ease-in-out infinite alternate}
+.aura-speech{position:absolute;bottom:97%;left:48px;transform:translateX(-50%);width:230px;max-width:80vw;background:#133854;border:1px solid #62c7e5;border-radius:12px;padding:10px 13px;box-shadow:0 8px 25px #000a;color:#f3fbff;font-size:12px;line-height:1.45;white-space:normal;pointer-events:none;text-align:center}
+.aura-speech[hidden]{display:none}
+.aura-sparkles{position:absolute;bottom:55px;left:10px;font-size:28px;white-space:nowrap;color:#ffe89b;opacity:0;pointer-events:none}
+.aura-tail-magic .aura-sparkles{animation:aura-sparkle 1.6s ease-out forwards}
+.aura-fox.aura-game-bounce svg{animation:aura-bob .22s infinite alternate}
+.aura-game{position:fixed;bottom:110px;left:15px;width:305px;max-width:90vw;z-index:125;background:#0e2641;border:1px solid #50a8d2;border-radius:13px;padding:14px;box-shadow:0 10px 35px #000a;color:#eff8ff;font-size:12px}
+.aura-game[hidden]{display:none}.aura-game-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.aura-game-head button{background:#1e496a;color:white;border:1px solid #6b94b2;border-radius:7px;font-size:18px;padding:2px 9px}
+.aura-game-stats{display:flex;justify-content:space-between;gap:9px;margin:12px 0;background:#132f4b;border-radius:8px;padding:10px}
+.aura-game-actions{display:flex;gap:8px}.aura-game-actions button{flex:1;padding:8px;background:#146454;color:white;border:1px solid #36ad99;border-radius:8px;cursor:pointer}
+#auraGameFeedback{padding-top:9px;line-height:1.4;color:#aed7ea}
+@keyframes aura-wag{to{transform:rotate(15deg)}}
+@keyframes aura-bite{0%{transform:rotate(-14deg) translateY(3px)}100%{transform:rotate(14deg) translateY(-4px)}}
+@keyframes aura-tail-wag{0%{transform:rotate(-8deg)}100%{transform:rotate(9deg) scale(1.05)}}
+@keyframes aura-sparkle{0%{opacity:0;transform:translateY(5px) scale(.6)}35%{opacity:1;transform:translateY(-7px) scale(1.2)}100%{opacity:0;transform:translateY(-23px) scale(1.5)}}
+@media(prefers-reduced-motion:reduce){.aura-fox .aura-tail,.aura-fox .aura-tail-tip,.aura-fox.aura-biting svg,.aura-fox.aura-tail-magic svg,.aura-fox.aura-game-bounce svg,.aura-tail-magic .aura-sparkles{animation:none!important}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">🏭 Escenarios</button><button class="push" id="showTutor">🎓 Tutor PLC</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">Scenes</button><button class="push" id="showTutor">Aura · Tutor</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>UNIONES Y RAMIFICACIONES</h4><div class="cards" id="junctions"></div><div class="palette-caption" id="junctionInstructions">Pulsa Punto de unión y haz clic en el espacio donde quieras colocar la conexión.</div><h4>PROGRAMACIÓN INTERNA</h4><div class="cards" id="timers"></div><div class="palette-caption">TON es una instrucción interna: no se conecta con cables físicos.</div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
 <section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
- <div class="ladder-top"><strong>▤ Programa escalera (Ladder)</strong><button id="closeLadder" title="Cerrar panel">×</button></div>
- <label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
+ <div class="ladder-top studio-move-handle"><strong>Ladder Workspace</strong><div class="studio-actions tiny"><button id="ladderDock" title="Panel lateral o flotante">Float</button><button id="ladderMax" title="Maximizar o restaurar">Max</button><button id="closeLadder" title="Cerrar panel">×</button></div></div><label class="ladder-width-row">Panel Width · Ancho <input id="ladderWidth" type="range" min="320" max="900" step="20" value="400"></label><nav class="ladder-tabs"><button data-ladder-tab="config" class="active">Program</button><button data-ladder-tab="editor">Ladder Editor</button><button data-ladder-tab="monitor">Monitor</button><button data-ladder-tab="all">All</button></nav>
+ <div data-ladder-section="config"><label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
  <textarea id="ladderGoal" rows="3" placeholder="Ejemplo: Al pulsar Marcha se enciende el motor y permanece encendido hasta pulsar Paro."></textarea>
- <label for="ladderPlatform">Plataforma de programación</label><select id="ladderPlatform"><option value="compactlogix">CompactLogix · Studio 5000</option><option value="micrologix">MicroLogix · RSLogix 500</option><option value="delta">Delta DVP · WPLSoft / ISPSoft</option><option value="codesys">CODESYS · IEC 61131-3</option></select><label for="ladderController">Modelo de CPU o módulo físico</label><input id="ladderController" placeholder="Ej. 1769-L24ER, 1763-L16BWA, DVP-SS2..." maxlength="90"><label for="ladderMode">Comportamiento a implementar</label>
+ <label for="ladderPlatform">Plataforma de programación</label><select id="ladderPlatform"><option value="compactlogix">CompactLogix · Studio 5000</option><option value="micrologix">MicroLogix · RSLogix 500</option><option value="delta">Delta DVP · WPLSoft / ISPSoft</option><option value="codesys">CODESYS · IEC 61131-3</option></select><label class="simulation-model"><input id="virtualCPU" type="checkbox" checked> Virtual PLC (Simulation Only)</label><label for="ladderController">CPU Model (optional) · Modelo físico</label><input id="ladderController" placeholder="Opcional, ej. 1769-L24ER / DVP-SS2" maxlength="90"><label for="ladderMode">Comportamiento a implementar</label>
  <select id="ladderMode">
   <option value="latch">Arranque/paro con enclavamiento</option>
   <option value="direct">Activación mientras llega señal</option>
   <option value="inverse">Activación cuando NO hay señal</option>
   <option value="and">Dos entradas simultáneas (Y)</option>
-  <option value="or">Cualquiera de dos entradas (O)</option><option value="timer">TON · Activar salida después de un retardo</option>
+  <option value="or">Cualquiera de dos entradas (O)</option><option value="timer">TON · On-Delay Timer</option>
+  <option value="tof">TOF · Off-Delay Timer</option>
+  <option value="counter">CTU · Count Up</option>
+  <option value="ctd">CTD · Count Down</option>
+  <option value="compare">CMP · Comparator</option>
  </select>
  <label id="ladderStopPolarityWrap">Tipo de contacto de PARO<input type="hidden" id="ladderStopPolarity" value="nc"><select id="ladderStopPolaritySelect"><option value="nc">Paro NC · I=1 en reposo; I=0 al presionar</option><option value="no">Paro NA · I=0 en reposo; I=1 al presionar</option></select></label><div class="ladder-fields">
   <label>Entrada principal<select id="ladderStart"></select></label>
   <label id="ladderSecondaryWrap">Entrada secundaria / Paro<select id="ladderStop"></select></label>
   <label>Salida controlada<select id="ladderOutput"></select></label>
  </div>
- <label id="ladderDelayWrap">Retardo TON en segundos<input id="ladderDelay" type="number" min="0.1" max="3600" step="0.1" value="3"></label><label id="ladderTimerWrap">Temporizador interno<select id="ladderTimer"></select></label><div class="ladder-wiring"><strong>Datos detectados en el diagrama eléctrico</strong><div id="ladderWiring"></div></div><button id="generateLadder" class="ladder-generate">Validar datos y generar programa Ladder</button><div id="ladderLive" class="ladder-live" aria-live="polite">Aquí aparecerán los estados de las entradas y salidas.</div>
+ <label id="ladderDelayWrap">Preset Time (PT) · segundos<input id="ladderDelay" type="number" min="0.1" max="3600" step="0.1" value="3"></label>
+ <label id="ladderCounterWrap">Preset Count (PV) · ciclos<input id="ladderCounterPreset" type="number" min="1" max="100000" step="1" value="3"></label>
+ <label id="ladderCompareWrap">Compare condition (CMP)<select id="ladderCompareOp"><option value="EQ">EQ · Equal (=)</option><option value="NE">NE · Not Equal (≠)</option><option value="GT">GT · Greater Than (&gt;)</option><option value="GE">GE · Greater or Equal (≥)</option><option value="LT">LT · Less Than (&lt;)</option><option value="LE">LE · Less or Equal (≤)</option></select><input id="ladderCompareThreshold" type="number" step="1" value="1" aria-label="Compare threshold"><small>En este simulador compara el valor 0/1 de la entrada elegida con una constante.</small></label><label id="ladderTimerWrap">Temporizador interno<select id="ladderTimer"></select></label><div class="ladder-wiring"><strong>Datos detectados en el diagrama eléctrico</strong><div id="ladderWiring"></div></div><button id="generateLadder" class="ladder-generate">Validar datos y generar programa Ladder</button></div><div data-ladder-section="monitor"><div id="ladderLive" class="ladder-live" aria-live="polite">Aquí aparecerán los estados de las entradas y salidas.</div><strong class="ladder-code-title">Signal Timing · Ondas de funcionamiento</strong><svg id="waveCanvas" viewBox="0 0 700 220" aria-label="Gráfica temporal de entradas y salidas"></svg><div class="studio-actions"><button id="clearWaves">Clear Traces</button><button id="wavePause">Pause / Resume</button></div>
  <div class="ladder-message">El texto describe el objetivo; para ejecutarlo debes elegir una lógica compatible. Solo se simulan las cinco lógicas básicas y TON indicadas. No interpreta automáticamente cualquier proceso industrial.</div>
  <button id="runLadderTests" class="ladder-generate" title="Comprobar comportamiento lógico sin modificar el circuito">▶ Probar lógica Ladder</button>
  <button id="reviewLadder" class="ladder-generate">⚠ Analizar programa y cableado</button>
@@ -159,34 +217,63 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div id="ladderTests" class="ladder-message"></div><div id="ladderReview" class="ladder-review"></div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
- <strong class="ladder-code-title">Editor Ladder / instrucciones de referencia</strong><label>Modifica el programa de texto compatible con el editor; después pulsa «Aplicar y simular».<textarea id="ladderEditor" rows="8" spellcheck="false" placeholder="Ejemplo: XIC(Entrada_0) OTE(Salida_0);"></textarea></label><div class="ladder-editor-actions"><button id="applyLadder" class="ladder-generate">✓ Aplicar y simular código</button><button id="importLadder" class="ladder-generate">↑ Importar Ladder de texto</button><input type="file" id="ladderFile" accept=".txt,.st,.il,.lad,.xml,.l5x" hidden></div><div id="ladderImportFeedback" class="ladder-message">Compatible con las instrucciones básicas incluidas en este editor. No admite proyectos binarios ni programas completos de los fabricantes.</div><strong class="ladder-code-title">Código de referencia
+ </div><div data-ladder-section="editor"><strong class="ladder-code-title">Ladder Editor / instrucciones de referencia</strong><label>Modifica el programa de texto compatible con el editor; después pulsa «Aplicar y simular».<textarea id="ladderEditor" rows="8" spellcheck="false" placeholder="Ejemplo: XIC(Entrada_0) OTE(Salida_0);"></textarea></label><div class="ladder-editor-actions"><button id="applyLadder" class="ladder-generate">✓ Aplicar y simular código</button><button id="importLadder" class="ladder-generate">↑ Importar Ladder de texto</button><input type="file" id="ladderFile" accept=".txt,.st,.il,.lad,.xml,.l5x" hidden></div><div id="ladderImportFeedback" class="ladder-message">Compatible con las instrucciones básicas incluidas en este editor. No admite proyectos binarios ni programas completos de los fabricantes.</div><strong class="ladder-code-title">Código de referencia</strong>
  <pre id="ladderCode" class="ladder-code">Genera el programa para ver las instrucciones.</pre>
  <button id="exportLadder" class="ladder-generate" title="Descargar instrucciones de referencia">↓ Exportar borrador Ladder (.txt)</button>
- <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
+ <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small></div>
 </section>
 <section id="scenarioPanel" class="studio-drawer" hidden aria-label="Escenarios industriales interactivos">
- <div class="studio-drawer-top"><strong>🏭 Laboratorio de escenarios</strong><button id="closeScenarios" title="Cerrar panel">×</button></div>
+ <div class="studio-drawer-top studio-move-handle"><strong>Scene Builder</strong><div class="studio-actions tiny"><button id="scenarioFloat">Float</button><button id="scenarioMax">Max</button><button id="closeScenarios" title="Cerrar panel">×</button></div></div>
  <p class="studio-lead">Construye una escena 2D y vincula sus elementos a entradas y salidas del PLC. Las señales virtuales son didácticas; no sustituyen el cableado real.</p>
- <label>Escenario inicial<select id="sceneTemplate"><option value="conveyor">Cinta transportadora</option><option value="traffic">Semáforo de tres luces</option><option value="robot">Brazo robótico y estación</option><option value="lights">Iluminación industrial</option></select></label>
+ <label>Escenario inicial<select id="sceneTemplate"><option value="conveyor">Cinta transportadora</option><option value="traffic">Semáforo de tres luces</option><option value="robot">Brazo robótico y estación</option><option value="lights">Iluminación industrial</option><option value="pneumatic">Pneumatics · Neumática</option><option value="custom">Custom Scene · Escena desde cero</option></select></label>
  <div class="studio-actions"><button id="loadSceneTemplate">Crear escenario</button><button id="clearScene">Vaciar escena</button></div>
  <svg id="sceneCanvas" viewBox="0 0 800 480" aria-label="Escena industrial construible"></svg>
- <div class="studio-actions"><select id="sceneAddType"><option value="belt">Cinta</option><option value="box">Caja</option><option value="sensor">Sensor</option><option value="traffic">Semáforo</option><option value="arm">Brazo</option><option value="lamp">Lámpara</option><option value="motor">Motor</option><option value="switch">Interruptor</option></select><button id="addSceneObject">＋ Agregar objeto</button></div>
+ <div class="studio-actions"><select id="sceneAddType"><option value="belt">Cinta</option><option value="box">Caja</option><option value="sensor">Sensor</option><option value="traffic">Semáforo</option><option value="arm">Brazo</option><option value="lamp">Lámpara</option><option value="motor">Motor</option><option value="switch">Interruptor</option><option value="cylinder">Pneumatic Cylinder · Cilindro</option><option value="valve">Solenoid Valve 5/2 · Válvula</option><option value="air">Air Supply · Suministro de aire</option></select><button id="addSceneObject">＋ Agregar objeto</button></div>
  <div id="sceneProperties" class="studio-properties">Selecciona un elemento de la escena para editar sus señales, nombre o eliminarlo.</div>
  <label class="scene-toggle"><input id="sceneEnabled" type="checkbox" checked> Permitir entradas virtuales en modo Simular</label><label class="scene-toggle"><input id="sceneAutoSensor" type="checkbox"> Activar fotoceldas automáticamente cuando pasa una caja</label><strong class="studio-subtitle">Entradas virtuales del escenario</strong>
- <div id="sceneInputs"></div>
+ <div id="sceneInputs"></div><h4 class="studio-subtitle">Pneumatics · Neumática didáctica</h4><p class="studio-lead">Añade un cilindro y una electroválvula 5/2 para visualizar señales de control. La representación no calcula presiones ni caudales.</p>
  <div id="sceneChallenge" class="studio-status"></div><button id="sceneEvaluate" class="studio-accent">✓ Evaluar práctica</button><div id="sceneStatus" class="studio-status"></div>
  <button id="sceneCoach" class="studio-accent">🎓 Revisar escenario con el tutor</button>
 </section>
 <section id="tutorPanel" class="studio-drawer" hidden aria-label="Tutor didáctico de PLC">
- <div class="studio-drawer-top"><strong>🎓 Tutor de automatización</strong><button id="closeTutor" title="Cerrar panel">×</button></div>
+ <div class="studio-drawer-top studio-move-handle"><strong>Aura · PLC Tutor</strong><div class="studio-actions tiny"><button id="tutorFloat">Float</button><button id="tutorMax">Max</button><button id="closeTutor" title="Cerrar panel">×</button></div></div>
  <p class="studio-lead">Tutor integrado, disponible sin conexión. Explica conceptos, revisa tu circuito y plantea ejercicios. Sus respuestas proceden de una base didáctica y reglas de diagnóstico, no de un modelo generativo.</p>
  <label>Consultar tema<select id="tutorTopic"></select></label>
  <div class="studio-actions"><button id="tutorExplain">Explicar tema</button><button id="tutorReview">⚠ Revisar proyecto</button><button id="tutorExercise">📝 Proponer ejercicio</button></div>
  <div id="tutorChat" class="tutor-chat" aria-live="polite"></div>
  <label>Pregunta al tutor<textarea id="tutorQuestion" rows="3" placeholder="Ej.: ¿Por qué no enciende la lámpara? ¿Cómo funciona TON?"></textarea></label>
  <button id="tutorAsk" class="studio-accent">Enviar pregunta</button>
+ <div class="studio-actions"><button id="auraPlay">Fox Chase · Mini Game</button><button id="auraHide">Hide Aura · Ocultar</button><button id="auraShow">Call Aura · Llamar</button></div>
+ <label class="scene-toggle"><input id="auraHintsToggle" type="checkbox" checked> Contextual Tips · Avisos de Aura</label>
+ <button id="auraFixLadder" class="studio-accent">Tail Magic · Revisar/Recrear Ladder</button>
+ <small>Las correcciones de programa requieren autorización antes de sustituir contenido. Aura no altera cables físicos automáticamente.</small>
+ <label>Software Guide · Guía por plataforma<select id="auraPlatform"><option value="compactlogix">Studio 5000 / CompactLogix</option><option value="micrologix">RSLogix 500 / MicroLogix</option><option value="delta">WPLSoft / ISPSoft / Delta</option><option value="codesys">CODESYS</option></select></label>
+ <button id="auraPlatformHelp" class="studio-accent">Show Workflow · Explicar pasos</button>
+ <label>English Glossary · Glosario inglés/español<input id="glossarySearch" placeholder="Ej. rung, preset, scan, solenoid"></label>
+ <div id="glossaryResults" class="studio-status"></div>
  <div class="tutor-references"><strong>Documentación de fabricantes</strong><a href="https://www.rockwellautomation.com/es-es/docs/studio-5000-logix-designer/38-00/contents-ditamap/studio-5000-logix-designer.html" target="_blank" rel="noopener noreferrer">Rockwell Studio 5000 · ayuda oficial</a><a href="https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1762-rm001_-en-p.pdf" target="_blank" rel="noopener noreferrer">Rockwell MicroLogix · instrucciones</a><a href="https://www.deltaww.com/en-US/service-support/faq/326" target="_blank" rel="noopener noreferrer">Delta · WPLSoft / ISPSoft</a><a href="https://content.helpme-codesys.com/es/CODESYS%20LD%20FBD/_cds_programming_in_ld.html" target="_blank" rel="noopener noreferrer">CODESYS · programación LD</a></div>
 </section>
+</div>
+<div id="auraFox" class="aura-fox" role="button" tabindex="0" title="Jugar con Aura / abrir tutor" aria-label="Aura, zorrita tutora interactiva">
+ <svg viewBox="-2 0 126 100" aria-hidden="true">
+  <path d="M17 35L11 6 37 20 52 17 79 5 73 37Q93 64 56 80Q16 82 10 58Z" fill="#ef9149" stroke="#ae5f37" stroke-width="3"/>
+  <path d="M14 45L37 57 48 71 58 58 79 44Q76 77 51 81Q25 81 14 45" fill="#fff1d7"/>
+  <path d="M17 18L23 37 31 24M69 25L73 16 63 28" fill="#ffd3ba"/>
+  <circle cx="33" cy="45" r="4.5" fill="#132335"/><circle cx="63" cy="45" r="4.5" fill="#132335"/>
+  <path d="M43 60Q48 66 53 60L48 55Z" fill="#423040"/>
+  <path d="M45 67Q48 70 51 67" stroke="#864a43" fill="none" stroke-width="2"/>
+  <path class="aura-tail" d="M76 66Q108 76 91 32Q105 42 106 60Q118 95 71 83Z" fill="#e68139" stroke="#a95d35" stroke-width="2"/><path class="aura-tail-tip" d="M101 36Q114 56 104 66L90 60Z" fill="#fff1d7"/>
+ </svg>
+ <span>Aura</span>
+ <div id="auraSpeech" class="aura-speech" hidden role="status" aria-live="polite"></div>
+ <div class="aura-sparkles" aria-hidden="true">✧ ✦ ✧</div>
+</div>
+<div id="auraGame" class="aura-game" hidden aria-label="Mini game con Aura">
+ <div class="aura-game-head"><strong>Fox Chase · Atrapa a Aura</strong><button id="closeAuraGame" title="Cerrar minijuego">×</button></div>
+ <p>Aura va a esconderse y saltar por el tablero. ¡Tócala antes de que se escape!</p>
+ <div class="aura-game-stats"><span>Score: <strong id="auraGameScore">0</strong></span><span>Time: <strong id="auraGameTime">30</strong> s</span><span>Best: <strong id="auraGameBest">0</strong></span></div>
+ <div class="aura-game-actions"><button id="startAuraGame">Start · Jugar</button><button id="stopAuraGame">Stop</button></div>
+ <div id="auraGameFeedback" role="status" aria-live="polite">Presiona Start para comenzar.</div>
 </div>
 <script>
 (()=>{
@@ -195,7 +282,10 @@ const NS='http://www.w3.org/2000/svg',E=id=>document.getElementById(id),canvas=E
 const types={
 no:['Pulsador NA','NO (3-4)',2],nc:['Pulsador NC','NC (1-2)',2],selector:['Selector NA','Enclavado',2],
 ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:['Capacitivo','Nivel / Objeto',3],limit:['Final Carrera','Rodillo NA',2],rollerNC:['Final carrera NC','Rodillo NC',2],rollerLever:['Final carrera palanca','Rodillo con palanca',2],selectorNC:['Selector NC','Contacto NC',2],selector3:['Selector 3 posiciones','Tres posiciones',2],
-green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2],timer:['Temporizador TON','Bloque lógico interno · sin bornes físicos',0],junction:['Punto de unión','Nodo libre para ramificaciones',1]
+green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2],timer:['TON · On Delay','Bloque lógico interno',0],
+tofBlock:['TOF · Off Delay','Bloque lógico interno',0],ctuBlock:['CTU · Count Up','Bloque lógico interno',0],ctdBlock:['CTD · Count Down','Bloque lógico interno',0],cmpBlock:['CMP · Comparator','Bloque lógico interno',0],
+emergency:['E-Stop · NC','Pulsador de emergencia didáctico',2],pressure:['Pressure Switch · NO','Presostato',2],level:['Level Switch · NO','Interruptor de nivel',2],fuse:['Fuse · F1','Fusible conductor ideal',2],breaker:['Circuit Breaker · QF','Interruptor automático',2],solenoid:['Solenoid Coil · Y1','Bobina electroválvula',2],motorLoad:['Motor Starter · KM','Bobina de contactor de motor',2],
+junction:['Punto de unión','Nodo libre para ramificaciones',1]
 };
 const nameOf=n=>n.label||({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC'})[n.type]||types[n.type][0];
 let placingJunction=false,ladderPlan=null,ladderRuntime={key:null,latch:false,started:0,elapsed:0,done:false,active:false,ready:false},copied=null,pasteNumber=0,multi=new Set(),groupDrag=null,nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,pan=null,pressedButton=null,view={x:0,y:0,w:1200,h:760},simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
@@ -205,7 +295,7 @@ function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,ioLabels:type=
 function find(id){return nodes.find(n=>n.id===id)}
 function K(n,i){return n.id+':'+i}
 function railGap(n){return Math.min(76,760/Math.max(1,(n.points||7)-1))}
-function localPorts(n){if(n.type==='junction')return [[0,0]];if(n.type==='timer')return [];if(n.type==='railplus'||n.type==='railzero')return Array.from({length:n.points||7},(_,i)=>[i*railGap(n),0]);
+function localPorts(n){if(n.type==='junction')return [[0,0]];if(['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock'].includes(n.type))return [];if(n.type==='railplus'||n.type==='railzero')return Array.from({length:n.points||7},(_,i)=>[i*railGap(n),0]);
 if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[25+i*43,23]),...Array.from({length:14},(_,i)=>[25+i*43,170]),...Array.from({length:6},(_,i)=>[637+i*43,23]),...Array.from({length:n.extraOutputs||0},(_,i)=>[637+i*43,170])];
 return types[n.type][2]===3?[[0,27],[0,63],[126,45]]:[[0,45],[126,45]]}
 function center(n){if(n.type==='junction')return [0,0];if(n.type.startsWith('rail'))return [((n.points||7)-1)*railGap(n)/2,0];if(n.type==='plc')return [(610+43*Math.max(n.extraInputs||0,n.extraOutputs||0))/2,96];return [63,45]}
@@ -221,33 +311,58 @@ function plcInputPins(plc){return [3,4,5,6,8,9,10,11,12,13,...Array.from({length
 function plcOutputPins(plc){return [18,20,22,24,25,26,...Array.from({length:plc.extraOutputs||0},(_,i)=>34+i)]}
 function resetLadderRuntime(){ladderRuntime={key:null,latch:false,started:0,elapsed:0,done:false,active:false,ready:false}}
 function evaluateLadder(plc,ready){
- const plan=ladderPlan;if(!plan){ladderRuntime.ready=ready;return null}
- const key=[plan.mode,plan.start,plan.stop,plan.output,plan.delaySeconds,plan.stopPolarity,plan.timerId].join('|');
+ const plan=ladderPlan;
+ if(!plan){ladderRuntime.ready=ready;return null}
+ const key=[plan.mode,plan.start,plan.stop,plan.output,plan.delaySeconds,plan.stopPolarity,plan.timerId,plan.counterPreset,plan.compareOp,plan.compareThreshold].join('|');
  if(ladderRuntime.key!==key){resetLadderRuntime();ladderRuntime.key=key}
  ladderRuntime.ready=ready;
  const inputPins=plcInputPins(plc),a=ins.has(inputPins.indexOf(Number(plan.start))),b=ins.has(inputPins.indexOf(Number(plan.stop)));
+ const now=Date.now(),previous=ladderRuntime.previousInput||false;
  ladderRuntime.start=!!a;ladderRuntime.stop=!!b;
  let isOn=false;
- if(!ready){ladderRuntime.latch=false;ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false}
- else if(plan.mode==='direct')isOn=a;
+ if(!ready){
+  ladderRuntime.latch=false;ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false;
+  ladderRuntime.count=0;ladderRuntime.previousInput=false;ladderRuntime.tofStarted=0;ladderRuntime.tofRunning=false;
+ }else if(plan.mode==='direct')isOn=a;
  else if(plan.mode==='inverse')isOn=!a;
  else if(plan.mode==='and')isOn=a&&b;
  else if(plan.mode==='or')isOn=a||b;
  else if(plan.mode==='latch'){
-   const stopPermits=plan.stopPolarity==='no'?!b:b;
-   if(!stopPermits)ladderRuntime.latch=false;
-   else if(a)ladderRuntime.latch=true;
-   isOn=ladderRuntime.latch;
- }else if(plan.mode==='timer'){
-   const delay=Math.max(100,Math.min(3600000,Number(plan.delaySeconds||3)*1000));
+  const stopPermits=plan.stopPolarity==='no'?!b:b;
+  if(!stopPermits)ladderRuntime.latch=false;
+  else if(a)ladderRuntime.latch=true;
+  isOn=ladderRuntime.latch;
+ }else if(plan.mode==='timer'||plan.mode==='tof'){
+  const delay=Math.max(100,Math.min(3600000,Number(plan.delaySeconds||3)*1000));
+  if(plan.mode==='timer'){
    if(!a){ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false}
-   else {
-     const now=Date.now();if(!ladderRuntime.started)ladderRuntime.started=now;
-     ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.started);
-     ladderRuntime.done=ladderRuntime.elapsed>=delay;
-   }
+   else{if(!ladderRuntime.started)ladderRuntime.started=now;ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.started);ladderRuntime.done=ladderRuntime.elapsed>=delay}
    isOn=ladderRuntime.done;
+  }else{
+   if(a){ladderRuntime.tofRunning=true;ladderRuntime.tofStarted=0;ladderRuntime.elapsed=0;isOn=true}
+   else if(ladderRuntime.tofRunning){
+    if(!ladderRuntime.tofStarted)ladderRuntime.tofStarted=now;
+    ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.tofStarted);
+    isOn=ladderRuntime.elapsed<delay;
+    if(!isOn)ladderRuntime.tofRunning=false;
+   }
+   ladderRuntime.done=isOn;
+  }
  }
+ else if(plan.mode==='counter'||plan.mode==='ctd'){
+  const preset=Math.max(1,Math.min(100000,Number(plan.counterPreset)||3));
+  if(!Number.isFinite(ladderRuntime.count))ladderRuntime.count=plan.mode==='ctd'?preset:0;
+  if(b){ladderRuntime.count=plan.mode==='ctd'?preset:0}
+  else if(a&&!previous){ladderRuntime.count=Math.max(0,Math.min(100000,ladderRuntime.count+(plan.mode==='ctd'?-1:1)))}
+  isOn=plan.mode==='ctd'?ladderRuntime.count<=0:ladderRuntime.count>=preset;
+  ladderRuntime.done=isOn;
+ }
+ else if(plan.mode==='compare'){
+  const inputNumber=Number(a),threshold=Number(plan.compareThreshold??1);
+  const compare={EQ:()=>inputNumber===threshold,NE:()=>inputNumber!==threshold,GT:()=>inputNumber>threshold,GE:()=>inputNumber>=threshold,LT:()=>inputNumber<threshold,LE:()=>inputNumber<=threshold};
+  isOn=!!compare[plan.compareOp||'EQ']?.();ladderRuntime.done=isOn;
+ }
+ ladderRuntime.previousInput=!!a;
  ladderRuntime.active=!!isOn;
  return {output:Number(plan.output),active:!!isOn};
 }
@@ -256,7 +371,7 @@ const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='rail
 const map=new Map(),link=(a,b)=>{if(!map.has(a))map.set(a,[]);map.get(a).push(b)},reach=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const x of map.get(q[i])||[])if(!seen.has(x)){seen.add(x);q.push(x)}return seen};
 for(const bus of [plus,minus])for(let i=0;i<localPorts(bus).length;i++)for(let j=0;j<localPorts(bus).length;j++)link(K(bus,i),K(bus,j));
 for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b)continue;link(K(a,w.ap),K(b,w.bp));link(K(b,w.bp),K(a,w.ap))}
-for(const n of nodes){const closed=['nc','rollerNC','selectorNC'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever'].includes(n.type)&&n.on;if(closed){link(K(n,0),K(n,1));link(K(n,1),K(n,0))}}
+for(const n of nodes){const closed=['nc','rollerNC','selectorNC','emergency','breaker','fuse'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever','pressure','level'].includes(n.type)&&n.on;if(closed){link(K(n,0),K(n,1));link(K(n,1),K(n,0))}}
 const src=Array.from({length:localPorts(plus).length},(_,i)=>K(plus,i));zero=reach(Array.from({length:localPorts(minus).length},(_,i)=>K(minus,i)));let potential=reach(src);
 for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&potential.has(K(n,0))&&zero.has(K(n,1)))src.push(K(n,2));
 potential=reach(src);
@@ -273,7 +388,7 @@ if(configured){
  if(ready&&configured.active&&op.includes(configured.output)){const index=op.indexOf(configured.output);outs.add(index);src.push(K(plc,configured.output))}
 }else for(let i=0;i<op.length;i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,op[i]))}
 live=reach(src);
-for(const n of nodes)if(['green','red','amber','blue','white','relay','buzzer'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id);
+for(const n of nodes)if(['green','red','amber','blue','white','relay','buzzer','solenoid','motorLoad'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id);
 shortCircuit=[...zero].some(k=>live.has(k));
 if(shortCircuit){live=new Set();activeLoads=new Set();outs=new Set();ladderRuntime.active=false}
 }
@@ -285,7 +400,7 @@ function validate(){
  reachable=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const next of adj.get(q[i])||[])if(!seen.has(next)){seen.add(next);q.push(next)}return seen};
  for(const bus of [plus,minus])for(let i=0;i<localPorts(bus).length;i++)for(let j=0;j<localPorts(bus).length;j++)join(K(bus,i),K(bus,j));
  for(const w of wires){const a=find(w.a),b=find(w.b);if(a&&b){join(K(a,w.ap),K(b,w.bp));join(K(b,w.bp),K(a,w.ap))}}
- for(const n of nodes){const closed=['nc','rollerNC','selectorNC'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever'].includes(n.type)&&n.on;
+ for(const n of nodes){const closed=['nc','rollerNC','selectorNC','emergency','breaker','fuse'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever','pressure','level'].includes(n.type)&&n.on;
  if(closed){join(K(n,0),K(n,1));join(K(n,1),K(n,0))}}
  const p=reachable(Array.from({length:localPorts(plus).length},(_,i)=>K(plus,i))),z=reachable(Array.from({length:localPorts(minus).length},(_,i)=>K(minus,i)));
  if([...p].some(x=>z.has(x)))error('Cortocircuito: +24 V y 0 V están unidos por cables o por un contacto cerrado. Separa los conductores; la simulación se ha bloqueado.');
@@ -300,7 +415,7 @@ function validate(){
     if(!z.has(K(n,1)))warn(what+': conecta BU (–) a 0 V.');
     if(!wires.some(w=>(w.a===n.id&&w.ap===2)||(w.b===n.id&&w.bp===2)))warn(what+': conecta BK (salida PNP) a una entrada I/0–I/9 del PLC.');
   }
-  if(['green','red','amber','blue','white','relay','buzzer'].includes(kind)){
+  if(['green','red','amber','blue','white','relay','buzzer','solenoid','motorLoad'].includes(kind)){
     const attached0=wires.some(w=>(w.a===n.id&&w.ap===0)||(w.b===n.id&&w.bp===0));
     const attached1=wires.some(w=>(w.a===n.id&&w.ap===1)||(w.b===n.id&&w.bp===1));
     if(!attached0)warn(what+': falta conectar la terminal positiva/A1 a una salida del PLC.');
@@ -382,10 +497,10 @@ function term(g,n,i,x,y,r=7){const p=S('circle',{cx:x,cy:y,r,class:'port'+(live.
 p.onpointerdown=ev=>{ev.stopPropagation();ev.preventDefault();if(simulation)return;if(first){connect(first.id,first.i,n.id,i);first=null}else first={id:n.id,i};draw()}}
 function drawSymbol(g,type,on=false,energized=false){
 const active=on?' on':'';
-if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever'].includes(type)){
+if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','emergency','pressure','level','breaker'].includes(type)){
 line(g,'M0 45 H35 M91 45 H126');
 S('circle',{cx:40,cy:45,r:3,fill:'#cde7ff'},g);S('circle',{cx:86,cy:45,r:3,fill:'#cde7ff'},g);
-if(['nc','selectorNC','rollerNC'].includes(type)){line(g,on?'M40 45 L82 32':'M40 45 H86',{class:'symbol'+active});line(g,'M59 25 L70 56');}
+if(['nc','selectorNC','rollerNC','emergency','breaker'].includes(type)){line(g,on?'M40 45 L82 32':'M40 45 H86',{class:'symbol'+active});line(g,'M59 25 L70 56');}
 else{line(g,on?'M40 45 H86':'M40 45 L82 29',{class:'symbol'+active});}
 line(g,'M63 9 V24');S('circle',{cx:63,cy:7,r:3,stroke:'#d8eeff',fill:'none'},g);
 if(['selector','selectorNC','selector3'].includes(type)){line(g,'M49 15 L77 15 M63 15 V27');if(type==='selector3')line(g,'M72 12 L82 2');}
@@ -401,9 +516,9 @@ line(g,'M0 45 H42 M84 45 H126');
 const color={green:'#18de91',red:'#ff5876',amber:'#ffc83c',blue:'#55baff',white:'#e9f5ff'}[type];
 S('circle',{cx:63,cy:45,r:20,fill:energized?color:'none',opacity:energized?'.7':'1',stroke:color,'stroke-width':2.5},g);
 line(g,'M49 31 L77 59 M77 31 L49 59',{stroke:energized?'#071524':color,class:'symbol'});
-}else if(type==='buzzer'){line(g,'M0 45 H39 M87 45 H126');S('path',{d:'M40 30 H60 L77 19 V71 L60 60 H40 Z',stroke:'#b8dfff',fill:'none','stroke-width':2.3},g);line(g,'M83 31 Q95 45 83 59');}else if(type==='timer'){S('rect',{x:12,y:18,width:102,height:60,rx:7,fill:'#112d44',stroke:'#60c6ff','stroke-width':2},g);T(g,63,39,'TON',{'text-anchor':'middle','font-weight':'bold',fill:'#88dcff','font-size':15});T(g,63,56,'IN · PT',{'text-anchor':'middle',fill:'#c2eaff','font-size':11});T(g,63,72,'Q · ET',{'text-anchor':'middle',fill:'#c2eaff','font-size':11});}else if(type==='relay'){
+}else if(type==='buzzer'){line(g,'M0 45 H39 M87 45 H126');S('path',{d:'M40 30 H60 L77 19 V71 L60 60 H40 Z',stroke:'#b8dfff',fill:'none','stroke-width':2.3},g);line(g,'M83 31 Q95 45 83 59');}else if(['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock'].includes(type)){S('rect',{x:12,y:18,width:102,height:60,rx:7,fill:'#112d44',stroke:'#60c6ff','stroke-width':2},g);T(g,63,39,({timer:'TON',tofBlock:'TOF',ctuBlock:'CTU',ctdBlock:'CTD',cmpBlock:'CMP'})[type],{'text-anchor':'middle','font-weight':'bold',fill:'#88dcff','font-size':15});T(g,63,56,'IN · PT',{'text-anchor':'middle',fill:'#c2eaff','font-size':11});T(g,63,72,'Q · ET',{'text-anchor':'middle',fill:'#c2eaff','font-size':11});}else if(type==='fuse'){line(g,'M0 45 H41 M85 45 H126');S('rect',{x:41,y:31,width:44,height:28,fill:'none',stroke:'#c3e5ff','stroke-width':2},g);line(g,'M45 45 H81');}else if(['relay','solenoid','motorLoad'].includes(type)){
 line(g,'M0 45 H40 M86 45 H126');S('rect',{x:40,y:29,width:46,height:32,fill:'none',stroke:'#6ecaff','stroke-width':2.5},g);
-T(g,63,49,'K1',{'text-anchor':'middle','font-size':13,fill:'#bceaff'});
+T(g,63,49,type==='solenoid'?'Y1':type==='motorLoad'?'KM':'K1',{'text-anchor':'middle','font-size':13,fill:'#bceaff'});
 }
 }
 function renderJunction(n){
@@ -435,10 +550,10 @@ g.setAttribute('transform','translate('+n.x+' '+n.y+') rotate('+(n.angle||0)+' 6
 S('rect',{x:-12,y:-14,width:150,height:111,rx:4,class:'hit'},g);
 drawSymbol(g,n.type,n.on,activeLoads.has(n.id));
 T(g,63,-21,nameOf(n),{'text-anchor':'middle','font-size':11,fill:'#b8d7f5'});
-if(n.type==='timer'){
+if(['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock'].includes(n.type)){
  const plan=ladderPlan;
- const selected=plan?.mode==='timer'&&(plan.timerId===n.id||String(plan.timerId)===String(n.id));
- T(g,63,102,selected?'ET '+(ladderRuntime.elapsed/1000).toFixed(1)+'s / '+Number(plan.delaySeconds||3).toFixed(1)+'s':'TON · interno',{'text-anchor':'middle','font-size':11,fill:selected&&ladderRuntime.done?'#31e6a1':'#8baed1'});
+ const selected=['timer','tof'].includes(plan?.mode)&&(plan.timerId===n.id||String(plan.timerId)===String(n.id));
+ T(g,63,102,selected?'ET '+(ladderRuntime.elapsed/1000).toFixed(1)+'s / '+Number(plan.delaySeconds||3).toFixed(1)+'s':({timer:'TON',tofBlock:'TOF',ctuBlock:'CTU',ctdBlock:'CTD',cmpBlock:'CMP'})[n.type]+' · Internal',{'text-anchor':'middle','font-size':11,fill:selected&&ladderRuntime.done?'#31e6a1':'#8baed1'});
  if(selected&&ladderRuntime.done)S('circle',{cx:119,cy:8,r:6,fill:'#19e49c'},g);
 }else if(n.on)S('circle',{cx:120,cy:8,r:4,fill:'#19e49c'},g);
 localPorts(n).forEach(([x,y],i)=>term(g,n,i,x,y));
@@ -518,8 +633,8 @@ function dragStart(e,n){
 if(e.button!==0||e.target.classList.contains('port'))return;e.preventDefault();e.stopPropagation();
 if(simulation){
  chosen={kind:'node',id:n.id};refreshInspector();
- if(['no','nc','limit','rollerNC','rollerLever'].includes(n.type)){n.on=true;pressedButton={id:n.id};draw();return}
- if(['selector','selectorNC','selector3','ind','opt','cap'].includes(n.type)){n.on=!n.on;draw();return}
+ if(['no','nc','limit','rollerNC','rollerLever','emergency'].includes(n.type)){n.on=true;pressedButton={id:n.id};draw();return}
+ if(['selector','selectorNC','selector3','ind','opt','cap','pressure','level','breaker'].includes(n.type)){n.on=!n.on;draw();return}
  return;
 }
 closeMenu();
@@ -581,11 +696,11 @@ function showMenu(e,obj,kind){
  const button=(name,act)=>{const b=document.createElement('button');b.textContent=name;b.onclick=ev=>{ev.stopPropagation();closeMenu();act()};m.appendChild(b)};
  if(kind==='node'){
   if(obj.type==='plc'&&!simulation)button('Etiquetar entradas/salidas',()=>{chosen={kind:'node',id:obj.id};refreshInspector();E('inspector').scrollIntoView({block:'nearest',behavior:'smooth'})});
-  if(simulation){if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});return}
+  if(simulation){if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap','pressure','level','breaker','emergency'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});return}
   button('Cambiar nombre',()=>{chosen={kind:'node',id:obj.id};renameChosen()});
   button('↶ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(-90)});
   button('↷ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(90)});
-  if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});
+  if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap','pressure','level','breaker','emergency'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});
   if(!['railplus','railzero','plc'].includes(obj.type)){
 button('Copiar (Ctrl+C)',()=>{chosen={kind:'node',id:obj.id};copySelection()});
 button('Cortar (Ctrl+X)',()=>{chosen={kind:'node',id:obj.id};cutSelection()});
@@ -685,12 +800,12 @@ function expansionStatus(){
 function icon(tgt,kind){const d=types[kind],b=document.createElement('button');b.className='tile';const art=document.createElementNS(NS,'svg');art.setAttribute('viewBox','-10 -14 146 103');art.style.width='100%';art.style.height='65px';
 if(kind==='junction'){const dot=document.createElementNS(NS,'circle');dot.setAttribute('cx','63');dot.setAttribute('cy','45');dot.setAttribute('r','8');dot.setAttribute('fill','#ffbf75');art.appendChild(dot)}else drawSymbol(art,kind,false,false);const label=document.createElement('span');label.textContent=d[0];b.append(art,label);b.title=d[0]+' · '+d[1];b.onclick=()=>{if(simulation){alert('Activa Editar para agregar componentes.');return}if(kind==='junction'){placingJunction=true;E('junctionInstructions').textContent='Haz clic en un espacio libre del circuito para colocar el punto de unión. Esc cancela.';return}
  const n=A(kind,430+Math.floor(Math.random()*300),235+Math.floor(Math.random()*100));chosen={kind:'node',id:n.id};draw()};tgt.appendChild(b)}
-['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].forEach(k=>icon(E('sensors'),k));['green','red','amber','blue','white','relay','buzzer'].forEach(k=>icon(E('loads'),k));icon(E('timers'),'timer');icon(E('junctions'),'junction');
+['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap','emergency','pressure','level','breaker'].forEach(k=>icon(E('sensors'),k));['green','red','amber','blue','white','relay','buzzer','solenoid','motorLoad','fuse'].forEach(k=>icon(E('loads'),k));['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock'].forEach(k=>icon(E('timers'),k));icon(E('junctions'),'junction');
 E('addInput').onclick=()=>changePLC('input',1);E('dropInput').onclick=()=>changePLC('input',-1);
 E('addOutput').onclick=()=>changePLC('output',1);E('dropOutput').onclick=()=>changePLC('output',-1);
 E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=()=>changeExpansion('railplus',-1);
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
-E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
+E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics();auraReactToErrors(validate())};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
 E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
 const STORAGE_KEY='plc-sim-studio-projects-v1';
 let projectId=null;
@@ -750,10 +865,11 @@ function refreshLadderWiring(){
  }
 }
 function updatePlatformControls(){
- const mode=E('ladderMode').value,requiresSecond=['latch','and','or'].includes(mode);
+ const mode=E('ladderMode').value,requiresSecond=['latch','and','or','counter','ctd'].includes(mode);
  E('ladderSecondaryWrap').style.display=requiresSecond?'flex':'none';
- E('ladderDelayWrap').style.display=mode==='timer'?'flex':'none';
- E('ladderTimerWrap').style.display=mode==='timer'?'flex':'none';
+ E('ladderDelayWrap').style.display=['timer','tof'].includes(mode)?'flex':'none';
+ E('ladderTimerWrap').style.display=['timer','tof'].includes(mode)?'flex':'none';
+ E('ladderCounterWrap').style.display=['counter','ctd'].includes(mode)?'flex':'none';E('ladderCompareWrap').style.display=mode==='compare'?'flex':'none';
  E('ladderStopPolarityWrap').style.display=mode==='latch'?'flex':'none';
 }
 function platformRemark(plan){
@@ -777,7 +893,9 @@ function updateLadderMonitor(){
  for(const [name,isOn] of inputs){if(name==='I secundaria'&&!['latch','and','or'].includes(plan.mode))continue;
   const row=document.createElement('div');row.textContent=name+': '+(isOn?'ACTIVA':'INACTIVA');row.className=isOn?'on':'off';display.appendChild(row)}
  const o=document.createElement('div');o.className=output?'on':'off';o.textContent='Salida '+ladderTag(plan.output,'output',plan.platform)+': '+(output?'ENERGIZADA':'DESENERGIZADA');display.appendChild(o);
- if(plan.mode==='timer'){const t=document.createElement('div');t.textContent=timerTag(plan)+' · TON ET '+(ladderRuntime.elapsed/1000).toFixed(1)+' / '+Number(plan.delaySeconds||3).toFixed(1)+' s · DN '+(ladderRuntime.done?'1':'0');display.appendChild(t)}
+ if(['timer','tof'].includes(plan.mode)){const t=document.createElement('div');t.textContent=timerTag(plan)+' · '+(plan.mode==='tof'?'TOF':'TON')+' ET '+(ladderRuntime.elapsed/1000).toFixed(1)+' / '+Number(plan.delaySeconds||3).toFixed(1)+' s · DN '+(ladderRuntime.done?'1':'0');display.appendChild(t)}
+ if(['counter','ctd'].includes(plan.mode)){const c=document.createElement('div');c.textContent=(plan.mode==='counter'?'CTU':'CTD')+' · CV '+(ladderRuntime.count||0)+' / PV '+Number(plan.counterPreset||3);display.appendChild(c)}
+ if(plan.mode==='compare'){const c=document.createElement('div');c.textContent='CMP · '+(plan.compareOp||'EQ')+' '+Number(plan.compareThreshold??1)+' → '+(ladderRuntime.active?'TRUE':'FALSE');display.appendChild(c)}
  if(!simulation){const n=document.createElement('small');n.textContent='Entra a Simular y pulsa los dispositivos físicamente conectados para ejecutar esta lógica.';display.appendChild(n)}
  const svg=E('ladderPreview')?.querySelector('svg');
  if(svg){
@@ -798,6 +916,15 @@ function ladderPseudoCode(plan){
  if(!plan)return 'Sin programa';
  const a=ladderTag(plan.start,'input',plan.platform),b=ladderTag(plan.stop,'input',plan.platform),o=ladderTag(plan.output,'output',plan.platform),t=timerTag(plan);
  const tsec=Math.max(0.1,Number(plan.delaySeconds||3));
+ if(['tof','counter','ctd','compare'].includes(plan.mode)){
+ const desc={
+ tof:'TOF · Off-delay: IN='+a+', PT='+tsec+'s, Q→'+o,
+ counter:'CTU · Rising-edge CU='+a+', RESET='+b+', PV='+Number(plan.counterPreset||3)+', Q→'+o,
+ ctd:'CTD · Count-down CD='+a+', LOAD='+b+', PV='+Number(plan.counterPreset||3)+', Q→'+o,
+ compare:'CMP · BOOL('+a+') '+(plan.compareOp||'EQ')+' '+Number(plan.compareThreshold??1)+' → '+o
+ };
+ return '// VIRTUAL PLC SIMULATION ONLY · NOT executable on '+plan.platform+' hardware\n'+desc[plan.mode]+'\n// Pseudocódigo: usa el software oficial para implementar la instrucción real.';
+ }
  const note='// BORRADOR de estudio, NO importable ni listo para un PLC real\n// CPU: '+(plan.controller||'sin especificar')+'\n// '+platformRemark(plan)+'\n\n';
  if(plan.platform==='codesys'){
   const lines={
@@ -851,9 +978,17 @@ function populateLadderSelectors(){
  timerSelect.value=String(ladderPlan?.timerId??last??'virtual');if(!timerSelect.value)timerSelect.value='virtual';
  refreshLadderWiring();updatePlatformControls();
 }
+function ladderTab(tab){
+ const panel=E('ladderPanel');panel.dataset.activeTab=tab;
+ for(const button of panel.querySelectorAll('[data-ladder-tab]'))button.classList.toggle('active',button.dataset.ladderTab===tab);
+}
+E('ladderPanel').addEventListener('click',e=>{
+ const button=e.target.closest('[data-ladder-tab]');
+ if(button)ladderTab(button.dataset.ladderTab);
+});
 function openLadder(){
- const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
- populateLadderSelectors();renderLadder();scheduleFit();
+ const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.toggle('ladder-visible',!panel.classList.contains('studio-floating'));
+ populateLadderSelectors();renderLadder();if(!E('ladderPanel').dataset.activeTab)ladderTab('config');scheduleFit();
  E('ladderGoal').focus();
 }
 function closeLadder(){
@@ -900,7 +1035,7 @@ function renderLadder(){
   const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
  }
  E('ladderCode').textContent=ladderPseudoCode(plan);E('ladderEditor').value=plan.source||ladderPseudoCode(plan);
- E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.controller||'';E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
+ E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.virtualCPU?'':(plan.controller||'');E('virtualCPU').checked=plan.virtualCPU!==false;E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderCounterPreset').value=String(plan.counterPreset||3);E('ladderCompareOp').value=plan.compareOp||'EQ';E('ladderCompareThreshold').value=String(plan.compareThreshold??1);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
  E('ladderMode').value=plan.mode||'direct';
  populateLadderSelectors();
  updatePlatformControls();
@@ -915,15 +1050,15 @@ function renderLadder(){
  ladderText(svg,622,42,'N',{'text-anchor':'middle','font-size':11});
  const inA=ladderTag(plan.start,'input',plan.platform),inB=ladderTag(plan.stop,'input',plan.platform),out=ladderTag(plan.output,'output',plan.platform);
  const rung=105;
- if(plan.mode==='timer'){
+ if(['timer','tof'].includes(plan.mode)){
   const t=timerTag(plan),delay=Number(plan.delaySeconds||3);
   ladderSegment(svg,36,105,188,105);ladderContact(svg,230,105,inA);
   ladderSegment(svg,272,105,386,105);
   const timerGroup=ladderEl('g',{'data-timer-box':'1'},svg);
   ladderEl('rect',{x:386,y:68,width:185,height:75,rx:5,fill:'#16394b',stroke:'#62abdf','stroke-width':2},timerGroup);
-  ladderText(timerGroup,402,89,'TON '+t,{'font-weight':'bold','font-size':16});
+  ladderText(timerGroup,402,89,(plan.mode==='tof'?'TOF ':'TON ')+t,{'font-weight':'bold','font-size':16});
   ladderText(timerGroup,402,109,'PT: '+delay.toFixed(1)+' s',{'font-size':13});
-  ladderText(timerGroup,402,129,'Q/DN: fin de retardo',{'font-size':12});
+  ladderText(timerGroup,402,129,plan.mode==='tof'?'Q: retardo de apagado':'Q/DN: fin de retardo',{'font-size':12});
   ladderSegment(svg,571,105,622,105);
   ladderSegment(svg,36,202,188,202);ladderContact(svg,230,202,t+'.DN');
   ladderSegment(svg,272,202,493,202);ladderCoil(svg,535,202,out);ladderSegment(svg,583,202,622,202);
@@ -943,6 +1078,16 @@ function renderLadder(){
   ladderSegment(svg,150,190,190,190);ladderContact(svg,235,190,inB);ladderSegment(svg,277,190,365,190);
   ladderSegment(svg,365,rung,493,rung);ladderSegment(svg,365,190,365,rung);
   ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ }
+ if(['counter','ctd','compare'].includes(plan.mode)){
+  ladderSegment(svg,36,112,154,112);ladderContact(svg,196,112,inA);ladderSegment(svg,238,112,367,112);
+  const block=ladderEl('g',{'data-block-kind':plan.mode},svg);
+  ladderEl('rect',{x:367,y:67,width:178,height:95,rx:6,fill:'#15334a',stroke:'#62a9d1','stroke-width':2},block);
+  ladderText(block,380,90,plan.mode==='counter'?'CTU':plan.mode==='ctd'?'CTD':'CMP',{'font-size':18,'font-weight':'bold'});
+  ladderText(block,380,112,plan.mode==='compare'?String(plan.compareOp)+' '+Number(plan.compareThreshold):'PV='+Number(plan.counterPreset||3),{'font-size':13});
+  ladderText(block,380,133,plan.mode==='compare'?'BOOL → 0 / 1':'CV='+Number(ladderRuntime.count||0),{'font-size':13});
+  ladderSegment(svg,545,112,622,112);
+  ladderSegment(svg,36,207,178,207);ladderContact(svg,222,207,plan.mode==='compare'?'CMP.Q':plan.mode==='counter'?'CTU.Q':'CTD.Q');ladderSegment(svg,264,207,493,207);ladderCoil(svg,535,207,out);ladderSegment(svg,583,207,622,207);
  }
  if(plan.mode==='latch'){
   // Arranque + sello en paralelo; PARO NC en serie.
@@ -969,6 +1114,8 @@ E('exportLadder').onclick=()=>{
 };
 E('showLadder').onclick=()=>openLadder();
 E('closeLadder').onclick=()=>closeLadder();
+E('virtualCPU').onchange=e=>{E('ladderController').disabled=e.target.checked;E('ladderController').placeholder=e.target.checked?'Virtual PLC / SIM':'Ej. 1769-L24ER o DVP-SS2';};
+E('virtualCPU').dispatchEvent(new Event('change'));
 E('ladderMode').onchange=updatePlatformControls;
 E('ladderGoal').addEventListener('input',e=>{
  if(ladderPlan)return;
@@ -990,13 +1137,16 @@ E('generateLadder').onclick=()=>{
  const msg=E('ladderMessage'),plc=nodes.find(n=>n.type==='plc');
  if(goal.length<10){msg.textContent='Describe qué debe hacer el PLC (mínimo 10 caracteres).';E('ladderGoal').focus();return}
  if(!['compactlogix','micrologix','delta','codesys'].includes(platform)){msg.textContent='Selecciona una plataforma válida.';return}
- if(!controller){msg.textContent='Indica la familia o modelo de CPU utilizado.';E('ladderController').focus();return}
+ if(!controller&&!E('virtualCPU').checked){msg.textContent='Indica modelo físico o activa Virtual PLC para trabajar solo en simulación.';E('ladderController').focus();return}
  if(!plc||!plcInputPins(plc).includes(start)||!plcOutputPins(plc).includes(output)){msg.textContent='Selecciona bornes de entrada y salida existentes.';return}
- if(['latch','and','or'].includes(mode)&&(!plcInputPins(plc).includes(stop)||start===stop)){msg.textContent='Selecciona dos entradas distintas.';return}
- if(mode==='timer'&&(!Number.isFinite(delaySeconds)||delaySeconds<0.1||delaySeconds>3600)){msg.textContent='El retardo debe estar entre 0.1 y 3600 segundos.';return}
- const checked=[start,...(['latch','and','or'].includes(mode)?[stop]:[]),output];
+ if(['latch','and','or','counter','ctd'].includes(mode)&&(!plcInputPins(plc).includes(stop)||start===stop)){msg.textContent='Selecciona dos entradas distintas.';return}
+ if(['timer','tof'].includes(mode)&&(!Number.isFinite(delaySeconds)||delaySeconds<0.1||delaySeconds>3600)){msg.textContent='El retardo debe estar entre 0.1 y 3600 segundos.';return}
+ const preset=Number(E('ladderCounterPreset').value),compareThreshold=Number(E('ladderCompareThreshold').value),compareOp=E('ladderCompareOp').value;
+ if(['counter','ctd'].includes(mode)&&(!Number.isInteger(preset)||preset<1||preset>100000)){msg.textContent='Count preset (PV) entre 1 y 100 000.';return}
+ if(mode==='compare'&&(!['EQ','NE','GT','GE','LT','LE'].includes(compareOp)||!Number.isFinite(compareThreshold))){msg.textContent='Comparator inválido. Elige operador y valor numérico.';return}
+ const checked=[start,...(['latch','and','or','counter','ctd'].includes(mode)?[stop]:[]),output];
  const missing=checked.filter(pin=>!wires.some(w=>w.a===plc.id&&w.ap===pin||w.b===plc.id&&w.bp===pin));
- ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output,platform,controller:controller.slice(0,90),delaySeconds:mode==='timer'?delaySeconds:0,timerId,stopPolarity,source:null};
+ ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output,platform,controller:(controller||'Virtual PLC / SIM').slice(0,90),virtualCPU:!!E('virtualCPU').checked,delaySeconds:['timer','tof'].includes(mode)?delaySeconds:0,timerId,stopPolarity,counterPreset:preset,compareOp,compareThreshold,source:null};
  resetLadderRuntime();renderLadder();draw();
  if(missing.length)msg.textContent+=' ATENCIÓN: faltan conexiones en '+missing.map(i=>portName(plc,i)).join(', ')+'. El programa se ha generado, pero no actuará hasta tener las señales necesarias.';
 };
@@ -1025,6 +1175,22 @@ function runLadderTests(){
   }else if(plan.mode==='timer'){
    simulate('Antes de señal',[],false);simulate('Temporizando',[a],false);
    simulate('Retardo cumplido',[a],true,true,true);simulate('Entrada desactivada',[],false,false,true);
+  }else if(plan.mode==='tof'){
+   simulate('Inicio sin entrada',[],false);simulate('Entrada activa',[a],true);
+   simulate('Salida retenida',[a],true,false,true);simulate('Entrada cae, continúa temporalmente',[],true,false,true);
+   ladderRuntime.tofStarted=Date.now()-Number(plan.delaySeconds)*1000-200;simulate('Retardo cumplido',[],false,false,true);
+  }else if(['counter','ctd'].includes(plan.mode)){
+   const pv=Math.min(8,Number(plan.counterPreset||3));
+   simulate('Sin pulsos',[],plan.mode==='ctd'?false:false);
+   for(let j=1;j<=pv;j++){
+    simulate('Contar flanco '+j,[a],j===pv,false,true);
+    if(j<pv)simulate('Soltar '+j,[],false,false,true);
+   }
+   simulate('Reset / Load',[b],false,false,true);
+  }else if(plan.mode==='compare'){
+   const op=plan.compareOp||'EQ',pv=Number(plan.compareThreshold??1);
+   const cmp=v=>({EQ:()=>v===pv,NE:()=>v!==pv,GT:()=>v>pv,GE:()=>v>=pv,LT:()=>v<pv,LE:()=>v<=pv})[op]?.()||false;
+   simulate('Bit 0',[],cmp(0));simulate('Bit 1',[a],cmp(1));
   }
  }finally{ins=oldInputs;ladderRuntime=oldRuntime}
  const good=cases.filter(x=>x.expected===x.actual).length;
@@ -1108,7 +1274,7 @@ function parseLadderSource(source,platform){
 }
 function applyLadderText(raw){
  const platform=E('ladderPlatform').value,parsed=parseLadderSource(raw,platform);
- const controller=E('ladderController').value.trim()||'CPU por configurar';
+ const controller=E('ladderController').value.trim()||'Virtual PLC / SIM';
  ladderPlan={...parsed,platform,controller,goal:E('ladderGoal').value.trim()||'Programa Ladder editado o importado: comprobar el comportamiento',timerId:E('ladderTimer').value||'virtual',source:String(raw).slice(0,25000)};
  resetLadderRuntime();renderLadder();draw();
  const plc=nodes.find(n=>n.type==='plc'),required=[parsed.start,...(['and','or','latch'].includes(parsed.mode)?[parsed.stop]:[]),parsed.output];
@@ -1117,7 +1283,7 @@ function applyLadderText(raw){
  E('ladderImportFeedback').textContent=message;
  return parsed;
 }
-E('applyLadder').onclick=()=>{try{applyLadderText(E('ladderEditor').value)}catch(e){E('ladderImportFeedback').textContent='No se aplicó: '+e.message}};
+E('applyLadder').onclick=()=>{try{applyLadderText(E('ladderEditor').value);auraTailMagic('¡Genial! Aplicaste una red reconocida. Ejecuta los tests para verificar el comportamiento.')}catch(e){E('ladderImportFeedback').textContent='No se aplicó: '+e.message;auraSay('Ese código no está soportado todavía: '+e.message)} };
 E('importLadder').onclick=()=>E('ladderFile').click();
 E('ladderFile').onchange=async e=>{
  const file=e.target.files?.[0];if(!file)return;
@@ -1159,17 +1325,17 @@ function ladderReviewIssues(){
  }
  if(plan.mode==='latch'){
   const names=wiringItems(plan.stop).join(' ').toLowerCase();
-  const connected=nodes.some(n=>['nc','rollerNC','selectorNC'].includes(n.type)&&names.includes(nameOf(n).toLowerCase()));
+  const connected=nodes.some(n=>['nc','rollerNC','selectorNC','emergency','breaker','fuse'].includes(n.type)&&names.includes(nameOf(n).toLowerCase()));
   if(plan.stopPolarity==='nc'&&!connected)report('warn','Paro NC: el Ladder espera I=1 en reposo y I=0 al pulsar. Verifica que el pulsador NC tenga +24 V y llegue a '+portName(plc,plan.stop)+' de forma independiente.');
   if(plan.start===plan.stop)report('error','Marcha y Paro usan la misma entrada; asigna dos bornes distintos.');
  }
- if(plan.mode==='timer'){
+ if(['timer','tof'].includes(plan.mode)){
   const ms=Number(plan.delaySeconds)*1000;
   if(!Number.isFinite(ms)||ms<100||ms>3600000)report('error','El TON debe tener un retardo entre 0.1 y 3600 segundos.');
   if(plan.timerId!=='virtual'&&!nodes.some(n=>String(n.id)===String(plan.timerId)&&n.type==='timer'))report('warn','El bloque TON asignado ya no existe. Selecciona un temporizador interno o utiliza TON virtual 1.');
  }
  const description=String(plan.goal||'').toLowerCase();
- if(/segundos?|temporiz|retardo/.test(description)&&plan.mode!=='timer')report('warn','La tarea menciona temporización, pero se seleccionó una lógica sin TON. Selecciona TON e indica el retardo.');
+ if(/segundos?|temporiz|retardo/.test(description)&&!['timer','tof'].includes(plan.mode))report('warn','La tarea menciona temporización, pero se seleccionó una lógica sin TON. Selecciona TON e indica el retardo.');
  if(/paro|detener|stop/.test(description)&&!['latch','and'].includes(plan.mode))report('warn','La tarea menciona una condición de parada, pero la lógica elegida no incorpora un paro explícito. Revisa la secuencia de seguridad.');
  if(/secuencia|etapas|contadores?|analogic|pid|comunicaci|modbus|ethernet/.test(description))report('warn','La tarea requiere funciones de secuencia, conteo, señales analógicas o comunicación que este simulador aún no ejecuta. La prueba no demuestra ese proceso completo.');
  if(!['compactlogix','micrologix','delta','codesys'].includes(plan.platform))report('error','No se eligió una familia de PLC válida.');
@@ -1184,7 +1350,7 @@ function showLadderReview(){
  for(const item of issues.slice(0,30)){const li=document.createElement('li');li.className=item.severity;li.textContent=item.message;ul.appendChild(li)}
  list.appendChild(ul);
 }
-E('reviewLadder').onclick=showLadderReview;
+E('reviewLadder').onclick=()=>{showLadderReview();auraReviewAndReact()};
 
 
 
@@ -1196,7 +1362,7 @@ const sceneTypes={
  arm:{name:'Brazo robótico',io:'output',width:115},
  lamp:{name:'Lámpara',io:'output',width:46},
  motor:{name:'Motor',io:'output',width:55},
- switch:{name:'Pulsador / interruptor',io:'input',width:42}
+ switch:{name:'Pulsador / interruptor',io:'input',width:42},cylinder:{name:'Pneumatic Cylinder · Cilindro',io:'output',width:145},valve:{name:'Solenoid Valve 5/2 · Válvula',io:'output',width:122},air:{name:'Air Supply · Suministro',io:'none',width:55}
 };
 let sceneState={template:'conveyor',objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0},sceneNext=1,sceneDrag=null;
 function sceneSignalPins(type){
@@ -1234,7 +1400,7 @@ function normalizeScene(raw){
  renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
 }
 function configureSceneTemplate(which){
- if(!['conveyor','traffic','robot','lights'].includes(which))which='conveyor';
+ if(!['conveyor','traffic','robot','lights','pneumatic','custom'].includes(which))which='conveyor';
  sceneState={template:which,objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0};sceneNext=1;
  const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
  const ip=plcInputPins(plc),op=plcOutputPins(plc);
@@ -1242,9 +1408,10 @@ function configureSceneTemplate(which){
  ['conveyor',[['belt',165,270,{label:'Transportador M1',pin:op[0]}],['box',210,238,{label:'Pieza A'}],['sensor',490,238,{label:'Fotocelda S1',pin:ip[0]}],['motor',78,315,{label:'Motor M1',pin:op[0]}]]],
  ['traffic',[['traffic',345,90,{label:'Semáforo 1',pin:op[0],pin2:op[1],pin3:op[2]}],['switch',195,318,{label:'Solicitud peatón',pin:ip[0]}],['lamp',550,318,{label:'Piloto auxiliar',pin:op[3]}]]],
  ['robot',[['arm',180,125,{label:'Brazo A1',pin:op[0]}],['box',520,305,{label:'Pieza B'}],['sensor',560,250,{label:'Presencia S1',pin:ip[0]}],['lamp',620,100,{label:'Pinza / estado',pin:op[1]}]]],
- ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]]
+ ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]],
+ ['pneumatic',[['cylinder',440,215,{label:'Cylinder A',pin:op[0]}],['valve',240,240,{label:'Valve Y1',pin:op[0]}],['air',100,250,{label:'Air Supply'}],['switch',370,375,{label:'Start S1',pin:ip[0]}]]]
  ];
- for(const item of labels.find(x=>x[0]===which)[1])addSceneObject(...item);
+ for(const item of (labels.find(x=>x[0]===which)?.[1]||[]))addSceneObject(...item);
  E('sceneTemplate').value=which;E('sceneEnabled').checked=true;E('sceneAutoSensor').checked=false;
  renderScene();refreshSceneProperties();refreshSceneInputs();sceneStatus();updateSceneChallenge();
 }
@@ -1258,7 +1425,23 @@ function drawScenarioObject(o){
  const rect=(x,y,w,height,fill,extra={})=>sceneSVGEl('rect',{x,y,width:w,height,rx:5,fill,stroke,...extra},g);
  const circ=(x,y,r,fill,extra={})=>sceneSVGEl('circle',{cx:x,cy:y,r,fill,stroke,...extra},g);
  const line=(x1,y1,x2,y2,extra={})=>sceneSVGEl('line',{x1,y1,x2,y2,stroke:'#bad4f3','stroke-width':5,'stroke-linecap':'round',...extra},g);
- if(o.type==='belt'){
+ if(o.type==='cylinder'){
+  rect(-75,-32,148,64,'#31506d',{'stroke-width':3});
+  rect(-62,-24,100,48,signal?'#16785f':'#638ba8',{'stroke-width':1});
+  line(38,0,signal?136:81,0,{'stroke-width':10,stroke:'#cee5f5'});
+  rect(signal?126:72,-19,16,38,'#accae0');
+  sceneLabel(g,0,-49,'CYLINDER '+(signal?'EXTEND':'RETRACT'),{fill:signal?'#6df3bf':'#c3d9ed','font-size':12});
+ }else if(o.type==='valve'){
+  rect(-62,-29,124,58,'#294f6b',{'stroke-width':3});
+  sceneSVGEl('rect',{x:0,y:-27,width:60,height:54,fill:signal?'#177f60':'#3c617c',stroke:'#accae4'},g);
+  line(-52,0,-8,0,{'stroke-width':4});
+  line(5,-19,48,19,{'stroke-width':4,stroke:signal?'#67fcc4':'#bcd9f1'});
+  sceneLabel(g,0,-47,'5/2 VALVE · '+(signal?'COIL ON':'COIL OFF'),{'font-size':12});
+ }else if(o.type==='air'){
+  circ(0,0,25,'#33556f',{'stroke-width':3});
+  sceneLabel(g,0,4,'AIR',{'font-size':15,'font-weight':'bold'});
+  sceneLabel(g,0,45,'Fuente simbólica');
+ }else if(o.type==='belt'){
   rect(-140,-28,280,58,signal?'#145c5a':'#28445e');
   for(let i=-112;i<=112;i+=40)circ(i,0,12,'#102e44',{'stroke-width':2});
   line(-140,30,140,30,{'stroke-width':6});
@@ -1327,6 +1510,8 @@ const sceneChallenges={
  conveyor:{goal:'Control de cinta: crea una banda, una caja y un sensor. Relaciona sensor I/0 con una salida de motor y comprueba su movimiento.',steps:['Coloca cinta, caja y sensor','Configura I/O','Crea Ladder directo o con enclavamiento','Activa entrada y comprueba movimiento']},
  traffic:{goal:'Semáforo: coloca un señalizador con tres salidas distintas. Documenta fases rojo–verde–ámbar y sus condiciones; esta edición no ejecuta automáticamente la secuencia multisalida.',steps:['Coloca un semáforo','Asigna tres salidas diferentes','Define estados y tiempos','Reconoce el límite actual del Ladder de una sola salida']},
  robot:{goal:'Brazo: coloca brazo y detector. Haz que la señal de presencia active su salida. La animación solo representa movimiento lógico, no cinemática.',steps:['Coloca brazo y sensor','Asigna una entrada y salida','Genera una red de control','Simula presencia y observa el brazo']},
+ custom:{goal:'Custom Scene: crea cualquier escena desde cero. Añade objetos, asigna entradas y salidas y programa el Ladder que desees.',steps:['Añade objetos libremente','Asigna I/O del Virtual PLC','Crea o importa un Ladder compatible','Comprueba entradas, salidas y ondas de funcionamiento']},
+ pneumatic:{goal:'Pneumatics: controla el avance de un cilindro con una electroválvula y una entrada digital. El aire es simbólico y no se calculan caudales.',steps:['Coloca Air Supply, Valve y Cylinder','Asigna la misma salida a válvula y cilindro','Añade Start Switch en una entrada','Prueba extensión y retorno']},
  lights:{goal:'Luces: coloca lámparas e interruptor. Relaciona entrada y salida para un control digital y verifica sus estados.',steps:['Coloca luces e interruptor','Asigna pines válidos','Genera Ladder de activación','Comprueba lámpara apagada y encendida']}
 };
 function evaluateSceneChallenge(){
@@ -1336,8 +1521,10 @@ function evaluateSceneChallenge(){
  const sensors=scene.filter(o=>['sensor','switch'].includes(o.type));
  const inputMatch=()=>plan&&sensors.some(o=>Number(o.pin)===Number(plan.start));
  let tests=[];
- if(state.template==='conveyor')tests=[['Hay cinta, caja y sensor',exists('belt')&&exists('box')&&exists('sensor')],['Existe programa Ladder',!!plan],['La salida Ladder controla la cinta',!!(plan&&scene.some(o=>o.type==='belt'&&Number(o.pin)===Number(plan.output)))],['La entrada Ladder corresponde al sensor',!!inputMatch()]];
+ if(state.template==='custom')tests=[['Hay al menos un objeto',scene.length>0],['Hay al menos un sensor o interruptor',scene.some(o=>['sensor','switch'].includes(o.type))],['Hay al menos un actuador',scene.some(o=>['belt','motor','lamp','traffic','arm','cylinder','valve'].includes(o.type))],['Hay Ladder aplicado',!!plan]];
+ else if(state.template==='conveyor')tests=[['Hay cinta, caja y sensor',exists('belt')&&exists('box')&&exists('sensor')],['Existe programa Ladder',!!plan],['La salida Ladder controla la cinta',!!(plan&&scene.some(o=>o.type==='belt'&&Number(o.pin)===Number(plan.output)))],['La entrada Ladder corresponde al sensor',!!inputMatch()]];
  else if(state.template==='robot')tests=[['Hay brazo y sensor',exists('arm')&&exists('sensor')],['Hay Ladder aplicado',!!plan],['La salida controla el brazo',!!(plan&&scene.some(o=>o.type==='arm'&&Number(o.pin)===Number(plan.output)))],['La entrada corresponde al sensor',!!inputMatch()]];
+ else if(state.template==='pneumatic')tests=[['Hay Air Supply, Valve y Cylinder',exists('air')&&exists('valve')&&exists('cylinder')],['Hay Ladder aplicado',!!plan],['La bobina de válvula y el cilindro comparten la salida Ladder',!!(plan&&scene.some(o=>o.type==='valve'&&Number(o.pin)===Number(plan.output))&&scene.some(o=>o.type==='cylinder'&&Number(o.pin)===Number(plan.output)))],['Hay sensor o interruptor en la entrada Ladder',!!inputMatch()]];
  else if(state.template==='lights')tests=[['Hay lámpara e interruptor',exists('lamp')&&exists('switch')],['Hay Ladder aplicado',!!plan],['La salida corresponde a una lámpara',!!pinMatch()],['La entrada corresponde al interruptor',!!inputMatch()]];
  else {
   const traffic=scene.find(o=>o.type==='traffic');
@@ -1416,6 +1603,7 @@ function sceneFeedback(){
   if(kind==='traffic'&&(!plcOutputPins(plc).includes(Number(o.pin2))||!plcOutputPins(plc).includes(Number(o.pin3))))out.push(o.label+': faltan salidas para ámbar o verde.');
  }
  if(sceneState.template==='traffic')out.push('El semáforo completo requiere varias salidas y lógica de secuencia; el motor Ladder actual solo programa una salida a la vez.');
+ if(sceneState.template==='pneumatic')out.push('La neumática es una animación de estados, no una simulación del aire comprimido, de las fuerzas ni del circuito 5/2 real.');
  if(sceneState.template==='robot')out.push('El brazo visualiza una condición digital, no simula control de servo, cinemática, límites o trayectorias.');
  if(!ladderPlan)out.push('No hay Ladder generado o importado. Abre Programa escalera y asocia una salida.');
  else if(!objs.some(o=>o.pin===ladderPlan.output&&sceneTypes[o.type]?.io!=='input'))out.push('La salida Ladder elegida no está asignada a ningún actuador de la escena.');
@@ -1442,7 +1630,7 @@ function sceneTick(){
  else if(!E('scenarioPanel').hidden)renderScene();
 }
 function openScenarios(){
- closeLadder();closeTutor();E('scenarioPanel').hidden=false;refreshScenarioEditControls();
+ E('scenarioPanel').hidden=false;refreshScenarioEditControls();
  if(!sceneState.objects.length)configureSceneTemplate(E('sceneTemplate').value||'conveyor');
  renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
 }
@@ -1567,8 +1755,6 @@ function initTutor(){
  tutorMessage('¡Bienvenido al tutor PLC! Selecciona un tema, describe una dificultad o pulsa «Revisar proyecto». También puedo proponerte ejercicios. Las respuestas son material didáctico local; no sustituyen manuales de fabricantes ni pruebas de seguridad.');
 }
 function openTutor(){
- closeLadder();
- E('scenarioPanel').hidden=true;
  E('tutorPanel').hidden=false;
 }
 function closeTutor(){E('tutorPanel').hidden=true}
@@ -1576,7 +1762,7 @@ E('showTutor').onclick=openTutor;
 E('openTutorFromLadder').onclick=openTutor;
 E('closeTutor').onclick=closeTutor;
 E('tutorExplain').onclick=()=>{const topic=tutorLibrary.find(t=>t.id===E('tutorTopic').value)||tutorLibrary[0];tutorMessage(tutorAnswer(topic.title))};
-E('tutorReview').onclick=()=>tutorMessage(tutorAudit());
+E('tutorReview').onclick=()=>{tutorMessage(tutorAudit());auraReviewAndReact()};
 E('tutorExercise').onclick=()=>{
  const selected=E('tutorTopic').value;
  const match=tutorExercises.find(x=>x[0]===selected);
@@ -1585,6 +1771,357 @@ E('tutorExercise').onclick=()=>{
 };
 E('tutorAsk').onclick=()=>{const value=E('tutorQuestion').value.trim();if(!value)return;tutorMessage(value,true);tutorMessage(tutorAnswer(value));E('tutorQuestion').value=''};
 E('tutorQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();E('tutorAsk').click()}});
+
+
+function toggleFloating(id,layoutToggle){
+ const panel=E(id),was=panel.classList.contains('studio-floating');
+ panel.classList.toggle('studio-floating',!was);
+ panel.classList.remove('studio-max');
+ if(layoutToggle)E('canvas').closest('.layout').classList.toggle('ladder-visible',was&&!panel.hidden);
+ scheduleFit();
+}
+function toggleMaxPanel(id){
+ const panel=E(id);if(!panel.classList.contains('studio-floating'))panel.classList.add('studio-floating');
+ panel.classList.toggle('studio-max');
+ if(id==='ladderPanel')E('canvas').closest('.layout').classList.remove('ladder-visible');
+ scheduleFit();
+}
+function installDragPanel(id){
+ const panel=E(id),header=panel.querySelector('.studio-move-handle');
+ if(!header)return;
+ let session=null;
+ header.addEventListener('pointerdown',e=>{
+  if(e.button!==0||e.target.closest('button')||!panel.classList.contains('studio-floating')||panel.classList.contains('studio-max'))return;
+  const bounds=panel.getBoundingClientRect();
+  session={startX:e.clientX,startY:e.clientY,left:bounds.left,top:bounds.top};
+  header.setPointerCapture(e.pointerId);e.preventDefault();
+ });
+ header.addEventListener('pointermove',e=>{
+  if(!session)return;
+  panel.style.left=Math.max(0,Math.min(window.innerWidth-110,session.left+e.clientX-session.startX))+'px';
+  panel.style.top=Math.max(0,Math.min(window.innerHeight-80,session.top+e.clientY-session.startY))+'px';
+ });
+ header.addEventListener('pointerup',()=>session=null);
+ header.addEventListener('pointercancel',()=>session=null);
+}
+E('ladderDock').onclick=()=>toggleFloating('ladderPanel',true);
+E('ladderMax').onclick=()=>toggleMaxPanel('ladderPanel');
+E('scenarioFloat').onclick=()=>toggleFloating('scenarioPanel',false);
+E('scenarioMax').onclick=()=>toggleMaxPanel('scenarioPanel');
+E('tutorFloat').onclick=()=>toggleFloating('tutorPanel',false);
+E('tutorMax').onclick=()=>toggleMaxPanel('tutorPanel');
+E('ladderWidth').oninput=e=>{
+ E('canvas').closest('.layout').style.setProperty('--ladder-width',e.target.value+'px');
+ scheduleFit();
+};
+['ladderPanel','scenarioPanel','tutorPanel'].forEach(installDragPanel);
+/* Aura's click and keyboard controls are attached by initAura after all tutor functions exist. */
+
+
+const glossary=[
+ ['Scan Cycle','Ciclo de escaneo','Lectura de entradas, ejecución de lógica y actualización de salidas.'],
+ ['Rung','Red o peldaño','Línea de lógica en Ladder.'],
+ ['Ladder Diagram (LD)','Diagrama de escalera','Lenguaje gráfico IEC 61131-3.'],
+ ['Contact','Contacto','Condición booleana para permitir la continuidad lógica.'],
+ ['Normally Open (NO)','Normalmente abierto (NA)','Contacto físico abierto en reposo.'],
+ ['Normally Closed (NC)','Normalmente cerrado','Contacto físico cerrado en reposo.'],
+ ['XIC (Examine If Closed)','Examina si es verdadero','Instrucción Rockwell: permite continuidad cuando el bit vale 1.'],
+ ['XIO (Examine If Open)','Examina si es falso','Instrucción Rockwell: permite continuidad cuando el bit vale 0.'],
+ ['OTE (Output Energize)','Bobina de salida','Instrucción para escribir un estado booleano de salida.'],
+ ['TON (On-Delay Timer)','Temporizador de conexión','Activa Q después de que IN permanezca activo durante PT.'],
+ ['TOF (Off-Delay Timer)','Temporizador de desconexión','Mantiene Q durante el tiempo después de desactivar IN.'],
+ ['RTO (Retentive Timer)','Temporizador retentivo','Acumula tiempo y suele requerir reset; aquí solo hay información didáctica.'],
+ ['PT (Preset Time)','Tiempo preseleccionado','Duración programada para un temporizador.'],
+ ['ET (Elapsed Time)','Tiempo transcurrido','Tiempo contado hasta el momento.'],
+ ['ACC (Accumulated)','Valor acumulado','Tiempo o conteo acumulado, según instrucción y familia.'],
+ ['DN (Done Bit)','Bit de fin','Indica que la condición del temporizador/contador está completa.'],
+ ['CTU (Count Up)','Contador ascendente','Incrementa al detectar flancos positivos.'],
+ ['CTD (Count Down)','Contador descendente','Decrementa un valor precargado, según implementación.'],
+ ['CV (Current Value)','Valor actual','Conteo actual del contador.'],
+ ['PV (Preset Value)','Valor prefijado','Objetivo o valor de carga para el contador.'],
+ ['EQ (Equal)','Igual','Comparador de igualdad.'],
+ ['NE (Not Equal)','Distinto','Comparador de desigualdad.'],
+ ['GT (Greater Than)','Mayor que','Comparador >.'],
+ ['GE (Greater or Equal)','Mayor o igual','Comparador ≥.'],
+ ['LT (Less Than)','Menor que','Comparador <.'],
+ ['LE (Less or Equal)','Menor o igual','Comparador ≤.'],
+ ['Set/Reset','Activar/reiniciar','Instrucciones que mantienen un bit hasta cambio explícito.'],
+ ['Latch','Enclavamiento','Retención de una condición después del pulso inicial.'],
+ ['Interlock','Enclavamiento de seguridad/proceso','Condición que evita una operación incompatible.'],
+ ['HMI (Human Machine Interface)','Interfaz humano-máquina','Pantalla de operación y supervisión.'],
+ ['SCADA','Supervisión y adquisición de datos','Sistema de supervisión industrial.'],
+ ['Digital Input (DI)','Entrada digital','Señal discreta 0/1.'],
+ ['Digital Output (DO)','Salida digital','Orden discreta 0/1.'],
+ ['Analog Input (AI)','Entrada analógica','Señal variable: tensión o corriente.'],
+ ['Analog Output (AO)','Salida analógica','Comando variable a un actuador.'],
+ ['PNP (Sourcing)','Sensor que suministra señal positiva','Salida suministra +V cuando está activa.'],
+ ['NPN (Sinking)','Sensor que absorbe corriente','Salida conmuta hacia 0 V al activarse.'],
+ ['Common (COM)','Común','Referencia eléctrica de un grupo; no siempre equivale a 0 V.'],
+ ['Ground / PE','Tierra de protección','Conductor para seguridad eléctrica.'],
+ ['VFD (Variable Frequency Drive)','Variador de frecuencia','Controla velocidad/frecuencia de motores.'],
+ ['Encoder','Codificador de posición','Produce pulsos/posición para medir movimiento.'],
+ ['Debounce','Antirrebote','Evita múltiples eventos por oscilación del contacto.'],
+ ['Rising Edge','Flanco positivo','Cambio 0→1 de una señal.'],
+ ['Falling Edge','Flanco negativo','Cambio 1→0.'],
+ ['Fault','Falla','Condición anómala de proceso o equipo.'],
+ ['Fail-safe','Estado seguro ante falla','Diseño que busca un resultado seguro frente a fallas especificadas.'],
+ ['Solenoid Valve','Electroválvula','Actúa sobre el flujo neumático o hidráulico mediante una bobina.'],
+ ['Cylinder','Cilindro','Actuador neumático de movimiento lineal.'],
+ ['Pressure','Presión','Magnitud normalmente expresada en bar, psi o pascal.'],
+ ['Flow','Caudal','Flujo por unidad de tiempo.'],
+ ['Setpoint (SP)','Consigna','Valor objetivo de una variable de proceso.'],
+ ['Process Variable (PV)','Variable de proceso','Valor medido para control.'],
+ ['PID','Proporcional Integral Derivativo','Algoritmo de control en lazo cerrado.'],
+ ['I/O Mapping','Mapeo de entradas/salidas','Relación entre direcciones, tags y bornes físicos.'],
+ ['Online Monitoring','Monitoreo en línea','Observación de valores en un programa durante ejecución.'],
+ ['Force','Forzado','Manipulación temporal de señales; requiere procedimientos seguros.'],
+ ['Watch Table','Tabla de observación','Inspección de variables sin modificar la lógica.'],
+ ['Function Block Diagram (FBD)','Diagrama de bloques funcionales','Lenguaje IEC 61131-3.'],
+ ['Structured Text (ST)','Texto estructurado','Lenguaje IEC 61131-3 parecido a código de alto nivel.'],
+ ['Sequential Function Chart (SFC)','Diagrama secuencial de funciones','Organización en pasos y transiciones.'],
+ ['Task','Tarea de ejecución','Programa con prioridad y ciclo específicos.']
+];
+const platformGuides={
+ compactlogix:{
+ label:'Studio 5000 · CompactLogix',
+ steps:['1. Crear un proyecto Logix Designer y seleccionar el catálogo exacto de CPU y firmware.','2. Configurar módulos locales/remotos y su tipo de E/S.','3. Definir Controller Tags y Program Tags con tipos correctos.','4. Crear Routine en Ladder y añadir XIC/XIO/OTE, TON/CTU/CMP en redes verificables.','5. Configurar tareas y programas, compilar/verificar y revisar advertencias.','6. En el IDE oficial, comprobar conexión con el controlador y usar monitor/force solo con procedimiento seguro.'],
+ caution:'Esta página no exporta un proyecto .ACD ni reproduce Tasks, AOIs, Add-On Profiles, motion o toda la ejecución Logix.'},
+ micrologix:{
+ label:'RSLogix 500 · MicroLogix',
+ steps:['1. Seleccionar CPU MicroLogix y firmware compatibles.','2. Establecer configuración de E/S y canales.','3. Revisar tabla de datos: I:0, O:0, B3, T4, C5 y N7 según CPU.','4. Crear redes Ladder, comprobar ramas y orden de prioridad.','5. Usar Verify Project y herramientas de monitoreo del software oficial.','6. Probar el circuito y documentar tabla de E/S y secuencia esperada.'],
+ caution:'El lector de esta página no abre archivos .RSS binarios ni reproduce interrupt routines o todas las instrucciones.'},
+ delta:{
+ label:'WPLSoft / ISPSoft · Delta DVP',
+ steps:['1. Crear un proyecto y escoger el controlador DVP correcto.','2. Confirmar codificación de X/Y y mapa de registros M, D, T, C aplicables.','3. Diseñar Ladder con LD/LDI, OUT, AND/OR, SET/RST, TMR, CMP según disponibilidad.','4. Verificar base de tiempo y rangos del temporizador en el manual de CPU.','5. Compilar y revisar errores y restricciones de memoria.','6. En el software oficial, comprobar entradas/salidas online de manera segura.'],
+ caution:'Aquí se usa una traducción didáctica parcial de direcciones; no hay emulación del firmware DVP.'},
+ codesys:{
+ label:'CODESYS · IEC 61131-3',
+ steps:['1. Crear Device/Application según el runtime o soft-PLC que utilizarás.','2. Configurar I/O Mapping y variables globales o locales.','3. Crear POU en LD, FBD o ST según el problema.','4. Instanciar TON, TOF, CTU/CTD y comparadores con tipos IEC correctos.','5. Asociar POU a una Task periódica y revisar su tiempo de ejecución.','6. Compilar y usar Simulation / Online Monitor en el entorno oficial, verificando el mapeo.'],
+ caution:'Este editor no interpreta todos los POUs, tipos, bibliotecas o configuraciones CODESYS.'}
+};
+E('auraPlatformHelp').onclick=()=>{
+ const guide=platformGuides[E('auraPlatform').value];
+ if(guide)tutorMessage('SOFTWARE WORKFLOW: '+guide.label+'\n\n'+guide.steps.join('\n')+'\n\nLÍMITE: '+guide.caution);
+};
+function searchGlossary(){
+ const field=E('glossarySearch'),box=E('glossaryResults');if(!field||!box)return;
+ const q=String(field.value||'').trim().toLowerCase();
+ const results=q?glossary.filter(row=>row.join(' ').toLowerCase().includes(q)).slice(0,12):glossary.slice(0,8);
+ box.replaceChildren();
+ for(const [en,es,explain] of results){
+  const row=document.createElement('div');row.style.padding='5px 0';row.textContent=en+' → '+es+'. '+explain;box.appendChild(row);
+ }
+ if(!results.length)box.textContent='No se encontró el término. Prueba abreviaciones como TON, CTU, Rung o COM.';
+}
+E('glossarySearch').addEventListener('input',searchGlossary);
+searchGlossary();
+
+
+let waveHistory=[],wavePaused=false,lastWavePlan=null;
+function waveTrace(kind,pin,plc){
+ if(kind==='I')return ins.has(plcInputPins(plc).indexOf(Number(pin)))?1:0;
+ if(kind==='Q')return outs.has(plcOutputPins(plc).indexOf(Number(pin)))?1:0;
+ if(kind==='T')return ladderRuntime.active?1:0;
+ return 0;
+}
+function waveSample(){
+ if(!simulation||wavePaused||!ladderPlan||!nodes.some(n=>n.type==='plc'))return;
+ const plc=nodes.find(n=>n.type==='plc');
+ const key=[ladderPlan.start,ladderPlan.stop,ladderPlan.output,ladderPlan.mode].join('-');
+ if(key!==lastWavePlan){waveHistory=[];lastWavePlan=key}
+ const sample={t:Date.now(),a:waveTrace('I',ladderPlan.start,plc),b:waveTrace('I',ladderPlan.stop,plc),q:waveTrace('Q',ladderPlan.output,plc),done:ladderRuntime.done?1:0};
+ waveHistory.push(sample);if(waveHistory.length>140)waveHistory.shift();
+ renderWaveform();
+}
+function renderWaveform(){
+ const svg=E('waveCanvas');if(!svg)return;
+ svg.replaceChildren();
+ const root=(type,attrs={})=>{const el=document.createElementNS(NS,type);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);svg.appendChild(el);return el};
+ root('rect',{width:700,height:220,fill:'#07182a'});
+ const tracks=[['IN 1','a','#66c2ff'],['IN 2','b','#e7bd69'],['OUT','q','#63e5ad'],['DONE','done','#ff8aa6']];
+ for(let i=0;i<tracks.length;i++){
+  const [label,key,color]=tracks[i],top=17+i*49;
+  root('text',{x:7,y:top+12,fill:'#bdcfe9','font-size':11,'font-family':'monospace'}).textContent=label;
+  root('line',{x1:72,y1:top+39,x2:690,y2:top+39,stroke:'#36516e','stroke-width':1});
+  root('line',{x1:72,y1:top+9,x2:690,y2:top+9,stroke:'#263e57','stroke-width':1,'stroke-dasharray':'3 6'});
+  if(!waveHistory.length)continue;
+  let d='',last=null;
+  for(let j=0;j<waveHistory.length;j++){
+   const x=72+j*(615/139),y=top+(waveHistory[j][key]?10:38);
+   if(j===0)d+='M'+x.toFixed(1)+' '+y;
+   else d+=' H'+x.toFixed(1)+' V'+y;
+   last=[x,y];
+  }
+  if(last)d+=' H690';
+  root('path',{d,fill:'none',stroke:color,'stroke-width':2.3,'stroke-linejoin':'round'});
+ }
+ root('text',{x:680,y:215,'text-anchor':'end',fill:'#9eb8d1','font-size':10}).textContent='Time →  |  ~0.15 s/sample';
+}
+E('clearWaves').onclick=()=>{waveHistory=[];renderWaveform()};
+E('wavePause').onclick=()=>{wavePaused=!wavePaused;E('wavePause').textContent=wavePaused?'Resume':'Pause'};
+window.setInterval(waveSample,150);
+renderWaveform();
+
+
+const auraRuntime={visible:true,gameActive:false,score:0,best:0,time:30,hints:true,paused:false,gameTimer:null,jumpTimer:null,speechTimer:null,reactionTimer:null,lastReact:0,explicitHide:false};
+function auraSay(message,duration=5500){
+ const bubble=E('auraSpeech');if(!bubble||!auraRuntime.hints)return;
+ bubble.textContent=String(message).slice(0,360);bubble.hidden=false;
+ if(auraRuntime.speechTimer)clearTimeout(auraRuntime.speechTimer);
+ auraRuntime.speechTimer=setTimeout(()=>{bubble.hidden=true},Math.max(1000,duration));
+}
+function auraPlace(screenX,screenY){
+ const fox=E('auraFox');if(!fox)return;
+ const x=Math.max(8,Math.min(window.innerWidth-95,screenX));
+ const y=Math.max(6,Math.min(window.innerHeight-100,screenY));
+ fox.classList.add('aura-at-target');fox.style.left=Math.round(x)+'px';fox.style.bottom=Math.round(window.innerHeight-y-87)+'px';
+}
+function auraResetPosition(){
+ const fox=E('auraFox');fox.classList.remove('aura-at-target');fox.style.left='';fox.style.bottom='';
+}
+function auraVisible(value,reason=''){
+ const fox=E('auraFox');
+ if(!value){fox.classList.add('aura-hidden');E('auraSpeech').hidden=true}
+ else{fox.classList.remove('aura-hidden')}
+ auraRuntime.visible=!!value;
+ if(reason==='manual')auraRuntime.explicitHide=!value;
+}
+function auraPointFromNode(nodeId,portIndex){
+ const n=find(nodeId);if(!n)return null;
+ const coord=ports(n)[portIndex]||[n.x,n.y];
+ return coord;
+}
+function auraPointFromIssue(item){
+ const msg=item?.message||'',plc=nodes.find(n=>n.type==='plc');
+ if(!plc)return null;
+ if(/cortocircuit/i.test(msg)){
+  const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero');
+  const w=wires.find(w=>w.a===plus?.id||w.b===plus?.id||w.a===minus?.id||w.b===minus?.id);
+  if(w){const a=find(w.a),b=find(w.b);if(a&&b){const pa=ports(a)[w.ap],pb=ports(b)[w.bp];if(pa&&pb)return [(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]}}
+ }
+ if(/L\+/.test(msg))return auraPointFromNode(plc.id,0);
+ if(/–\/M|0 V/.test(msg))return auraPointFromNode(plc.id,1);
+ for(const pin of [...plcInputPins(plc),...plcOutputPins(plc)]){
+  if(msg.includes(portName(plc,pin)))return auraPointFromNode(plc.id,pin);
+ }
+ const cable=wires.find(w=>w.a!==plc.id&&w.b!==plc.id)||wires[0];
+ if(cable){const a=find(cable.a),b=find(cable.b);const pa=a&&ports(a)[cable.ap],pb=b&&ports(b)[cable.bp];if(pa&&pb)return [(pa[0]+pb[0])/2,(pa[1]+pb[1])/2]}
+ return [plc.x+200,plc.y-100];
+}
+function auraCircuitToViewport(coord){
+ if(!coord)return null;
+ const box=canvas.getBoundingClientRect();
+ const ratio=Math.min(box.width/view.w,box.height/view.h);
+ const offsetX=(box.width-view.w*ratio)/2,offsetY=(box.height-view.h*ratio)/2;
+ return [box.left+offsetX+(coord[0]-view.x)*ratio,box.top+offsetY+(coord[1]-view.y)*ratio];
+}
+function auraReactToErrors(issues){
+ if(!auraRuntime.hints||auraRuntime.gameActive||auraRuntime.explicitHide)return;
+ const errors=(issues||[]).filter(item=>item.severity==='error');
+ if(!errors.length)return;
+ const fox=E('auraFox'),issue=errors[0],point=auraCircuitToViewport(auraPointFromIssue(issue));
+ auraVisible(true);fox.classList.remove('aura-tail-magic');fox.classList.add('aura-biting');
+ if(point)auraPlace(point[0]-35,point[1]-66);
+ auraSay('¡Ñam! Detecté un error: '+issue.message+' Revisa la conexión antes de simular.',7500);
+ clearTimeout(auraRuntime.reactionTimer);
+ auraRuntime.reactionTimer=setTimeout(()=>{fox.classList.remove('aura-biting');if(!auraRuntime.gameActive)auraResetPosition()},3400);
+}
+function auraTailMagic(message){
+ if(auraRuntime.explicitHide)return;
+ const fox=E('auraFox');auraVisible(true);
+ fox.classList.remove('aura-biting','aura-tail-magic');
+ void fox.offsetWidth;
+ fox.classList.add('aura-tail-magic');
+ auraSay(message||'¡Brillitos! Revisé el programa Ladder. Comprueba los cambios antes de simular.',6000);
+ clearTimeout(auraRuntime.reactionTimer);
+ auraRuntime.reactionTimer=setTimeout(()=>fox.classList.remove('aura-tail-magic'),1800);
+}
+function auraReviewAndReact(){
+ const issues=ladderReviewIssues(),bad=issues.filter(p=>p.severity==='error');
+ if(bad.length){auraReactToErrors(bad);return}
+ if(issues.some(p=>p.severity==='warn'))auraSay('Veo algunas advertencias. Revisa el diagnóstico para aprender a corregirlas.');
+ else auraTailMagic('¡Muy bien! No detecté errores básicos en el diagrama. Sigue probando cada estado.');
+}
+function auraFixLadder(){
+ if(!ladderPlan){auraSay('Primero crea o importa un Ladder para poder revisarlo.');openLadder();return}
+ const reference=ladderPseudoCode(ladderPlan),editor=E('ladderEditor'),hasUnsaved=editor.value.trim()!==(ladderPlan.source||reference).trim();
+ if(hasUnsaved&&!confirm('Hay texto editado sin aplicar. ¿Deseas reemplazarlo por un borrador didáctico del plan actual?'))return;
+ if(!confirm('Aura regenerará el Ladder DIDÁCTICO desde los parámetros actuales. Se perderán los cambios manuales de código no aplicados. ¿Continuar?'))return;
+ ladderPlan.source=null;
+ renderLadder();draw();
+ E('ladderImportFeedback').textContent='Aura regeneró el borrador desde la configuración. No modifica físicamente el cableado ni garantiza compatibilidad con el PLC comercial. Usa «Probar lógica Ladder» antes de simular.';
+ auraTailMagic('¡Fiuu! Moví la cola y regeneré el borrador. Revisa ahora entradas, salidas y parámetros.');
+}
+function auraGamePosition(){
+ if(!auraRuntime.gameActive)return;
+ const x=20+Math.random()*Math.max(40,window.innerWidth-140);
+ const y=110+Math.random()*Math.max(60,window.innerHeight-250);
+ auraPlace(x,y);
+}
+function auraGameStatus(message){
+ E('auraGameScore').textContent=auraRuntime.score;
+ E('auraGameTime').textContent=auraRuntime.time;
+ E('auraGameBest').textContent=auraRuntime.best;
+ if(message)E('auraGameFeedback').textContent=message;
+}
+function auraSaveBest(){
+ try{localStorage.setItem('plc-aura-game-best-v1',String(auraRuntime.best))}catch{}
+}
+function auraStopGame(message='Juego finalizado.'){
+ clearInterval(auraRuntime.gameTimer);clearInterval(auraRuntime.jumpTimer);
+ auraRuntime.gameTimer=null;auraRuntime.jumpTimer=null;
+ auraRuntime.gameActive=false;
+ const fox=E('auraFox');fox.classList.remove('aura-catching','aura-game-bounce');
+ auraResetPosition();auraGameStatus(message);
+}
+function auraStartGame(){
+ auraStopGame('');
+ auraRuntime.gameActive=true;auraRuntime.score=0;auraRuntime.time=30;
+ auraVisible(true);
+ const fox=E('auraFox');fox.classList.add('aura-catching','aura-game-bounce');fox.classList.remove('aura-biting','aura-tail-magic');
+ E('auraGame').hidden=false;
+ auraGameStatus('Encuentra a Aura y haz clic en ella. Puedes usar Enter si la enfocas.');
+ auraGamePosition();
+ auraRuntime.jumpTimer=setInterval(auraGamePosition,1250);
+ auraRuntime.gameTimer=setInterval(()=>{
+  if(!auraRuntime.gameActive)return;
+  auraRuntime.time-=1;auraGameStatus();
+  if(auraRuntime.time<=0)auraStopGame('¡Tiempo! Lograste '+auraRuntime.score+' puntos. ¿Repetimos?');
+ },1000);
+}
+function auraCatch(){
+ if(!auraRuntime.gameActive){openTutor();return}
+ auraRuntime.score+=1;
+ if(auraRuntime.score>auraRuntime.best){auraRuntime.best=auraRuntime.score;auraSaveBest()}
+ auraGameStatus('¡Te atrapé! Aura brinca hacia otro lugar.');
+ auraGamePosition();
+}
+function auraToggleGame(){E('auraGame').hidden=false;if(!auraRuntime.gameActive)auraGameStatus('Pulsa Start para jugar.')}
+function auraWanderTick(){
+ if(auraRuntime.gameActive||auraRuntime.explicitHide||E('auraFox').classList.contains('aura-biting'))return;
+ if(Math.random()<0.3){
+  auraVisible(false);
+  setTimeout(()=>{if(auraRuntime.gameActive||auraRuntime.explicitHide)return;auraVisible(true);auraResetPosition();auraSay('¡Puf! Ya regresé. ¿Quieres una pista o una práctica?')},2700);
+ }else if(auraRuntime.hints&&Math.random()<0.35){
+  const tips=['¿Probaste todos los estados del pulsador?','Recuerda distinguir XIC/XIO del contacto físico NO/NC.','Puedes abrir Signal Timing para ver los cambios de entradas.','Busca Run Tests cuando crees una nueva red.'];
+  auraSay(tips[Math.floor(Math.random()*tips.length)],4300);
+ }
+}
+function initAura(){
+ try{auraRuntime.best=Math.max(0,Math.min(100000,Number(localStorage.getItem('plc-aura-game-best-v1'))||0))}catch{}
+ auraGameStatus();
+ E('auraFox').onclick=auraCatch;
+ E('auraFox').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();auraCatch()}};
+ E('auraPlay').onclick=auraToggleGame;
+ E('auraHide').onclick=()=>{if(auraRuntime.gameActive)auraStopGame('Juego detenido.');auraVisible(false,'manual')};
+ E('auraShow').onclick=()=>{auraVisible(true,'manual');auraResetPosition();auraSay('¡Aquí estoy! Soy Aura. ¿Revisamos tu Ladder?')};
+ E('startAuraGame').onclick=auraStartGame;
+ E('stopAuraGame').onclick=()=>auraStopGame('Juego detenido.');
+ E('closeAuraGame').onclick=()=>{auraStopGame('Juego cerrado.');E('auraGame').hidden=true};
+ E('auraHintsToggle').onchange=e=>{auraRuntime.hints=!!e.target.checked;E('auraSpeech').hidden=true};
+ E('auraFixLadder').onclick=auraFixLadder;
+ window.setInterval(auraWanderTick,24000);
+}
 
 function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
@@ -1641,9 +2178,9 @@ if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);
 if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placingJunction=true;E('junctionInstructions').textContent='Haz clic en el circuito para colocar un punto libre.'}
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
-reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
-initTutor();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
-window.setInterval(()=>{if(simulation&&ladderPlan?.mode==='timer'&&ladderRuntime.started&&!ladderRuntime.done)draw()},180);
+reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();
+initTutor();initAura();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
