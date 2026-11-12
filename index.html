@@ -1,9 +1,19 @@
 <!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PLC-Sim Studio</title>
 <style>
-:root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#080e19;--side:#101b30;--card:#1b2941;--edge:#324663;--fg:#eef5ff;--mut:#90a8ca;--cyan:#35d4ff;--green:#00d78f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg)}button,select{font:inherit;cursor:pointer;color:inherit}header{height:55px;display:flex;align-items:center;gap:9px;padding:5px 12px;background:#0c1730;border-bottom:1px solid #24334d}header strong{font-size:18px;line-height:1}header small{display:block;font-size:11px;color:#91afd5}.logo{background:#2a78ed;padding:9px;border-radius:9px}.v{font-size:10px;color:#79d8ff;border:1px solid #285995;background:#132b4d;border-radius:5px;padding:3px}.push{border:1px solid #35506e;background:#1b2b46;padding:9px 13px;border-radius:9px}.run{background:#007f60;border-color:#00aa7d}.edit{background:#725010;border-color:#ad7e20}.spacer{flex:1}select{background:#192941;border:1px solid #2b4264;border-radius:8px;padding:9px;max-width:260px}.layout{height:calc(100vh - 55px);display:grid;grid-template-columns:237px 1fr}aside{background:linear-gradient(180deg,#101e35,#0d1729);border-right:2px solid #2d3f5a;overflow:auto;padding:10px 8px}.side-title{font-weight:800;font-size:13px;color:#a9c4e8;margin:6px 2px 20px}aside h4{font-size:10px;color:#7899c7;letter-spacing:.7px;margin:16px 4px 9px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{min-height:94px;border:1px solid transparent;background:transparent;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:5px}.tile:hover{border-color:var(--cyan);background:#1a273e}.tile svg{width:100px;height:55px;overflow:visible}.inspector{padding:9px;border:1px solid #344966;border-radius:9px;font-size:11px;color:#b3c7e6}.inspector label{display:block;margin-bottom:7px}.inspector input{background:#101e34;color:#fff;padding:9px;border:1px solid #4a688b;border-radius:7px;width:100%;margin-top:5px}.inspector button{margin-top:8px;padding:6px;border-radius:6px;background:#25456c;border:1px solid #46618a;color:#fff}.tile b{font-size:11px}.tile span{font:10px monospace;color:#85a5d8}main{position:relative;overflow:hidden;background:radial-gradient(circle at center,#0b1625,#070b13 78%)}svg{width:100%;height:100%;touch-action:none}#wireLayer path{stroke:#ffc844;stroke-width:3.2;fill:none;cursor:pointer}.device .symbol{stroke:#d8eeff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}.device .symbol.on{stroke:var(--green)}.device .symbol.emph{stroke-width:3.4}.device .hit{fill:transparent;stroke:none;cursor:move}.device rect{fill:var(--card);stroke:var(--edge);stroke-width:2}.device text{fill:var(--fg);font-size:12px;pointer-events:none}.port{stroke:#9db1ca;stroke-width:2;fill:#0d1b2b;cursor:crosshair}.port.on{fill:var(--green);stroke:var(--green)}.port.pending{stroke:#ff57be;stroke-width:4}.selected .symbol{stroke:var(--cyan)}.selected .hit{stroke:var(--cyan);stroke-dasharray:3 4;stroke-width:1}.note{position:absolute;bottom:13px;left:15px;border:1px solid #31435e;color:#9cb5d8;background:#101c2de6;padding:9px;border-radius:9px;font-size:11px}.plc text{fill:#d8e9ff}.screw{fill:#e7edf2;stroke:#556979}.screw-inner{fill:#172435;stroke:#64788e}.wire-selected{stroke:#ff63c4!important}@media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
+:root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#080e19;--side:#101b30;--card:#1b2941;--edge:#324663;--fg:#eef5ff;--mut:#90a8ca;--cyan:#35d4ff;--green:#00d78f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg)}button,select{font:inherit;cursor:pointer;color:inherit}header{height:55px;display:flex;align-items:center;gap:9px;padding:5px 12px;background:#0c1730;border-bottom:1px solid #24334d}header strong{font-size:18px;line-height:1}header small{display:block;font-size:11px;color:#91afd5}.logo{background:#2a78ed;padding:9px;border-radius:9px}.v{font-size:10px;color:#79d8ff;border:1px solid #285995;background:#132b4d;border-radius:5px;padding:3px}.push{border:1px solid #35506e;background:#1b2b46;padding:9px 13px;border-radius:9px}.run{background:#007f60;border-color:#00aa7d}.edit{background:#725010;border-color:#ad7e20}.spacer{flex:1}select{background:#192941;border:1px solid #2b4264;border-radius:8px;padding:9px;max-width:260px}.layout{height:calc(100vh - 55px);display:grid;grid-template-columns:237px 1fr}aside{background:linear-gradient(180deg,#101e35,#0d1729);border-right:2px solid #2d3f5a;overflow:auto;padding:10px 8px}.side-title{font-weight:800;font-size:13px;color:#a9c4e8;margin:6px 2px 20px}aside h4{font-size:10px;color:#7899c7;letter-spacing:.7px;margin:16px 4px 9px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{min-height:94px;border:1px solid transparent;background:transparent;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:5px}.tile:hover{border-color:var(--cyan);background:#1a273e}.tile svg{width:100px;height:55px;overflow:visible}.inspector{padding:9px;border:1px solid #344966;border-radius:9px;font-size:11px;color:#b3c7e6}.inspector label{display:block;margin-bottom:7px}.inspector input{background:#101e34;color:#fff;padding:9px;border:1px solid #4a688b;border-radius:7px;width:100%;margin-top:5px}.inspector button{margin-top:8px;padding:6px;border-radius:6px;background:#25456c;border:1px solid #46618a;color:#fff}.tile b{font-size:11px}.tile span{font:10px monospace;color:#85a5d8}main{position:relative;overflow:hidden;background:radial-gradient(circle at center,#0b1625,#070b13 78%)}svg{width:100%;height:100%;touch-action:none}#wireLayer path{stroke:#ffc844;stroke-width:3.2;fill:none;cursor:pointer}.device .symbol{stroke:#d8eeff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}.device .symbol.on{stroke:var(--green)}.device .symbol.emph{stroke-width:3.4}.device .hit{fill:transparent;stroke:none;cursor:move}.device rect{fill:var(--card);stroke:var(--edge);stroke-width:2}.device text{fill:var(--fg);font-size:12px;pointer-events:none}.port{stroke:#9db1ca;stroke-width:2;fill:#0d1b2b;cursor:crosshair}.port.on{fill:var(--green);stroke:var(--green)}.port.pending{stroke:#ff57be;stroke-width:4}.selected .symbol{stroke:var(--cyan)}.selected .hit{stroke:var(--cyan);stroke-dasharray:3 4;stroke-width:1}.note{position:absolute;bottom:13px;left:15px;border:1px solid #31435e;color:#9cb5d8;background:#101c2de6;padding:9px;border-radius:9px;font-size:11px}.plc text{fill:#d8e9ff}.screw{fill:#e7edf2;stroke:#556979}.screw-inner{fill:#172435;stroke:#64788e}.wire-selected{stroke:#ff63c4!important}
+.wire-handle{fill:#ffb45c;stroke:#fff;stroke-width:2;cursor:move}
+.device-menu{position:absolute;z-index:5;background:#142541;border:1px solid #48658b;border-radius:12px;padding:10px;min-width:195px;box-shadow:0 12px 32px #0009;max-width:calc(100% - 20px)}
+.device-menu[hidden]{display:none}.device-menu b{display:block;font-size:12px;color:#b5d8ff;margin:0 0 8px}
+.device-menu button{background:#203d61;border:1px solid #42678e;padding:7px 9px;color:#fff;border-radius:7px;margin:3px;cursor:pointer;font-size:12px}
+.device-menu button:hover{background:#2b537d}
+.diagnostic{position:absolute;top:12px;right:13px;width:min(330px,45%);max-height:39vh;overflow:auto;padding:10px 12px;background:#12243ae8;border:1px solid #355575;border-radius:12px;z-index:2;font-size:12px}
+.diagnostic strong{color:#b5dcff}.diagnostic button{border:1px solid #4d718c;background:#213b58;color:#ecf7ff;padding:4px 8px;border-radius:7px;cursor:pointer;float:right}
+.diagnostic ul{margin:7px 0;padding-left:17px}.diagnostic li{margin:7px 0;color:#bed2e8}.diagnostic li.error{color:#ff9baf}.diagnostic li.warn{color:#ffd17e}
+.diagnostic li.ok{color:#75e9bf}
+@media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
-<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div class="note">Conecta dos terminales · Arrastra símbolos y ambas barras · R gira 90° · Supr elimina</div></main></div>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main></div>
 <script>
 (()=>{
 'use strict';
@@ -14,7 +24,7 @@ ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:
 green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2]
 };
 const nameOf=n=>n.label||({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type][0];
-let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set();
+let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
 function S(tag,attrs={},parent=layer){const a=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))a.setAttribute(k,v);parent.appendChild(a);return a}
 function T(g,x,y,str,attrs={}){const a=S('text',{x,y,...attrs},g);a.textContent=str;return a}
 function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[type]||types[type][0]};nodes.push(n);return n}
@@ -41,9 +51,57 @@ const ready=potential.has(K(plc,0))&&zero.has(K(plc,1));
 for(let i=0;i<10;i++){const term=i<4?i+3:i+4;if(ready&&potential.has(K(plc,term)))ins.add(i)}
 const op=[18,20,22,24,25,26];for(let i=0;i<6;i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,op[i]))}
 live=reach(src);
-for(const n of nodes)if(['green','red','amber','relay'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id)}
+for(const n of nodes)if(['green','red','amber','blue','white','relay','buzzer'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id);
+shortCircuit=[...zero].some(k=>live.has(k));
+if(shortCircuit){live=new Set();activeLoads=new Set();outs=new Set()}
+}
+function validate(){
+ const issues=[],error=(msg)=>issues.push({severity:'error',message:msg}),warn=(msg)=>issues.push({severity:'warn',message:msg});
+ const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');
+ if(!plus||!minus||!plc){error('Falta la barra de +24 V, la de 0 V o el PLC.');return issues}
+ const adj=new Map(),join=(a,b)=>{if(!adj.has(a))adj.set(a,[]);adj.get(a).push(b)},
+ reachable=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const next of adj.get(q[i])||[])if(!seen.has(next)){seen.add(next);q.push(next)}return seen};
+ for(const bus of [plus,minus])for(let i=0;i<7;i++)for(let j=0;j<7;j++)join(K(bus,i),K(bus,j));
+ for(const w of wires){const a=find(w.a),b=find(w.b);if(a&&b){join(K(a,w.ap),K(b,w.bp));join(K(b,w.bp),K(a,w.ap))}}
+ for(const n of nodes){const closed=['nc','rollerNC','selectorNC'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever'].includes(n.type)&&n.on;
+ if(closed){join(K(n,0),K(n,1));join(K(n,1),K(n,0))}}
+ const p=reachable(Array.from({length:7},(_,i)=>K(plus,i))),z=reachable(Array.from({length:7},(_,i)=>K(minus,i)));
+ if([...p].some(x=>z.has(x)))error('Cortocircuito: +24 V y 0 V están unidos por cables o por un contacto cerrado. Separa los conductores; la simulación se ha bloqueado.');
+ if(!p.has(K(plc,0)))error('PLC: conecta L+ (+24 V) a la barra positiva.');
+ if(!z.has(K(plc,1)))error('PLC: conecta el borne –/M a la barra de 0 V.');
+ if(z.has(K(plc,0)))error('PLC: L+ está conectado a 0 V. Corrige la alimentación.');
+ if(p.has(K(plc,1)))error('PLC: el borne –/M está conectado a +24 V. Corrige la alimentación.');
+ for(const n of nodes){
+  const kind=n.type,what=nameOf(n);
+  if(['ind','opt','cap'].includes(kind)){
+    if(!p.has(K(n,0)))warn(what+': conecta BN (+) a la barra de +24 V.');
+    if(!z.has(K(n,1)))warn(what+': conecta BU (–) a 0 V.');
+    if(!wires.some(w=>(w.a===n.id&&w.ap===2)||(w.b===n.id&&w.bp===2)))warn(what+': conecta BK (salida PNP) a una entrada I/0–I/9 del PLC.');
+  }
+  if(['green','red','amber','blue','white','relay','buzzer'].includes(kind)){
+    const attached0=wires.some(w=>(w.a===n.id&&w.ap===0)||(w.b===n.id&&w.bp===0));
+    const attached1=wires.some(w=>(w.a===n.id&&w.ap===1)||(w.b===n.id&&w.bp===1));
+    if(!attached0)warn(what+': falta conectar la terminal positiva/A1 a una salida del PLC.');
+    if(!attached1)warn(what+': falta conectar la terminal negativa/A2 a 0 V.');
+    if(attached1&&!z.has(K(n,1)))warn(what+': el retorno (–/A2) no llega a la barra de 0 V.');
+  }
+ }
+ for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b)continue;
+  const x=a.type==='plc'?{n:a,i:w.ap}:b.type==='plc'?{n:b,i:w.bp}:null;
+  if(x&&[14,15,16,17,19,21,23].includes(x.i))warn('PLC: la terminal '+pnames[x.i]+' pertenece a una sección de alimentación/VAC no modelada. No conectes 24 V DC suponiendo que se comporta como una salida digital.');
+ }
+ if(!issues.some(i=>i.severity==='error')&&wires.length)issues.unshift({severity:'ok',message:'No se detectaron cortocircuitos ni fallas básicas en los bornes revisados.'});
+ issues.push({severity:'warn',message:'Modelo didáctico: las salidas O/0–O/5 siguen I/0–I/5 por demostración; no equivale al programa real del PLC ni valida las secciones 85–264 VAC de la referencia.'});
+ return issues;
+}
+function renderDiagnostics(){
+ const list=E('diagList');if(!list)return;
+ const issues=validate();list.replaceChildren();
+ const ul=document.createElement('ul');for(const item of issues.slice(0,18)){const li=document.createElement('li');li.className=item.severity;li.textContent=item.message;ul.appendChild(li)}list.appendChild(ul);
+}
 function pointer(ev){const p=canvas.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(canvas.getScreenCTM().inverse())}
-function route(a,b){const mid=(a[1]+b[1])/2;return 'M'+a[0]+' '+a[1]+'V'+mid+'H'+b[0]+'V'+b[1]}
+function elbow(a,b,w){const mx=Number.isFinite(w?.bendX)?w.bendX:(a[0]+b[0])/2;const my=Number.isFinite(w?.bendY)?w.bendY:(a[1]+b[1])/2;return [mx,my]}
+function route(a,b,w){const [x,y]=elbow(a,b,w);return 'M'+a[0]+' '+a[1]+'H'+x+'V'+y+'H'+b[0]+'V'+b[1]}
 function line(g,d,more={}){return S('path',{d,class:'symbol',...more},g)}
 function term(g,n,i,x,y,r=7){const p=S('circle',{cx:x,cy:y,r,class:'port'+(live.has(K(n,i))?' on':'')+(first&&first.id===n.id&&first.i===i?' pending':'')},g);
 p.onpointerdown=ev=>{ev.stopPropagation();ev.preventDefault();if(first){connect(first.id,first.i,n.id,i);first=null}else first={id:n.id,i};draw()}}
@@ -120,20 +178,47 @@ S('path',{d:'M10 78 H284 M314 78 H600',stroke:'#555','stroke-width':1.1,fill:'no
 g.onpointerdown=e=>dragStart(e,n);
 g.ondblclick=e=>{e.stopPropagation();chosen={kind:'node',id:n.id};renameChosen()};
 }
-function draw(){solve();layer.replaceChildren();wl.replaceChildren();
+function draw(){solve();layer.replaceChildren();wl.replaceChildren();renderDiagnostics();
 for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b||!ports(a)[w.ap]||!ports(b)[w.bp])continue;
-const p=S('path',{d:route(ports(a)[w.ap],ports(b)[w.bp]),class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
-p.onpointerdown=e=>{e.stopPropagation();chosen={kind:'wire',id:w.id};draw()}}
+const aPort=ports(a)[w.ap],bPort=ports(b)[w.bp];
+const p=S('path',{d:route(aPort,bPort,w),class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
+p.onpointerdown=e=>{e.stopPropagation();chosen={kind:'wire',id:w.id};refreshInspector();draw();showMenu(e,w,'wire')};
+if(chosen?.kind==='wire'&&chosen.id===w.id){
+ const [x,y]=elbow(aPort,bPort,w);
+ const handle=S('circle',{cx:x,cy:y,r:9,class:'wire-handle'},wl);
+ handle.onpointerdown=e=>{e.stopPropagation();e.preventDefault();closeMenu();wireDrag={id:w.id};canvas.setPointerCapture(e.pointerId)};
+}
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
 rub.setAttribute('opacity',first?1:0)}
-function dragStart(e,n){if(e.target.classList.contains('port'))return;e.stopPropagation();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
-canvas.onpointermove=e=>{const p=pointer(e);if(drag){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
-canvas.onpointerup=()=>{if(drag&&!drag.moved){const n=find(drag.id);if(n&&['no','nc','selector','selectorNC','selector3','ind','opt','cap','limit','rollerNC','rollerLever'].includes(n.type)&&simulation){n.on=!n.on;drag=null;draw();return}}drag=null};canvas.onpointerdown=()=>{chosen=null;refreshInspector();draw()};
-function refreshInspector(){const pane=E('inspector');pane.replaceChildren();const n=chosen?.kind==='node'?find(chosen.id):null;if(!n){pane.textContent='Selecciona un símbolo, barra o PLC para cambiar su nombre.';return}const label=document.createElement('label');label.textContent='Nombre o referencia';const input=document.createElement('input');input.value=nameOf(n);input.maxLength=50;input.oninput=()=>{n.label=input.value;draw()};label.appendChild(input);pane.appendChild(label);const helper=document.createElement('div');helper.textContent='Tipo: '+(types[n.type]?.[0]||n.type)+' · Rotación: '+(n.angle||0)+'°';pane.appendChild(helper)}
+function dragStart(e,n){if(e.button!==0||e.target.classList.contains('port'))return;e.stopPropagation();closeMenu();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
+canvas.onpointermove=e=>{const p=pointer(e);if(wireDrag){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
+canvas.onpointerup=e=>{if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null};
+canvas.onpointerdown=()=>{closeMenu();chosen=null;refreshInspector();draw()};
+function closeMenu(){E('menu').hidden=true}
+function showMenu(e,obj,kind){
+ const m=E('menu'),base=canvas.getBoundingClientRect();
+ let x=e.clientX-base.left+12,y=e.clientY-base.top+10;
+ x=Math.min(Math.max(8,x),base.width-215);y=Math.min(Math.max(8,y),base.height-155);
+ m.style.left=x+'px';m.style.top=y+'px';m.replaceChildren();m.hidden=false;
+ const title=document.createElement('b');title.textContent=kind==='node'?nameOf(obj):'Cable #'+obj.id;m.appendChild(title);
+ const button=(name,act)=>{const b=document.createElement('button');b.textContent=name;b.onclick=ev=>{ev.stopPropagation();closeMenu();act()};m.appendChild(b)};
+ if(kind==='node'){
+  button('Cambiar nombre',()=>{chosen={kind:'node',id:obj.id};renameChosen()});
+  button('↶ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(-90)});
+  button('↷ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(90)});
+  if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});
+  if(!['railplus','railzero','plc'].includes(obj.type))button('Eliminar',()=>{chosen={kind:'node',id:obj.id};remove()});
+ }else{
+  button('Reacomodar cable',()=>{chosen={kind:'wire',id:obj.id};draw()});
+  button('Restablecer ruta',()=>{delete obj.bendX;delete obj.bendY;draw()});
+  button('Eliminar cable',()=>{chosen={kind:'wire',id:obj.id};remove()});
+ }
+}
+function refreshInspector(){const pane=E('inspector');pane.replaceChildren();const n=chosen?.kind==='node'?find(chosen.id):null;if(!n){pane.textContent=chosen?.kind==='wire'?'Cable seleccionado: arrastra su punto naranja para ajustar las curvas.':'Selecciona un símbolo, barra o PLC para cambiar su nombre.';return}const label=document.createElement('label');label.textContent='Nombre o referencia';const input=document.createElement('input');input.value=nameOf(n);input.maxLength=50;input.oninput=()=>{n.label=input.value;draw()};label.appendChild(input);pane.appendChild(label);const helper=document.createElement('div');helper.textContent='Tipo: '+(types[n.type]?.[0]||n.type)+' · Rotación: '+(n.angle||0)+'°';pane.appendChild(helper)}
 function renameChosen(){const n=chosen?.kind==='node'?find(chosen.id):null;if(!n)return;const val=prompt('Nuevo nombre o referencia del componente:',nameOf(n));if(val!==null){n.label=val.trim().slice(0,50)||nameOf(n);refreshInspector();draw()}}
 function rotateChosen(delta){if(chosen?.kind!=='node')return;const n=find(chosen.id);if(!n)return;n.angle=((n.angle||0)+delta+360)%360;refreshInspector();draw()}
 function remove(){if(!chosen)return;if(chosen.kind==='wire')wires=wires.filter(w=>w.id!==chosen.id);else{const n=find(chosen.id);if(n&&!['railplus','railzero','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}chosen=null;refreshInspector();draw()}
-function reset(type){nodes=[];wires=[];next=1;first=null;chosen=null;
+function reset(type){nodes=[];wires=[];next=1;first=null;chosen=null;closeMenu();
 const positive=A('railplus',295,106),negative=A('railzero',295,671),plc=A('plc',335,454);
 if(type!=='empty'){connect(positive.id,0,plc.id,0);connect(negative.id,0,plc.id,1);
 if(type==='start'){const stop=A('nc',337,230),start=A('no',510,230),lamp=A('green',830,255);
@@ -144,7 +229,7 @@ draw()}
 function icon(tgt,kind){const d=types[kind],b=document.createElement('button');b.className='tile';const art=document.createElementNS(NS,'svg');art.setAttribute('viewBox','-10 -14 146 103');art.style.width='100%';art.style.height='65px';
 drawSymbol(art,kind,false,false);const label=document.createElement('span');label.textContent=d[0];b.append(art,label);b.title=d[0]+' · '+d[1];b.onclick=()=>{const n=A(kind,430+Math.floor(Math.random()*300),235+Math.floor(Math.random()*100));chosen={kind:'node',id:n.id};draw()};tgt.appendChild(b)}
 ['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].forEach(k=>icon(E('sensors'),k));['green','red','amber','blue','white','relay','buzzer'].forEach(k=>icon(E('loads'),k));
-E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
+E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
 E('simulate').onclick=()=>{simulation=true;draw()};E('edit').onclick=()=>{simulation=false;draw()};E('examples').onchange=e=>reset(e.target.value);E('del').onclick=remove;
 E('save').onclick=()=>{const blob=new Blob([JSON.stringify({version:3,nodes,wires},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 E('load').onclick=()=>E('file').click();E('file').onchange=async e=>{try{const file=e.target.files?.[0];if(!file)return;const v=JSON.parse(await file.text());if(!Array.isArray(v.nodes)||!Array.isArray(v.wires))throw Error('Archivo inválido');
@@ -152,7 +237,7 @@ nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
 for(const n of nodes){n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type;}
 next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;draw()}catch(err){alert(err.message)}e.target.value=''};
-window.onkeydown=e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='Escape'){first=null;draw()}if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);if(e.key==='F2')renameChosen();if(e.key==='Delete'||e.key==='Backspace')remove()};
+window.onkeydown=e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='Escape'){first=null;closeMenu();draw()}if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);if(e.key==='F2')renameChosen();if(e.key==='Delete'||e.key==='Backspace')remove()};
 reset('start');refreshInspector();
 })();
 </script></html>
