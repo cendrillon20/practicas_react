@@ -845,7 +845,9 @@ function updateLadderMonitor(){
  for(const [name,isOn] of inputs){if(name==='I secundaria'&&!['latch','and','or'].includes(plan.mode))continue;
   const row=document.createElement('div');row.textContent=name+': '+(isOn?'ACTIVA':'INACTIVA');row.className=isOn?'on':'off';display.appendChild(row)}
  const o=document.createElement('div');o.className=output?'on':'off';o.textContent='Salida '+ladderTag(plan.output,'output',plan.platform)+': '+(output?'ENERGIZADA':'DESENERGIZADA');display.appendChild(o);
- if(plan.mode==='timer'){const t=document.createElement('div');t.textContent=timerTag(plan)+' · TON ET '+(ladderRuntime.elapsed/1000).toFixed(1)+' / '+Number(plan.delaySeconds||3).toFixed(1)+' s · DN '+(ladderRuntime.done?'1':'0');display.appendChild(t)}
+ if(['timer','tof'].includes(plan.mode)){const t=document.createElement('div');t.textContent=timerTag(plan)+' · '+(plan.mode==='tof'?'TOF':'TON')+' ET '+(ladderRuntime.elapsed/1000).toFixed(1)+' / '+Number(plan.delaySeconds||3).toFixed(1)+' s · DN '+(ladderRuntime.done?'1':'0');display.appendChild(t)}
+ if(['counter','ctd'].includes(plan.mode)){const c=document.createElement('div');c.textContent=(plan.mode==='counter'?'CTU':'CTD')+' · CV '+(ladderRuntime.count||0)+' / PV '+Number(plan.counterPreset||3);display.appendChild(c)}
+ if(plan.mode==='compare'){const c=document.createElement('div');c.textContent='CMP · '+(plan.compareOp||'EQ')+' '+Number(plan.compareThreshold??1)+' → '+(ladderRuntime.active?'TRUE':'FALSE');display.appendChild(c)}
  if(!simulation){const n=document.createElement('small');n.textContent='Entra a Simular y pulsa los dispositivos físicamente conectados para ejecutar esta lógica.';display.appendChild(n)}
  const svg=E('ladderPreview')?.querySelector('svg');
  if(svg){
@@ -866,6 +868,15 @@ function ladderPseudoCode(plan){
  if(!plan)return 'Sin programa';
  const a=ladderTag(plan.start,'input',plan.platform),b=ladderTag(plan.stop,'input',plan.platform),o=ladderTag(plan.output,'output',plan.platform),t=timerTag(plan);
  const tsec=Math.max(0.1,Number(plan.delaySeconds||3));
+ if(['tof','counter','ctd','compare'].includes(plan.mode)){
+ const desc={
+ tof:'TOF · Off-delay: IN='+a+', PT='+tsec+'s, Q→'+o,
+ counter:'CTU · Rising-edge CU='+a+', RESET='+b+', PV='+Number(plan.counterPreset||3)+', Q→'+o,
+ ctd:'CTD · Count-down CD='+a+', LOAD='+b+', PV='+Number(plan.counterPreset||3)+', Q→'+o,
+ compare:'CMP · BOOL('+a+') '+(plan.compareOp||'EQ')+' '+Number(plan.compareThreshold??1)+' → '+o
+ };
+ return '// VIRTUAL PLC SIMULATION ONLY · NOT executable on '+plan.platform+' hardware\n'+desc[plan.mode]+'\n// Pseudocódigo: usa el software oficial para implementar la instrucción real.';
+ }
  const note='// BORRADOR de estudio, NO importable ni listo para un PLC real\n// CPU: '+(plan.controller||'sin especificar')+'\n// '+platformRemark(plan)+'\n\n';
  if(plan.platform==='codesys'){
   const lines={
@@ -976,7 +987,7 @@ function renderLadder(){
   const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
  }
  E('ladderCode').textContent=ladderPseudoCode(plan);E('ladderEditor').value=plan.source||ladderPseudoCode(plan);
- E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.virtualCPU?'':(plan.controller||'');E('virtualCPU').checked=plan.virtualCPU!==false;E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
+ E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.virtualCPU?'':(plan.controller||'');E('virtualCPU').checked=plan.virtualCPU!==false;E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderCounterPreset').value=String(plan.counterPreset||3);E('ladderCompareOp').value=plan.compareOp||'EQ';E('ladderCompareThreshold').value=String(plan.compareThreshold??1);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
  E('ladderMode').value=plan.mode||'direct';
  populateLadderSelectors();
  updatePlatformControls();
@@ -991,15 +1002,15 @@ function renderLadder(){
  ladderText(svg,622,42,'N',{'text-anchor':'middle','font-size':11});
  const inA=ladderTag(plan.start,'input',plan.platform),inB=ladderTag(plan.stop,'input',plan.platform),out=ladderTag(plan.output,'output',plan.platform);
  const rung=105;
- if(plan.mode==='timer'){
+ if(['timer','tof'].includes(plan.mode)){
   const t=timerTag(plan),delay=Number(plan.delaySeconds||3);
   ladderSegment(svg,36,105,188,105);ladderContact(svg,230,105,inA);
   ladderSegment(svg,272,105,386,105);
   const timerGroup=ladderEl('g',{'data-timer-box':'1'},svg);
   ladderEl('rect',{x:386,y:68,width:185,height:75,rx:5,fill:'#16394b',stroke:'#62abdf','stroke-width':2},timerGroup);
-  ladderText(timerGroup,402,89,'TON '+t,{'font-weight':'bold','font-size':16});
+  ladderText(timerGroup,402,89,(plan.mode==='tof'?'TOF ':'TON ')+t,{'font-weight':'bold','font-size':16});
   ladderText(timerGroup,402,109,'PT: '+delay.toFixed(1)+' s',{'font-size':13});
-  ladderText(timerGroup,402,129,'Q/DN: fin de retardo',{'font-size':12});
+  ladderText(timerGroup,402,129,plan.mode==='tof'?'Q: retardo de apagado':'Q/DN: fin de retardo',{'font-size':12});
   ladderSegment(svg,571,105,622,105);
   ladderSegment(svg,36,202,188,202);ladderContact(svg,230,202,t+'.DN');
   ladderSegment(svg,272,202,493,202);ladderCoil(svg,535,202,out);ladderSegment(svg,583,202,622,202);
@@ -1019,6 +1030,16 @@ function renderLadder(){
   ladderSegment(svg,150,190,190,190);ladderContact(svg,235,190,inB);ladderSegment(svg,277,190,365,190);
   ladderSegment(svg,365,rung,493,rung);ladderSegment(svg,365,190,365,rung);
   ladderCoil(svg,535,rung,out);ladderSegment(svg,583,rung,622,rung);
+ }
+ if(['counter','ctd','compare'].includes(plan.mode)){
+  ladderSegment(svg,36,112,154,112);ladderContact(svg,196,112,inA);ladderSegment(svg,238,112,367,112);
+  const block=ladderEl('g',{'data-block-kind':plan.mode},svg);
+  ladderEl('rect',{x:367,y:67,width:178,height:95,rx:6,fill:'#15334a',stroke:'#62a9d1','stroke-width':2},block);
+  ladderText(block,380,90,plan.mode==='counter'?'CTU':plan.mode==='ctd'?'CTD':'CMP',{'font-size':18,'font-weight':'bold'});
+  ladderText(block,380,112,plan.mode==='compare'?String(plan.compareOp)+' '+Number(plan.compareThreshold):'PV='+Number(plan.counterPreset||3),{'font-size':13});
+  ladderText(block,380,133,plan.mode==='compare'?'BOOL → 0 / 1':'CV='+Number(ladderRuntime.count||0),{'font-size':13});
+  ladderSegment(svg,545,112,622,112);
+  ladderSegment(svg,36,207,178,207);ladderContact(svg,222,207,plan.mode==='compare'?'CMP.Q':plan.mode==='counter'?'CTU.Q':'CTD.Q');ladderSegment(svg,264,207,493,207);ladderCoil(svg,535,207,out);ladderSegment(svg,583,207,622,207);
  }
  if(plan.mode==='latch'){
   // Arranque + sello en paralelo; PARO NC en serie.
@@ -1070,11 +1091,14 @@ E('generateLadder').onclick=()=>{
  if(!['compactlogix','micrologix','delta','codesys'].includes(platform)){msg.textContent='Selecciona una plataforma válida.';return}
  if(!controller&&!E('virtualCPU').checked){msg.textContent='Indica modelo físico o activa Virtual PLC para trabajar solo en simulación.';E('ladderController').focus();return}
  if(!plc||!plcInputPins(plc).includes(start)||!plcOutputPins(plc).includes(output)){msg.textContent='Selecciona bornes de entrada y salida existentes.';return}
- if(['latch','and','or'].includes(mode)&&(!plcInputPins(plc).includes(stop)||start===stop)){msg.textContent='Selecciona dos entradas distintas.';return}
- if(mode==='timer'&&(!Number.isFinite(delaySeconds)||delaySeconds<0.1||delaySeconds>3600)){msg.textContent='El retardo debe estar entre 0.1 y 3600 segundos.';return}
- const checked=[start,...(['latch','and','or'].includes(mode)?[stop]:[]),output];
+ if(['latch','and','or','counter','ctd'].includes(mode)&&(!plcInputPins(plc).includes(stop)||start===stop)){msg.textContent='Selecciona dos entradas distintas.';return}
+ if(['timer','tof'].includes(mode)&&(!Number.isFinite(delaySeconds)||delaySeconds<0.1||delaySeconds>3600)){msg.textContent='El retardo debe estar entre 0.1 y 3600 segundos.';return}
+ const preset=Number(E('ladderCounterPreset').value),compareThreshold=Number(E('ladderCompareThreshold').value),compareOp=E('ladderCompareOp').value;
+ if(['counter','ctd'].includes(mode)&&(!Number.isInteger(preset)||preset<1||preset>100000)){msg.textContent='Count preset (PV) entre 1 y 100 000.';return}
+ if(mode==='compare'&&(!['EQ','NE','GT','GE','LT','LE'].includes(compareOp)||!Number.isFinite(compareThreshold))){msg.textContent='Comparator inválido. Elige operador y valor numérico.';return}
+ const checked=[start,...(['latch','and','or','counter','ctd'].includes(mode)?[stop]:[]),output];
  const missing=checked.filter(pin=>!wires.some(w=>w.a===plc.id&&w.ap===pin||w.b===plc.id&&w.bp===pin));
- ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output,platform,controller:(controller||'Virtual PLC / SIM').slice(0,90),virtualCPU:!!E('virtualCPU').checked,delaySeconds:mode==='timer'?delaySeconds:0,timerId,stopPolarity,source:null};
+ ladderPlan={goal:goal.slice(0,1000),mode,start,stop,output,platform,controller:(controller||'Virtual PLC / SIM').slice(0,90),virtualCPU:!!E('virtualCPU').checked,delaySeconds:['timer','tof'].includes(mode)?delaySeconds:0,timerId,stopPolarity,counterPreset:preset,compareOp,compareThreshold,source:null};
  resetLadderRuntime();renderLadder();draw();
  if(missing.length)msg.textContent+=' ATENCIÓN: faltan conexiones en '+missing.map(i=>portName(plc,i)).join(', ')+'. El programa se ha generado, pero no actuará hasta tener las señales necesarias.';
 };
