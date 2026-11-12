@@ -255,7 +255,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 </section>
 </div>
 <div id="auraFox" class="aura-fox" role="button" tabindex="0" title="Jugar con Aura / abrir tutor" aria-label="Aura, zorrita tutora interactiva">
- <svg viewBox="0 0 95 87" aria-hidden="true">
+ <svg viewBox="-2 0 126 100" aria-hidden="true">
   <path d="M17 35L11 6 37 20 52 17 79 5 73 37Q93 64 56 80Q16 82 10 58Z" fill="#ef9149" stroke="#ae5f37" stroke-width="3"/>
   <path d="M14 45L37 57 48 71 58 58 79 44Q76 77 51 81Q25 81 14 45" fill="#fff1d7"/>
   <path d="M17 18L23 37 31 24M69 25L73 16 63 28" fill="#ffd3ba"/>
@@ -2180,7 +2180,7 @@ if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();
 initTutor();initAura();configureSceneTemplate('conveyor');refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
-window.setInterval(()=>{if(simulation&&ladderPlan?.mode==='timer'&&ladderRuntime.started&&!ladderRuntime.done)draw()},180);
+window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
