@@ -312,7 +312,7 @@ function routeWire(w){
  const p=ports(a)[w.ap],q=ports(b)[w.bp],start=exitPort(a,w.ap),end=exitPort(b,w.bp),boxes=nodes.filter(n=>n.type!=='junction').map(block);
  let legs=[start];if(Array.isArray(w.waypoints)&&w.waypoints.length)legs.push(...w.waypoints.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])).slice(0,16));else if(Number.isFinite(w.bendX)&&Number.isFinite(w.bendY))legs.push([w.bendX,w.bendY]);legs.push(end);
  let pts=[p,start];
- for(let i=0;i<legs.length-1;i++){const segment=pathfind(legs[i],legs[i+1],boxes);if(!segment){if(legs.length>2)return routeWire({...w,waypoints:[],bendX:null,bendY:null});return null}pts.push(...segment.slice(1))}
+ for(let i=0;i<legs.length-1;i++){const segment=pathfind(legs[i],legs[i+1],boxes);if(!segment)return null;pts.push(...segment.slice(1))}
  pts.push(q);
  const compact=[];for(const point of pts){const n=compact.length;if(n>=2&&(compact[n-1][0]-compact[n-2][0])*(point[1]-compact[n-1][1])===(compact[n-1][1]-compact[n-2][1])*(point[0]-compact[n-1][0]))compact.pop();compact.push(point)}
  return {d:'M'+compact.map(x=>x[0]+' '+x[1]).join(' L'),handle:compact[Math.floor(compact.length/2)],points:compact};
