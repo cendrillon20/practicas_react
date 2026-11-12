@@ -308,12 +308,12 @@ function pathfind(a,b,boxes){
 function routeWire(w){
  const a=find(w.a),b=find(w.b);if(!a||!b)return null;
  const p=ports(a)[w.ap],q=ports(b)[w.bp],start=exitPort(a,w.ap),end=exitPort(b,w.bp),boxes=nodes.filter(n=>n.type!=='junction').map(block);
- let legs=[start];if(Number.isFinite(w.bendX)&&Number.isFinite(w.bendY))legs.push([w.bendX,w.bendY]);legs.push(end);
+ let legs=[start];if(Array.isArray(w.waypoints)&&w.waypoints.length)legs.push(...w.waypoints.filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])).slice(0,16));else if(Number.isFinite(w.bendX)&&Number.isFinite(w.bendY))legs.push([w.bendX,w.bendY]);legs.push(end);
  let pts=[p,start];
- for(let i=0;i<legs.length-1;i++){const segment=pathfind(legs[i],legs[i+1],boxes);if(!segment){if(legs.length===3)return routeWire({...w,bendX:null,bendY:null});return null}pts.push(...segment.slice(1))}
+ for(let i=0;i<legs.length-1;i++){const segment=pathfind(legs[i],legs[i+1],boxes);if(!segment){if(legs.length>2)return routeWire({...w,waypoints:[],bendX:null,bendY:null});return null}pts.push(...segment.slice(1))}
  pts.push(q);
  const compact=[];for(const point of pts){const n=compact.length;if(n>=2&&(compact[n-1][0]-compact[n-2][0])*(point[1]-compact[n-1][1])===(compact[n-1][1]-compact[n-2][1])*(point[0]-compact[n-1][0]))compact.pop();compact.push(point)}
- return {d:'M'+compact.map(x=>x[0]+' '+x[1]).join(' L'),handle:compact[Math.floor(compact.length/2)]};
+ return {d:'M'+compact.map(x=>x[0]+' '+x[1]).join(' L'),handle:compact[Math.floor(compact.length/2)],points:compact};
 }
 function route(a,b,w){const [x,y]=elbow(a,b,w);return 'M'+a[0]+' '+a[1]+'H'+x+'V'+y+'H'+b[0]+'V'+b[1]}
 function line(g,d,more={}){return S('path',{d,class:'symbol',...more},g)}
@@ -433,11 +433,22 @@ const routed=routeWire(w);w.unroutable=!routed;
  // temporalmente imposible (por ejemplo, dos piezas superpuestas).
  if(routed)w.lastRoute=routed.d;
  const p=S('path',{d:routed?.d||w.lastRoute||'',style:'--wire-color:'+(w.color||'#ffc844'),class:(chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':'')+(w.unroutable?' wire-blocked':'')},wl);
-p.onpointerdown=e=>{e.stopPropagation();if(simulation)return;multi.clear();chosen={kind:'wire',id:w.id};E('wireColor').value=w.color||'#ffc844';refreshInspector();draw();showMenu(e,w,'wire')};
+p.onpointerdown=e=>{e.stopPropagation();e.preventDefault();if(simulation)return;w.lastClickPos=pointer(e);multi.clear();chosen={kind:'wire',id:w.id};E('wireColor').value=w.color||'#ffc844';refreshInspector();draw();showMenu(e,w,'wire')};
 if(chosen?.kind==='wire'&&chosen.id===w.id){
- const [x,y]=routed?.handle||elbow(aPort,bPort,w);
- const handle=S('circle',{cx:x,cy:y,r:9,class:'wire-handle'},wl);
- handle.onpointerdown=e=>{e.stopPropagation();e.preventDefault();if(simulation)return;closeMenu();wireDrag={id:w.id};canvas.setPointerCapture(e.pointerId)};
+ const manual=Array.isArray(w.waypoints)?w.waypoints:[];
+ const points=manual.length?manual:[routed?.handle||elbow(aPort,bPort,w)];
+ points.forEach((point,index)=>{
+  const [x,y]=point;
+  const handle=S('circle',{cx:x,cy:y,r:10,class:'wire-handle'},wl);
+  handle.setAttribute('title','Arrastrar quiebre '+(index+1)+' · Doble clic para quitar');
+  handle.onpointerdown=e=>{
+   e.stopPropagation();e.preventDefault();if(simulation)return;closeMenu();
+   if(!Array.isArray(w.waypoints)||!w.waypoints.length)w.waypoints=[[x,y]];
+   delete w.bendX;delete w.bendY;
+   wireDrag={id:w.id,index};canvas.setPointerCapture(e.pointerId);
+  };
+  handle.ondblclick=e=>{e.preventDefault();e.stopPropagation();if(simulation)return;w.waypoints?.splice(index,1);draw()};
+ });
 }
 }
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
@@ -462,7 +473,7 @@ drag={id:n.id,x:n.x,y:n.y,p,moved:false};
 groupDrag=nodes.filter(x=>multi.has(x.id)).map(x=>({id:x.id,x:x.x,y:x.y}));
 canvas.setPointerCapture(e.pointerId);draw();
 }
-canvas.onpointermove=e=>{if(pan){manualZoom=true;const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag&&!simulation){const dx=Math.round((p.x-drag.p.x)/10)*10,dy=Math.round((p.y-drag.p.y)/10)*10;for(const original of groupDrag||[]){const n=find(original.id);if(n){n.x=original.x+dx;n.y=original.y+dy}}drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
+canvas.onpointermove=e=>{if(pan){manualZoom=true;const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){if(!Array.isArray(w.waypoints))w.waypoints=[];w.waypoints[wireDrag.index]=[Math.round(p.x/10)*10,Math.round(p.y/10)*10];draw()}return}if(drag&&!simulation){const dx=Math.round((p.x-drag.p.x)/10)*10,dy=Math.round((p.y-drag.p.y)/10)*10;for(const original of groupDrag||[]){const n=find(original.id);if(n){n.x=original.x+dx;n.y=original.y+dy}}drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
 canvas.onpointerup=e=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw();return}if(pan){pan=null;return}if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved&&multi.size<2){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null;groupDrag=null};
 canvas.onpointerdown=e=>{e.preventDefault();if(e.button===1||e.shiftKey){e.preventDefault();pan={x:e.clientX,y:e.clientY,view:{...view}};canvas.setPointerCapture(e.pointerId);return}closeMenu();chosen=null;multi.clear();refreshInspector();draw()};
 let manualZoom=false,fitPending=false,lastCanvasWidth=0,lastCanvasHeight=0;
@@ -520,12 +531,20 @@ button('Eliminar (Supr)',()=>{chosen={kind:'node',id:obj.id};remove()});
 if(copied)button('Pegar (Ctrl+V)',pasteSelection);
  }else{
   if(simulation)return;
-  button('Reacomodar cable',()=>{chosen={kind:'wire',id:obj.id};draw()});
-  button('Restablecer ruta',()=>{delete obj.bendX;delete obj.bendY;draw()});
+  button('＋ Punto para ajustar cable',()=>{
+   const p=obj.lastClickPos||routeWire(obj)?.handle;
+   if(!p)return;
+   if(!Array.isArray(obj.waypoints))obj.waypoints=[];
+   obj.waypoints.push([Math.round(p.x??p[0]),Math.round(p.y??p[1])]);
+   delete obj.bendX;delete obj.bendY;
+   chosen={kind:'wire',id:obj.id};draw();
+ });
+ button('＋ Unión eléctrica en cable',()=>{const p=obj.lastClickPos||routeWire(obj)?.handle;if(p)splitWireAt(obj,p.x??p[0],p.y??p[1])});
+  button('Quitar último quiebre',()=>{obj.waypoints?.pop();draw()});button('Ruta automática',()=>{obj.waypoints=[];delete obj.bendX;delete obj.bendY;draw()});
   button('Eliminar cable',()=>{chosen={kind:'wire',id:obj.id};remove()});
  }
 }
-function refreshInspector(){const pane=E('inspector');pane.replaceChildren();const n=chosen?.kind==='node'?find(chosen.id):null;if(multi.size>1){pane.textContent=multi.size+' componentes seleccionados. Puedes moverlos juntos o pulsar Supr para eliminar los que no sean barras ni PLC.';return}if(!n){pane.textContent=chosen?.kind==='wire'?'Cable seleccionado: arrastra su punto naranja para ajustar las curvas.':'Selecciona un símbolo, barra o PLC para cambiar su nombre.';return}const label=document.createElement('label');label.textContent='Nombre o referencia';const input=document.createElement('input');input.value=nameOf(n);input.maxLength=50;input.disabled=simulation;input.oninput=()=>{if(simulation)return;n.label=input.value;draw()};label.appendChild(input);pane.appendChild(label);const helper=document.createElement('div');helper.textContent='Tipo: '+(types[n.type]?.[0]||n.type)+' · Rotación: '+(n.angle||0)+'°';pane.appendChild(helper);
+function refreshInspector(){const pane=E('inspector');pane.replaceChildren();const n=chosen?.kind==='node'?find(chosen.id):null;if(multi.size>1){pane.textContent=multi.size+' componentes seleccionados. Puedes moverlos juntos o pulsar Supr para eliminar los que no sean barras ni PLC.';return}if(!n){pane.textContent=chosen?.kind==='wire'?'Cable seleccionado: arrastra los puntos naranjas para cambiar la ruta. Clic en el cable > + Punto para ajustar cable. Para ramificar, usa + Unión eléctrica.':'Selecciona un símbolo, barra o PLC para cambiar su nombre.';return}const label=document.createElement('label');label.textContent='Nombre o referencia';const input=document.createElement('input');input.value=nameOf(n);input.maxLength=50;input.disabled=simulation;input.oninput=()=>{if(simulation)return;n.label=input.value;draw()};label.appendChild(input);pane.appendChild(label);const helper=document.createElement('div');helper.textContent='Tipo: '+(types[n.type]?.[0]||n.type)+' · Rotación: '+(n.angle||0)+'°';pane.appendChild(helper);
 if(n.type==='plc'){
  const title=document.createElement('h4');title.textContent='Etiquetas para I/O';pane.appendChild(title);
  const hint=document.createElement('small');hint.textContent='Elige un borne, escribe su nombre (Marcha, Paro, Motor, etc.).';pane.appendChild(hint);
