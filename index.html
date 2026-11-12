@@ -152,11 +152,18 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 @keyframes aura-bob{0%,100%{translate:0 0}50%{translate:0 -6px}}
 @media(prefers-reduced-motion:reduce){.aura-fox,.aura-fox svg{animation:none}}
 @media(max-width:740px){.aura-fox svg{width:46px;height:44px}.aura-fox{bottom:8px}.ladder-panel.studio-floating,.studio-drawer.studio-floating{left:2vw;top:7vh;width:96vw;height:82vh}}
+.ladder-width-row{display:flex!important;flex-direction:row!important;gap:10px;align-items:center!important}.ladder-width-row input{flex:1}
+.layout.ladder-visible{grid-template-columns:195px minmax(0,1fr) minmax(320px,var(--ladder-width,400px))}
+.layout .ladder-panel{width:auto}
+.layout .ladder-panel.studio-floating{width:min(690px,90vw);resize:both}
+.studio-drawer#scenarioPanel.studio-floating{left:8vw;top:8vh}
+.studio-drawer#tutorPanel.studio-floating{left:42vw;top:11vh}
+@media(max-width:1000px){.layout.ladder-visible{grid-template-columns:175px minmax(0,1fr)}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">Scenes</button><button class="push" id="showTutor">Aura · Tutor</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>UNIONES Y RAMIFICACIONES</h4><div class="cards" id="junctions"></div><div class="palette-caption" id="junctionInstructions">Pulsa Punto de unión y haz clic en el espacio donde quieras colocar la conexión.</div><h4>PROGRAMACIÓN INTERNA</h4><div class="cards" id="timers"></div><div class="palette-caption">TON es una instrucción interna: no se conecta con cables físicos.</div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
 <section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
- <div class="ladder-top studio-move-handle"><strong>Ladder Workspace</strong><div class="studio-actions tiny"><button id="ladderDock" title="Panel lateral o flotante">Float</button><button id="ladderMax" title="Maximizar o restaurar">Max</button><button id="closeLadder" title="Cerrar panel">×</button></div></div><nav class="ladder-tabs"><button data-ladder-tab="config" class="active">Program</button><button data-ladder-tab="editor">Ladder Editor</button><button data-ladder-tab="monitor">Monitor</button><button data-ladder-tab="all">All</button></nav>
+ <div class="ladder-top studio-move-handle"><strong>Ladder Workspace</strong><div class="studio-actions tiny"><button id="ladderDock" title="Panel lateral o flotante">Float</button><button id="ladderMax" title="Maximizar o restaurar">Max</button><button id="closeLadder" title="Cerrar panel">×</button></div></div><label class="ladder-width-row">Panel Width · Ancho <input id="ladderWidth" type="range" min="320" max="900" step="20" value="400"></label><nav class="ladder-tabs"><button data-ladder-tab="config" class="active">Program</button><button data-ladder-tab="editor">Ladder Editor</button><button data-ladder-tab="monitor">Monitor</button><button data-ladder-tab="all">All</button></nav>
  <div data-ladder-section="config"><label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
  <textarea id="ladderGoal" rows="3" placeholder="Ejemplo: Al pulsar Marcha se enciende el motor y permanece encendido hasta pulsar Paro."></textarea>
  <label for="ladderPlatform">Plataforma de programación</label><select id="ladderPlatform"><option value="compactlogix">CompactLogix · Studio 5000</option><option value="micrologix">MicroLogix · RSLogix 500</option><option value="delta">Delta DVP · WPLSoft / ISPSoft</option><option value="codesys">CODESYS · IEC 61131-3</option></select><label class="simulation-model"><input id="virtualCPU" type="checkbox" checked> Virtual PLC (Simulation Only)</label><label for="ladderController">CPU Model (optional) · Modelo físico</label><input id="ladderController" placeholder="Opcional, ej. 1769-L24ER / DVP-SS2" maxlength="90"><label for="ladderMode">Comportamiento a implementar</label>
@@ -939,7 +946,7 @@ E('ladderPanel').addEventListener('click',e=>{
  if(button)ladderTab(button.dataset.ladderTab);
 });
 function openLadder(){
- const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
+ const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.toggle('ladder-visible',!panel.classList.contains('studio-floating'));
  populateLadderSelectors();renderLadder();if(!E('ladderPanel').dataset.activeTab)ladderTab('config');scheduleFit();
  E('ladderGoal').focus();
 }
@@ -1544,7 +1551,7 @@ function sceneTick(){
  else if(!E('scenarioPanel').hidden)renderScene();
 }
 function openScenarios(){
- closeLadder();closeTutor();E('scenarioPanel').hidden=false;refreshScenarioEditControls();
+ E('scenarioPanel').hidden=false;refreshScenarioEditControls();
  if(!sceneState.objects.length)configureSceneTemplate(E('sceneTemplate').value||'conveyor');
  renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
 }
@@ -1669,8 +1676,6 @@ function initTutor(){
  tutorMessage('¡Bienvenido al tutor PLC! Selecciona un tema, describe una dificultad o pulsa «Revisar proyecto». También puedo proponerte ejercicios. Las respuestas son material didáctico local; no sustituyen manuales de fabricantes ni pruebas de seguridad.');
 }
 function openTutor(){
- closeLadder();
- E('scenarioPanel').hidden=true;
  E('tutorPanel').hidden=false;
 }
 function closeTutor(){E('tutorPanel').hidden=true}
@@ -1687,6 +1692,52 @@ E('tutorExercise').onclick=()=>{
 };
 E('tutorAsk').onclick=()=>{const value=E('tutorQuestion').value.trim();if(!value)return;tutorMessage(value,true);tutorMessage(tutorAnswer(value));E('tutorQuestion').value=''};
 E('tutorQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();E('tutorAsk').click()}});
+
+
+function toggleFloating(id,layoutToggle){
+ const panel=E(id),was=panel.classList.contains('studio-floating');
+ panel.classList.toggle('studio-floating',!was);
+ panel.classList.remove('studio-max');
+ if(layoutToggle)E('canvas').closest('.layout').classList.toggle('ladder-visible',was&&!panel.hidden);
+ scheduleFit();
+}
+function toggleMaxPanel(id){
+ const panel=E(id);if(!panel.classList.contains('studio-floating'))panel.classList.add('studio-floating');
+ panel.classList.toggle('studio-max');
+ if(id==='ladderPanel')E('canvas').closest('.layout').classList.remove('ladder-visible');
+ scheduleFit();
+}
+function installDragPanel(id){
+ const panel=E(id),header=panel.querySelector('.studio-move-handle');
+ if(!header)return;
+ let session=null;
+ header.addEventListener('pointerdown',e=>{
+  if(e.button!==0||e.target.closest('button')||!panel.classList.contains('studio-floating')||panel.classList.contains('studio-max'))return;
+  const bounds=panel.getBoundingClientRect();
+  session={startX:e.clientX,startY:e.clientY,left:bounds.left,top:bounds.top};
+  header.setPointerCapture(e.pointerId);e.preventDefault();
+ });
+ header.addEventListener('pointermove',e=>{
+  if(!session)return;
+  panel.style.left=Math.max(0,Math.min(window.innerWidth-110,session.left+e.clientX-session.startX))+'px';
+  panel.style.top=Math.max(0,Math.min(window.innerHeight-80,session.top+e.clientY-session.startY))+'px';
+ });
+ header.addEventListener('pointerup',()=>session=null);
+ header.addEventListener('pointercancel',()=>session=null);
+}
+E('ladderDock').onclick=()=>toggleFloating('ladderPanel',true);
+E('ladderMax').onclick=()=>toggleMaxPanel('ladderPanel');
+E('scenarioFloat').onclick=()=>toggleFloating('scenarioPanel',false);
+E('scenarioMax').onclick=()=>toggleMaxPanel('scenarioPanel');
+E('tutorFloat').onclick=()=>toggleFloating('tutorPanel',false);
+E('tutorMax').onclick=()=>toggleMaxPanel('tutorPanel');
+E('ladderWidth').oninput=e=>{
+ E('canvas').closest('.layout').style.setProperty('--ladder-width',e.target.value+'px');
+ scheduleFit();
+};
+['ladderPanel','scenarioPanel','tutorPanel'].forEach(installDragPanel);
+E('auraFox').onclick=()=>openTutor();
+E('auraFox').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTutor()}};
 
 function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
