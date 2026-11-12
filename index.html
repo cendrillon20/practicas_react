@@ -122,6 +122,9 @@ body.phone-mode main{flex:1 1 0;min-height:0}
   <label>Salida controlada<select id="ladderOutput"></select></label>
  </div>
  <label id="ladderDelayWrap">Retardo TON en segundos<input id="ladderDelay" type="number" min="0.1" max="3600" step="0.1" value="3"></label><label id="ladderTimerWrap">Temporizador interno<select id="ladderTimer"></select></label><div class="ladder-wiring"><strong>Datos detectados en el diagrama eléctrico</strong><div id="ladderWiring"></div></div><button id="generateLadder" class="ladder-generate">Validar datos y generar programa Ladder</button><div id="ladderLive" class="ladder-live" aria-live="polite">Aquí aparecerán los estados de las entradas y salidas.</div>
+ <div class="ladder-message">El texto describe el objetivo; para ejecutarlo debes elegir una lógica compatible. Solo se simulan las cinco lógicas básicas y TON indicadas. No interpreta automáticamente cualquier proceso industrial.</div>
+ <button id="runLadderTests" class="ladder-generate" title="Comprobar comportamiento lógico sin modificar el circuito">▶ Probar lógica Ladder</button>
+ <div id="ladderTests" class="ladder-message"></div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
  <strong class="ladder-code-title">Instrucciones de referencia según la plataforma</strong>
@@ -892,6 +895,39 @@ E('generateLadder').onclick=()=>{
  if(missing.length)msg.textContent+=' ATENCIÓN: faltan conexiones en '+missing.map(i=>portName(plc,i)).join(', ')+'. El programa se ha generado, pero no actuará hasta tener las señales necesarias.';
 };
 
+function runLadderTests(){
+ const plc=nodes.find(n=>n.type==='plc'),plan=ladderPlan,target=E('ladderTests');target.replaceChildren();
+ if(!plan||!plc){target.textContent='Primero genera el programa Ladder.';return}
+ const oldInputs=ins,oldRuntime={...ladderRuntime},cases=[];
+ const pins=plcInputPins(plc),a=pins.indexOf(plan.start),b=pins.indexOf(plan.stop);
+ function simulate(name,active,expected,fastForward=false,keep=false){
+  if(!keep)resetLadderRuntime();
+  ins=new Set(active);
+  if(fastForward)ladderRuntime.started=Date.now()-Math.max(100,Number(plan.delaySeconds||3)*1000)-50;
+  const result=evaluateLadder(plc,true);
+  cases.push({name,expected,actual:result?.active===true});
+ }
+ try{
+  if(plan.mode==='direct'){simulate('Sin señal',[],false);simulate('Entrada activa',[a],true)}
+  else if(plan.mode==='inverse'){simulate('Sin señal',[],true);simulate('Entrada activa',[a],false)}
+  else if(plan.mode==='and'){simulate('Ambas apagadas',[],false);simulate('Solo primera',[a],false);simulate('Solo segunda',[b],false);simulate('Ambas activas',[a,b],true)}
+  else if(plan.mode==='or'){simulate('Ambas apagadas',[],false);simulate('Solo primera',[a],true);simulate('Solo segunda',[b],true)}
+  else if(plan.mode==='latch'){
+   const idle=plan.stopPolarity==='no'?[]:[b],start=plan.stopPolarity==='no'?[a]:[a,b],released=idle,stop=plan.stopPolarity==='no'?[b]:[];
+   simulate('En reposo',idle,false);simulate('Pulsar marcha',start,true,false,true);
+   simulate('Soltar marcha',released,true,false,true);simulate('Pulsar paro',stop,false,false,true);
+  }else if(plan.mode==='timer'){
+   simulate('Antes de señal',[],false);simulate('Temporizando',[a],false);
+   simulate('Retardo cumplido',[a],true,true,true);simulate('Entrada desactivada',[],false,false,true);
+  }
+ }finally{ins=oldInputs;ladderRuntime=oldRuntime}
+ const good=cases.filter(x=>x.expected===x.actual).length;
+ const title=document.createElement('strong');title.textContent='Prueba lógica: '+good+' / '+cases.length+' casos correctos';title.style.color=good===cases.length?'#50e1ae':'#ff9a87';target.appendChild(title);
+ for(const c of cases){const row=document.createElement('div');row.textContent=(c.expected===c.actual?'✓ ':'✗ ')+c.name+' → '+(c.actual?'ON':'OFF');target.appendChild(row)}
+ const disclaimer=document.createElement('small');disclaimer.textContent='Estas pruebas verifican la tabla lógica interna, no sustituyen una prueba de cableado, seguridad ni ejecución en el PLC físico.';target.appendChild(disclaimer);
+ updateLadderMonitor();
+}
+E('runLadderTests').onclick=runLadderTests;
 function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
