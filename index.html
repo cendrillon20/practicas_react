@@ -846,7 +846,7 @@ E('addOutput').onclick=()=>changePLC('output',1);E('dropOutput').onclick=()=>cha
 E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=()=>changeExpansion('railplus',-1);
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
 E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics();auraReactToErrors(validate())};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
-E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
+E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();graphicRuntime.clear();graphicPrevOutputs.clear();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('edit').onclick=()=>{resetLadderRuntime();graphicRuntime.clear();graphicPrevOutputs.clear();simulation=false;refreshInspector();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
 const STORAGE_KEY='plc-sim-studio-projects-v1';
 let projectId=null;
 function listProjects(){try{const raw=localStorage.getItem(STORAGE_KEY);const data=raw?JSON.parse(raw):[];return Array.isArray(data)?data:[]}catch{return []}}
@@ -2272,19 +2272,50 @@ function graphInputValue(item,outputs,plc){
  if(item.source==='output')return outputs.has(pin);
  return ins.has(plcInputPins(plc).indexOf(pin));
 }
+
+function graphFunctionBlock(item,incoming,plc,now){
+ const key=Number(item.id),state=graphicRuntime.get(key)||{started:0,last:false,count:0,active:false,done:false};
+ if(!incoming&&item.type!=='BLINK'&&item.type!=='CTU'&&item.type!=='TON'){state.active=false}
+ let output=false;
+ if(item.type==='TON'){
+  if(!incoming){state.started=0;state.done=false}
+  else{if(!state.started)state.started=now;state.done=now-state.started>=Math.max(100,Number(item.seconds||1)*1000)}
+  output=state.done;
+ }else if(item.type==='CTU'){
+  if(item.resetPin!==null&&ins.has(plcInputPins(plc).indexOf(Number(item.resetPin))))state.count=0;
+  else if(incoming&&!state.last)state.count=Math.min(100000,state.count+1);
+  output=state.count>=Math.max(1,Number(item.preset)||4);
+ }else if(item.type==='BLINK'){
+  if(item.resetPin!==null&&ins.has(plcInputPins(plc).indexOf(Number(item.resetPin)))){state.started=0;state.done=false}
+  else if(incoming&&!state.last&&!state.started){state.started=now;state.done=false}
+  if(state.started){
+   const onMs=Math.max(100,Number(item.onSeconds||.4)*1000),offMs=Math.max(100,Number(item.offSeconds||.4)*1000);
+   const period=onMs+offMs,count=Math.max(1,Math.min(100,Number(item.preset)||4)),elapsed=now-state.started;
+   output=elapsed>=count*period?true:(elapsed%period)<onMs;
+   state.done=elapsed>=count*period;
+  }
+ }
+ state.last=!!incoming;state.active=!!output;graphicRuntime.set(key,state);return !!output;
+}
 function evaluateGraphicLadder(plc,ready){
- const results=[],outputs=new Set(),status={};
+ const results=[],outputs=new Set(),status={},now=Date.now();
+ if(!ready){graphicRuntime.clear();graphicPrevOutputs.clear()}
  for(const rung of graphicLadder.rungs){
   let rungOn=false;
   for(let bi=0;bi<rung.branches.length;bi++){
-   const branch=rung.branches[bi];
-   let path=!!ready;
+   const branch=rung.branches[bi];let path=!!ready;
    for(let ci=0;ci<branch.length;ci++){
-    const item=branch[ci],read=item.type==='WIRE'||graphInputValue(item,outputs,plc);
-    const pass=item.type==='WIRE'?true:item.type==='NC'?!read:read;
-    path=path&&pass;
-    status['c:'+item.id]=path;
-    status['test:'+item.id]=pass;
+    const item=branch[ci];let pass=false;
+    if(item.type==='WIRE')pass=true;
+    else if(['TON','CTU','BLINK'].includes(item.type)){
+     const blockOut=graphFunctionBlock(item,path,plc,now);
+     pass=!!blockOut;path=!!ready&&pass;
+    }else{
+     const read=graphInputValue(item,new Set([...graphicPrevOutputs,...outputs]),plc);
+     pass=item.type==='NC'?!read:read;
+     path=path&&pass;
+    }
+    status['c:'+item.id]=path;status['test:'+item.id]=pass;
    }
    status['b:'+rung.id+':'+bi]=path;
    rungOn=rungOn||path;
@@ -2293,6 +2324,7 @@ function evaluateGraphicLadder(plc,ready){
   if(rungOn)outputs.add(Number(rung.output));
   results.push({rungId:rung.id,output:Number(rung.output),active:rungOn});
  }
+ graphicPrevOutputs=outputs;
  graphicLive=status;
  return results;
 }
@@ -2598,6 +2630,9 @@ reset('start');simulation=false;refreshInspector();expansionStatus();updateView(
 initTutor();initAura();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
+window.setInterval(()=>{
+ if(simulation&&graphicLadder.enabled&&graphicLadder.rungs.some(r=>r.branches.some(b=>b.some(i=>['TON','CTU','BLINK'].includes(i.type)))))draw();
+},150);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
  const w=Math.round(rect.width),h=Math.round(rect.height);
