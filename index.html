@@ -263,33 +263,58 @@ function plcInputPins(plc){return [3,4,5,6,8,9,10,11,12,13,...Array.from({length
 function plcOutputPins(plc){return [18,20,22,24,25,26,...Array.from({length:plc.extraOutputs||0},(_,i)=>34+i)]}
 function resetLadderRuntime(){ladderRuntime={key:null,latch:false,started:0,elapsed:0,done:false,active:false,ready:false}}
 function evaluateLadder(plc,ready){
- const plan=ladderPlan;if(!plan){ladderRuntime.ready=ready;return null}
- const key=[plan.mode,plan.start,plan.stop,plan.output,plan.delaySeconds,plan.stopPolarity,plan.timerId].join('|');
+ const plan=ladderPlan;
+ if(!plan){ladderRuntime.ready=ready;return null}
+ const key=[plan.mode,plan.start,plan.stop,plan.output,plan.delaySeconds,plan.stopPolarity,plan.timerId,plan.counterPreset,plan.compareOp,plan.compareThreshold].join('|');
  if(ladderRuntime.key!==key){resetLadderRuntime();ladderRuntime.key=key}
  ladderRuntime.ready=ready;
  const inputPins=plcInputPins(plc),a=ins.has(inputPins.indexOf(Number(plan.start))),b=ins.has(inputPins.indexOf(Number(plan.stop)));
+ const now=Date.now(),previous=ladderRuntime.previousInput||false;
  ladderRuntime.start=!!a;ladderRuntime.stop=!!b;
  let isOn=false;
- if(!ready){ladderRuntime.latch=false;ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false}
- else if(plan.mode==='direct')isOn=a;
+ if(!ready){
+  ladderRuntime.latch=false;ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false;
+  ladderRuntime.count=0;ladderRuntime.previousInput=false;ladderRuntime.tofStarted=0;ladderRuntime.tofRunning=false;
+ }else if(plan.mode==='direct')isOn=a;
  else if(plan.mode==='inverse')isOn=!a;
  else if(plan.mode==='and')isOn=a&&b;
  else if(plan.mode==='or')isOn=a||b;
  else if(plan.mode==='latch'){
-   const stopPermits=plan.stopPolarity==='no'?!b:b;
-   if(!stopPermits)ladderRuntime.latch=false;
-   else if(a)ladderRuntime.latch=true;
-   isOn=ladderRuntime.latch;
- }else if(plan.mode==='timer'){
-   const delay=Math.max(100,Math.min(3600000,Number(plan.delaySeconds||3)*1000));
+  const stopPermits=plan.stopPolarity==='no'?!b:b;
+  if(!stopPermits)ladderRuntime.latch=false;
+  else if(a)ladderRuntime.latch=true;
+  isOn=ladderRuntime.latch;
+ }else if(plan.mode==='timer'||plan.mode==='tof'){
+  const delay=Math.max(100,Math.min(3600000,Number(plan.delaySeconds||3)*1000));
+  if(plan.mode==='timer'){
    if(!a){ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false}
-   else {
-     const now=Date.now();if(!ladderRuntime.started)ladderRuntime.started=now;
-     ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.started);
-     ladderRuntime.done=ladderRuntime.elapsed>=delay;
-   }
+   else{if(!ladderRuntime.started)ladderRuntime.started=now;ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.started);ladderRuntime.done=ladderRuntime.elapsed>=delay}
    isOn=ladderRuntime.done;
+  }else{
+   if(a){ladderRuntime.tofRunning=true;ladderRuntime.tofStarted=0;ladderRuntime.elapsed=0;isOn=true}
+   else if(ladderRuntime.tofRunning){
+    if(!ladderRuntime.tofStarted)ladderRuntime.tofStarted=now;
+    ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.tofStarted);
+    isOn=ladderRuntime.elapsed<delay;
+    if(!isOn)ladderRuntime.tofRunning=false;
+   }
+   ladderRuntime.done=isOn;
+  }
  }
+ else if(plan.mode==='counter'||plan.mode==='ctd'){
+  const preset=Math.max(1,Math.min(100000,Number(plan.counterPreset)||3));
+  if(!Number.isFinite(ladderRuntime.count))ladderRuntime.count=plan.mode==='ctd'?preset:0;
+  if(b){ladderRuntime.count=plan.mode==='ctd'?preset:0}
+  else if(a&&!previous){ladderRuntime.count=Math.max(0,Math.min(100000,ladderRuntime.count+(plan.mode==='ctd'?-1:1)))}
+  isOn=plan.mode==='ctd'?ladderRuntime.count<=0:ladderRuntime.count>=preset;
+  ladderRuntime.done=isOn;
+ }
+ else if(plan.mode==='compare'){
+  const inputNumber=Number(a),threshold=Number(plan.compareThreshold??1);
+  const compare={EQ:()=>inputNumber===threshold,NE:()=>inputNumber!==threshold,GT:()=>inputNumber>threshold,GE:()=>inputNumber>=threshold,LT:()=>inputNumber<threshold,LE:()=>inputNumber<=threshold};
+  isOn=!!compare[plan.compareOp||'EQ']?.();ladderRuntime.done=isOn;
+ }
+ ladderRuntime.previousInput=!!a;
  ladderRuntime.active=!!isOn;
  return {output:Number(plan.output),active:!!isOn};
 }
