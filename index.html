@@ -53,7 +53,7 @@ body.phone-mode main{flex:1;min-height:0}
 .ladder-message{font-size:11px;color:#b1cde9;line-height:1.5}
 .ladder-preview{min-height:125px;overflow-x:auto;background:#091523;border:1px solid #314c6a;border-radius:10px;padding:8px}
 .ladder-preview svg{width:100%;min-width:360px;height:auto;touch-action:auto;user-select:none}
-.ladder-panel small{font-size:11px;color:#91aac8;line-height:1.5}.ladder-code-title{font-size:12px;color:#c5e2ff}.ladder-code{font:12px/1.55 Consolas,Monaco,monospace;white-space:pre;overflow:auto;border:1px solid #395979;border-radius:9px;padding:11px;background:#061523;color:#b7e9d2;max-height:220px}
+.ladder-panel small{font-size:11px;color:#91aac8;line-height:1.5}.ladder-code-title{font-size:12px;color:#c5e2ff}.ladder-editor-actions{display:flex;gap:8px;flex-wrap:wrap}.ladder-editor-actions button{flex:1 1 140px;font-size:12px}.ladder-panel #ladderEditor{font:12px/1.6 Consolas,monospace;min-height:150px;resize:vertical;white-space:pre;tab-size:2}.ladder-code{font:12px/1.55 Consolas,Monaco,monospace;white-space:pre;overflow:auto;border:1px solid #395979;border-radius:9px;padding:11px;background:#061523;color:#b7e9d2;max-height:220px}
 @media(max-width:1000px){
  .layout.ladder-visible{grid-template-columns:190px minmax(0,1fr)}
  .layout.ladder-visible .ladder-panel{position:absolute;right:0;top:56px;bottom:0;width:min(440px,75vw);z-index:9;box-shadow:-10px 0 32px #000a}
@@ -127,7 +127,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div id="ladderTests" class="ladder-message"></div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
- <strong class="ladder-code-title">Instrucciones de referencia según la plataforma</strong>
+ <strong class="ladder-code-title">Editor Ladder / instrucciones de referencia</strong><label>Modifica el programa de texto compatible con el editor; después pulsa «Aplicar y simular».<textarea id="ladderEditor" rows="8" spellcheck="false" placeholder="Ejemplo: XIC(Entrada_0) OTE(Salida_0);"></textarea></label><div class="ladder-editor-actions"><button id="applyLadder" class="ladder-generate">✓ Aplicar y simular código</button><button id="importLadder" class="ladder-generate">↑ Importar Ladder de texto</button><input type="file" id="ladderFile" accept=".txt,.st,.il,.lad,.xml,.l5x" hidden></div><div id="ladderImportFeedback" class="ladder-message">Compatible con las instrucciones básicas incluidas en este editor. No admite proyectos binarios ni programas completos de los fabricantes.</div><strong class="ladder-code-title">Código de referencia
  <pre id="ladderCode" class="ladder-code">Genera el programa para ver las instrucciones.</pre>
  <button id="exportLadder" class="ladder-generate" title="Descargar instrucciones de referencia">↓ Exportar borrador Ladder (.txt)</button>
  <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
@@ -832,10 +832,10 @@ function ladderCoil(root,x,y,label){
 function ladderLabel(i){const plc=nodes.find(n=>n.type==='plc');return plc?portName(plc,i)+(plc.ioLabels?.[i]?' '+plc.ioLabels[i]:''):''}
 function renderLadder(){
  const preview=E('ladderPreview');if(!preview)return;preview.replaceChildren();
- const plan=ladderPlan;if(!plan){E('ladderCode').textContent='Genera el programa para ver las instrucciones.';
+ const plan=ladderPlan;if(!plan){E('ladderCode').textContent='Genera el programa para ver las instrucciones.';E('ladderEditor').value='';
   const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
  }
- E('ladderCode').textContent=ladderPseudoCode(plan);
+ E('ladderCode').textContent=ladderPseudoCode(plan);E('ladderEditor').value=plan.source||ladderPseudoCode(plan);
  E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.controller||'';E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
  E('ladderMode').value=plan.mode||'direct';
  populateLadderSelectors();
