@@ -101,8 +101,38 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  .layout>main{flex:1 1 0;min-height:0}
  .layout.ladder-visible .ladder-panel{top:0;bottom:0;width:100%;position:absolute;z-index:12}
 }
+
+.layout{position:relative}
+.studio-drawer{position:absolute;right:0;top:0;bottom:0;width:min(450px,92vw);z-index:15;overflow-y:auto;overscroll-behavior:contain;background:#0b1d30;border-left:1px solid #45698e;box-shadow:-8px 0 22px #0009;padding:14px;display:flex;flex-direction:column;gap:11px;font-size:12px}
+.studio-drawer[hidden]{display:none}
+.studio-drawer-top{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #37577d;padding-bottom:10px}
+.studio-drawer-top strong{font-size:15px}
+.studio-drawer-top button{background:#1c3552;border:1px solid #4a709a;color:#f1f8ff;padding:3px 10px;border-radius:7px;font-size:21px}
+.studio-lead{margin:0;color:#bad2ec;line-height:1.5}
+.studio-drawer label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#c1d7f4}
+.studio-drawer select,.studio-drawer input,.studio-drawer textarea{width:100%;padding:8px;background:#122740;color:#eaf4ff;border:1px solid #3e628b;border-radius:7px;font:inherit}
+.studio-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.studio-actions>*{flex:1 1 auto;min-width:0}
+.studio-drawer button{cursor:pointer}
+.studio-actions button,.studio-accent{padding:8px 10px;background:#1d4061;border:1px solid #4b769e;color:#f3f8ff;border-radius:8px}
+.studio-accent{background:#096e63;border-color:#1bab93}
+.studio-drawer #sceneCanvas{width:100%;height:auto;aspect-ratio:5/3;border:1px solid #3b567c;border-radius:9px;touch-action:none;background:#071523}
+.studio-subtitle{font-size:12px;color:#e5f1ff}
+.studio-properties{padding:10px;border:1px solid #365574;border-radius:8px;color:#c3d9ed;display:grid;gap:8px}
+.studio-properties label{display:flex;flex-direction:column}
+.studio-status{font-size:11px;color:#abd4ef;border:1px solid #2e506e;background:#112b40;border-radius:9px;padding:10px;line-height:1.5}
+.scene-toggle{display:flex!important;flex-direction:row!important;align-items:center!important}.scene-toggle input{width:auto!important}.scene-input{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2f4864;padding:5px 2px;gap:8px}
+.scene-input button{background:#213b58;color:#e9f4ff;border:1px solid #4c6d8e;padding:5px 10px;border-radius:7px}
+.scene-input button.active{background:#086f58;border-color:#30d1a5}
+.tutor-chat{border:1px solid #345875;background:#09182b;border-radius:10px;min-height:160px;max-height:42vh;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:10px}
+.tutor-bubble{padding:9px 11px;border-radius:9px;background:#17324b;line-height:1.55;color:#d7eaff;white-space:pre-wrap}
+.tutor-bubble.user{background:#1d465f;align-self:flex-end;color:#f5fdff;max-width:94%}
+.tutor-bubble.bot{align-self:flex-start;max-width:100%}
+.tutor-references{display:flex;flex-direction:column;gap:7px;border-top:1px solid #344b69;padding-top:11px}
+.tutor-references a{color:#82c9ff;text-decoration:underline;font-size:11px}
+@media(max-width:680px){.studio-drawer{width:100%}.studio-drawer #sceneCanvas{max-height:270px}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">🏭 Escenarios</button><button class="push" id="showTutor">🎓 Tutor PLC</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>UNIONES Y RAMIFICACIONES</h4><div class="cards" id="junctions"></div><div class="palette-caption" id="junctionInstructions">Pulsa Punto de unión y haz clic en el espacio donde quieras colocar la conexión.</div><h4>PROGRAMACIÓN INTERNA</h4><div class="cards" id="timers"></div><div class="palette-caption">TON es una instrucción interna: no se conecta con cables físicos.</div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
 <section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
  <div class="ladder-top"><strong>▤ Programa escalera (Ladder)</strong><button id="closeLadder" title="Cerrar panel">×</button></div>
@@ -125,7 +155,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div class="ladder-message">El texto describe el objetivo; para ejecutarlo debes elegir una lógica compatible. Solo se simulan las cinco lógicas básicas y TON indicadas. No interpreta automáticamente cualquier proceso industrial.</div>
  <button id="runLadderTests" class="ladder-generate" title="Comprobar comportamiento lógico sin modificar el circuito">▶ Probar lógica Ladder</button>
  <button id="reviewLadder" class="ladder-generate">⚠ Analizar programa y cableado</button>
- <button id="copyAIPrompt" class="ladder-generate" title="Copiar los datos necesarios para revisarlos con una IA externa">✦ Copiar consulta para IA</button>
+ <button id="openTutorFromLadder" class="ladder-generate">🎓 Preguntar al tutor integrado</button>
  <div id="ladderTests" class="ladder-message"></div><div id="ladderReview" class="ladder-review"></div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
@@ -133,7 +163,31 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <pre id="ladderCode" class="ladder-code">Genera el programa para ver las instrucciones.</pre>
  <button id="exportLadder" class="ladder-generate" title="Descargar instrucciones de referencia">↓ Exportar borrador Ladder (.txt)</button>
  <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
-</section></div>
+</section>
+<section id="scenarioPanel" class="studio-drawer" hidden aria-label="Escenarios industriales interactivos">
+ <div class="studio-drawer-top"><strong>🏭 Laboratorio de escenarios</strong><button id="closeScenarios" title="Cerrar panel">×</button></div>
+ <p class="studio-lead">Construye una escena 2D y vincula sus elementos a entradas y salidas del PLC. Las señales virtuales son didácticas; no sustituyen el cableado real.</p>
+ <label>Escenario inicial<select id="sceneTemplate"><option value="conveyor">Cinta transportadora</option><option value="traffic">Semáforo de tres luces</option><option value="robot">Brazo robótico y estación</option><option value="lights">Iluminación industrial</option></select></label>
+ <div class="studio-actions"><button id="loadSceneTemplate">Crear escenario</button><button id="clearScene">Vaciar escena</button></div>
+ <svg id="sceneCanvas" viewBox="0 0 800 480" aria-label="Escena industrial construible"></svg>
+ <div class="studio-actions"><select id="sceneAddType"><option value="belt">Cinta</option><option value="box">Caja</option><option value="sensor">Sensor</option><option value="traffic">Semáforo</option><option value="arm">Brazo</option><option value="lamp">Lámpara</option><option value="motor">Motor</option><option value="switch">Interruptor</option></select><button id="addSceneObject">＋ Agregar objeto</button></div>
+ <div id="sceneProperties" class="studio-properties">Selecciona un elemento de la escena para editar sus señales, nombre o eliminarlo.</div>
+ <label class="scene-toggle"><input id="sceneEnabled" type="checkbox" checked> Permitir entradas virtuales en modo Simular</label><label class="scene-toggle"><input id="sceneAutoSensor" type="checkbox"> Activar fotoceldas automáticamente cuando pasa una caja</label><strong class="studio-subtitle">Entradas virtuales del escenario</strong>
+ <div id="sceneInputs"></div>
+ <div id="sceneChallenge" class="studio-status"></div><button id="sceneEvaluate" class="studio-accent">✓ Evaluar práctica</button><div id="sceneStatus" class="studio-status"></div>
+ <button id="sceneCoach" class="studio-accent">🎓 Revisar escenario con el tutor</button>
+</section>
+<section id="tutorPanel" class="studio-drawer" hidden aria-label="Tutor didáctico de PLC">
+ <div class="studio-drawer-top"><strong>🎓 Tutor de automatización</strong><button id="closeTutor" title="Cerrar panel">×</button></div>
+ <p class="studio-lead">Tutor integrado, disponible sin conexión. Explica conceptos, revisa tu circuito y plantea ejercicios. Sus respuestas proceden de una base didáctica y reglas de diagnóstico, no de un modelo generativo.</p>
+ <label>Consultar tema<select id="tutorTopic"></select></label>
+ <div class="studio-actions"><button id="tutorExplain">Explicar tema</button><button id="tutorReview">⚠ Revisar proyecto</button><button id="tutorExercise">📝 Proponer ejercicio</button></div>
+ <div id="tutorChat" class="tutor-chat" aria-live="polite"></div>
+ <label>Pregunta al tutor<textarea id="tutorQuestion" rows="3" placeholder="Ej.: ¿Por qué no enciende la lámpara? ¿Cómo funciona TON?"></textarea></label>
+ <button id="tutorAsk" class="studio-accent">Enviar pregunta</button>
+ <div class="tutor-references"><strong>Documentación de fabricantes</strong><a href="https://www.rockwellautomation.com/es-es/docs/studio-5000-logix-designer/38-00/contents-ditamap/studio-5000-logix-designer.html" target="_blank" rel="noopener noreferrer">Rockwell Studio 5000 · ayuda oficial</a><a href="https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1762-rm001_-en-p.pdf" target="_blank" rel="noopener noreferrer">Rockwell MicroLogix · instrucciones</a><a href="https://www.deltaww.com/en-US/service-support/faq/326" target="_blank" rel="noopener noreferrer">Delta · WPLSoft / ISPSoft</a><a href="https://content.helpme-codesys.com/es/CODESYS%20LD%20FBD/_cds_programming_in_ld.html" target="_blank" rel="noopener noreferrer">CODESYS · programación LD</a></div>
+</section>
+</div>
 <script>
 (()=>{
 'use strict';
@@ -208,6 +262,11 @@ for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&potential.ha
 potential=reach(src);
 const ready=potential.has(K(plc,0))&&zero.has(K(plc,1));
 for(let i=0;i<10+(plc.extraInputs||0);i++){const term=i<10?(i<4?i+3:i+4):28+i-10;if(ready&&potential.has(K(plc,term)))ins.add(i)}
+// Las señales de laboratorio se suman explícitamente a las E/S físicas;
+// no representan un voltaje real en el borne ni anulan un corto circuito.
+if(ready&&sceneState.enabled)for(const [pin,on] of Object.entries(sceneState.virtual)){
+ if(on){const i=plcInputPins(plc).indexOf(Number(pin));if(i>=0)ins.add(i)}
+}
 const configured=evaluateLadder(plc,ready);
 const op=plcOutputPins(plc);
 if(configured){
@@ -632,7 +691,7 @@ E('addOutput').onclick=()=>changePLC('output',1);E('dropOutput').onclick=()=>cha
 E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=()=>changeExpansion('railplus',-1);
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
 E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
-E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
+E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();refreshSceneProperties();refreshSceneInputs();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
 const STORAGE_KEY='plc-sim-studio-projects-v1';
 let projectId=null;
 function listProjects(){try{const raw=localStorage.getItem(STORAGE_KEY);const data=raw?JSON.parse(raw):[];return Array.isArray(data)?data:[]}catch{return []}}
@@ -1126,18 +1185,402 @@ function showLadderReview(){
  list.appendChild(ul);
 }
 E('reviewLadder').onclick=showLadderReview;
-E('copyAIPrompt').onclick=async()=>{
- const plc=nodes.find(n=>n.type==='plc'),platform=E('ladderPlatform').value,controller=E('ladderController').value;
- const desc=E('ladderGoal').value.trim(),pins=plc?[...plcInputPins(plc),...plcOutputPins(plc)]:[];
- const io=pins.map(pin=>portName(plc,pin)+' / '+(plc.ioLabels?.[pin]||'sin etiqueta')+' / conectado: '+wiringItems(pin).join(', ')).join('\n');
- const request='Revisa este proyecto PLC DIDÁCTICO. Propón un programa Ladder y señala las conexiones y supuestos inseguros. NO inventes características del hardware. Explica cada red y solicita aclaraciones si el proceso no está especificado.\nPlataforma: '+platform+'\nModelo: '+controller+'\nObjetivo: '+desc+'\nEntradas/salidas y conexiones:\n'+io+'\nLadder actual:\n'+E('ladderEditor').value;
- try{
-  if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(request);E('ladderImportFeedback').textContent='Consulta copiada. Pégala en la IA que prefieras para solicitar una revisión; la web no cuenta aún con una conexión directa a un modelo de IA.'}
-  else{E('ladderEditor').value=request;E('ladderImportFeedback').textContent='No se pudo usar el portapapeles; se dejó la consulta en el editor para copiarla manualmente. No la apliques como Ladder.'}
- }catch{E('ladderImportFeedback').textContent='No se pudo copiar. Revisa el permiso del portapapeles de tu navegador.'}
-};
 
-function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
+
+
+const sceneTypes={
+ belt:{name:'Cinta transportadora',io:'output',width:280},
+ box:{name:'Caja / producto',io:'none',width:44},
+ sensor:{name:'Sensor de paso',io:'input',width:30},
+ traffic:{name:'Semáforo',io:'traffic',width:90},
+ arm:{name:'Brazo robótico',io:'output',width:115},
+ lamp:{name:'Lámpara',io:'output',width:46},
+ motor:{name:'Motor',io:'output',width:55},
+ switch:{name:'Pulsador / interruptor',io:'input',width:42}
+};
+let sceneState={template:'conveyor',objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0},sceneNext=1,sceneDrag=null;
+function sceneSignalPins(type){
+ const plc=nodes.find(n=>n.type==='plc');if(!plc)return [];
+ return sceneTypes[type]?.io==='input'?plcInputPins(plc):plcOutputPins(plc);
+}
+function sceneOutput(pin){
+ if(!simulation)return false;
+ const plc=nodes.find(n=>n.type==='plc');if(!plc||pin===null||pin===undefined)return false;
+ const idx=plcOutputPins(plc).indexOf(Number(pin));return idx>=0&&outs.has(idx);
+}
+function sceneInput(pin){return !!sceneState.virtual[String(pin)]}
+function sceneSVGEl(tag,attrs={},parent=E('sceneCanvas')){
+ const el=document.createElementNS(NS,tag);
+ for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));
+ parent.appendChild(el);return el;
+}
+function sceneLabel(parent,x,y,text,attrs={}){
+ const txt=sceneSVGEl('text',{x,y,'font-size':13,fill:'#c3dff6','text-anchor':'middle','font-family':'Segoe UI,Arial,sans-serif',...attrs},parent);
+ txt.textContent=String(text).slice(0,30);return txt;
+}
+function addSceneObject(type,x=270,y=230,extra={}){
+ if(!sceneTypes[type])return null;
+ const pins=sceneSignalPins(type);
+ const item={id:sceneNext++,type,x,y,label:sceneTypes[type].name,pin:pins[0]??null,...extra};
+ if(type==='traffic'){const out=plcOutputPins(nodes.find(n=>n.type==='plc'));item.pin=out[0]??null;item.pin2=out[1]??null;item.pin3=out[2]??null}
+ sceneState.objects.push(item);return item;
+}
+function normalizeScene(raw){
+ const state=raw&&typeof raw==='object'?raw:{};
+ const elements=Array.isArray(state.objects)?state.objects.filter(o=>o&&sceneTypes[o.type]&&Number.isFinite(o.x)&&Number.isFinite(o.y)).slice(0,40):[];
+ sceneNext=Math.max(0,...elements.map(o=>Number(o.id)||0))+1;
+ sceneState={template:typeof state.template==='string'?state.template:'conveyor',objects:elements,virtual:state.virtual&&typeof state.virtual==='object'?state.virtual:{},selected:null,enabled:state.enabled!==false,autoSensor:state.autoSensor===true,frame:0};
+ E('sceneTemplate').value=sceneState.template;E('sceneEnabled').checked=sceneState.enabled;E('sceneAutoSensor').checked=sceneState.autoSensor;
+ renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
+}
+function configureSceneTemplate(which){
+ if(!['conveyor','traffic','robot','lights'].includes(which))which='conveyor';
+ sceneState={template:which,objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0};sceneNext=1;
+ const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
+ const ip=plcInputPins(plc),op=plcOutputPins(plc);
+ const labels=[
+ ['conveyor',[['belt',165,270,{label:'Transportador M1',pin:op[0]}],['box',210,238,{label:'Pieza A'}],['sensor',490,238,{label:'Fotocelda S1',pin:ip[0]}],['motor',78,315,{label:'Motor M1',pin:op[0]}]]],
+ ['traffic',[['traffic',345,90,{label:'Semáforo 1',pin:op[0],pin2:op[1],pin3:op[2]}],['switch',195,318,{label:'Solicitud peatón',pin:ip[0]}],['lamp',550,318,{label:'Piloto auxiliar',pin:op[3]}]]],
+ ['robot',[['arm',180,125,{label:'Brazo A1',pin:op[0]}],['box',520,305,{label:'Pieza B'}],['sensor',560,250,{label:'Presencia S1',pin:ip[0]}],['lamp',620,100,{label:'Pinza / estado',pin:op[1]}]]],
+ ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]]
+ ];
+ for(const item of labels.find(x=>x[0]===which)[1])addSceneObject(...item);
+ E('sceneTemplate').value=which;E('sceneEnabled').checked=true;E('sceneAutoSensor').checked=false;
+ renderScene();refreshSceneProperties();refreshSceneInputs();sceneStatus();updateSceneChallenge();
+}
+function sceneCoordinate(e){
+ const svg=E('sceneCanvas'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+ return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function drawScenarioObject(o){
+ const svg=E('sceneCanvas'),g=sceneSVGEl('g',{'data-scene-id':o.id,transform:'translate('+o.x+' '+o.y+')',style:'cursor:pointer'},svg);
+ const selected=sceneState.selected===o.id,signal=sceneOutput(o.pin),stroke=selected?'#ffcb62':'#8cb5d5';
+ const rect=(x,y,w,height,fill,extra={})=>sceneSVGEl('rect',{x,y,width:w,height,rx:5,fill,stroke,...extra},g);
+ const circ=(x,y,r,fill,extra={})=>sceneSVGEl('circle',{cx:x,cy:y,r,fill,stroke,...extra},g);
+ const line=(x1,y1,x2,y2,extra={})=>sceneSVGEl('line',{x1,y1,x2,y2,stroke:'#bad4f3','stroke-width':5,'stroke-linecap':'round',...extra},g);
+ if(o.type==='belt'){
+  rect(-140,-28,280,58,signal?'#145c5a':'#28445e');
+  for(let i=-112;i<=112;i+=40)circ(i,0,12,'#102e44',{'stroke-width':2});
+  line(-140,30,140,30,{'stroke-width':6});
+  sceneLabel(g,0,-44,'Cinta · '+(signal?'EN MARCHA':'PARADA'),{fill:signal?'#55edbc':'#a6c0dd'});
+ }else if(o.type==='box'){
+  rect(-23,-21,46,42,'#a16e3c',{'stroke-width':3});
+  sceneSVGEl('path',{d:'M-23 -21L0 -10L23 -21M0 -10V21',stroke:'#d7ad70','stroke-width':2,fill:'none'},g);
+ }else if(o.type==='sensor'){
+  const active=sceneInput(o.pin);
+  rect(-17,-18,34,36,active?'#146b53':'#36566c');
+  circ(0,0,6,active?'#5bffc6':'#bad4ec');
+  line(20,-10,58,-10,{'stroke-width':2,'stroke-dasharray':'4 3',stroke:active?'#42e5b1':'#7198ba'});
+  sceneLabel(g,0,-35,active?'SENSOR ON':'SENSOR OFF',{fill:active?'#6ef6ce':'#bfd0ed'});
+ }else if(o.type==='traffic'){
+  rect(-38,-12,76,200,'#182b3e',{'stroke-width':4,rx:13});
+  circ(0,34,22,sceneOutput(o.pin)?'#ff535d':'#512630',{'stroke-width':2});
+  circ(0,89,22,sceneOutput(o.pin2)?'#ffd052':'#514526',{'stroke-width':2});
+  circ(0,144,22,sceneOutput(o.pin3)?'#3bf6a2':'#244c3c',{'stroke-width':2});
+  line(0,189,0,235,{'stroke-width':8});
+ }else if(o.type==='arm'){
+  rect(-44,120,88,21,'#36577a');
+  circ(0,115,17,'#3f7294');
+  const t=signal?0.7:-0.4,elbowX=70*Math.cos(t),elbowY=115-70*Math.sin(t);
+  line(0,115,elbowX,elbowY,{'stroke-width':19,stroke:'#54a7d9'});
+  circ(elbowX,elbowY,12,'#daecfd');
+  line(elbowX,elbowY,elbowX+54,elbowY-42,{'stroke-width':15,stroke:'#77c5f3'});
+  line(elbowX+54,elbowY-42,elbowX+65,elbowY-26,{'stroke-width':5});
+  line(elbowX+54,elbowY-42,elbowX+47,elbowY-23,{'stroke-width':5});
+ }else if(o.type==='lamp'){
+  circ(0,0,28,signal?'#ffd069':'#343f57',{'stroke-width':4,stroke:signal?'#fff9c5':'#7292b2'});
+  if(signal)circ(0,0,40,'#ffd56d',{opacity:.14,stroke:'none'});
+  line(-13,35,13,35);line(-10,44,10,44);
+ }else if(o.type==='motor'){
+  circ(0,0,29,signal?'#146a57':'#36536a',{'stroke-width':3});
+  sceneLabel(g,0,8,'M',{fill:signal?'#6affbf':'#dfebf8','font-size':24,'font-weight':'bold'});
+  line(30,0,56,0);
+ }else if(o.type==='switch'){
+  const active=sceneInput(o.pin);
+  rect(-25,-22,50,45,active?'#0f755b':'#36566c');
+  circ(0,0,12,active?'#7cffe1':'#c0d8ed');
+  sceneLabel(g,0,-38,active?'ACTIVO':'INACTIVO');
+ }
+ if(o.type!=='belt'&&o.type!=='sensor'&&o.type!=='switch')sceneLabel(g,0,o.type==='traffic'?260:o.type==='arm'?166:66,o.label||sceneTypes[o.type].name);
+ const makeHit=()=>{g.onpointerdown=e=>{
+  e.preventDefault();e.stopPropagation();
+  if(simulation){
+   if(['sensor','switch'].includes(o.type)){sceneState.virtual[o.pin]=!sceneInput(o.pin);draw();renderScene();refreshSceneInputs()}
+   return;
+  }
+  sceneState.selected=o.id;refreshSceneProperties();renderScene();
+  const p=sceneCoordinate(e);sceneDrag={id:o.id,dx:p.x-o.x,dy:p.y-o.y};
+  svg.setPointerCapture(e.pointerId);
+ }};
+ makeHit();
+}
+function renderScene(){
+ const svg=E('sceneCanvas');if(!svg)return;svg.replaceChildren();
+ sceneSVGEl('rect',{x:0,y:0,width:800,height:480,fill:'#0b2237',rx:7},svg);
+ for(let x=0;x<=800;x+=40)sceneSVGEl('line',{x1:x,y1:0,x2:x,y2:480,stroke:'#1d3551','stroke-width':.8},svg);
+ for(let y=0;y<=480;y+=40)sceneSVGEl('line',{x1:0,y1:y,x2:800,y2:y,stroke:'#1d3551','stroke-width':.8},svg);
+ sceneSVGEl('line',{x1:0,y1:445,x2:800,y2:445,stroke:'#43647b','stroke-width':3},svg);
+ for(const o of sceneState.objects)drawScenarioObject(o);
+ sceneStatus();
+}
+const sceneChallenges={
+ conveyor:{goal:'Control de cinta: crea una banda, una caja y un sensor. Relaciona sensor I/0 con una salida de motor y comprueba su movimiento.',steps:['Coloca cinta, caja y sensor','Configura I/O','Crea Ladder directo o con enclavamiento','Activa entrada y comprueba movimiento']},
+ traffic:{goal:'Semáforo: coloca un señalizador con tres salidas distintas. Documenta fases rojo–verde–ámbar y sus condiciones; esta edición no ejecuta automáticamente la secuencia multisalida.',steps:['Coloca un semáforo','Asigna tres salidas diferentes','Define estados y tiempos','Reconoce el límite actual del Ladder de una sola salida']},
+ robot:{goal:'Brazo: coloca brazo y detector. Haz que la señal de presencia active su salida. La animación solo representa movimiento lógico, no cinemática.',steps:['Coloca brazo y sensor','Asigna una entrada y salida','Genera una red de control','Simula presencia y observa el brazo']},
+ lights:{goal:'Luces: coloca lámparas e interruptor. Relaciona entrada y salida para un control digital y verifica sus estados.',steps:['Coloca luces e interruptor','Asigna pines válidos','Genera Ladder de activación','Comprueba lámpara apagada y encendida']}
+};
+function evaluateSceneChallenge(){
+ const state=sceneState,scene=state.objects,plan=ladderPlan;
+ const exists=type=>scene.some(o=>o.type===type);
+ const pinMatch=()=>plan&&scene.some(o=>['belt','lamp','motor','arm'].includes(o.type)&&Number(o.pin)===Number(plan.output));
+ const sensors=scene.filter(o=>['sensor','switch'].includes(o.type));
+ const inputMatch=()=>plan&&sensors.some(o=>Number(o.pin)===Number(plan.start));
+ let tests=[];
+ if(state.template==='conveyor')tests=[['Hay cinta, caja y sensor',exists('belt')&&exists('box')&&exists('sensor')],['Existe programa Ladder',!!plan],['La salida Ladder controla la cinta',!!(plan&&scene.some(o=>o.type==='belt'&&Number(o.pin)===Number(plan.output)))],['La entrada Ladder corresponde al sensor',!!inputMatch()]];
+ else if(state.template==='robot')tests=[['Hay brazo y sensor',exists('arm')&&exists('sensor')],['Hay Ladder aplicado',!!plan],['La salida controla el brazo',!!(plan&&scene.some(o=>o.type==='arm'&&Number(o.pin)===Number(plan.output)))],['La entrada corresponde al sensor',!!inputMatch()]];
+ else if(state.template==='lights')tests=[['Hay lámpara e interruptor',exists('lamp')&&exists('switch')],['Hay Ladder aplicado',!!plan],['La salida corresponde a una lámpara',!!pinMatch()],['La entrada corresponde al interruptor',!!inputMatch()]];
+ else {
+  const traffic=scene.find(o=>o.type==='traffic');
+  tests=[['Hay semáforo',!!traffic],['Rojo, ámbar y verde usan pines distintos',!!(traffic&&new Set([traffic.pin,traffic.pin2,traffic.pin3]).size===3)],['Hay un Ladder básico configurado',!!plan]];
+ }
+ const good=tests.filter(x=>x[1]).length;
+ const lines=['EVALUACIÓN: '+good+' de '+tests.length+' criterios satisfechos.',...tests.map(([label,ok])=>(ok?'✓ ':'✗ ')+label)];
+ if(state.template==='traffic')lines.push('LÍMITE: la secuencia de tres salidas necesita un ejecutor Ladder de múltiples redes; esta práctica verifica configuración y visualización parcial.');
+ lines.push('Esto es una comprobación educativa. No equivale a FAT, SAT ni validación de seguridad.');
+ return lines.join('\n');
+}
+function updateSceneChallenge(){
+ const target=E('sceneChallenge');if(!target)return;
+ const challenge=sceneChallenges[sceneState.template]||sceneChallenges.conveyor;
+ target.textContent='MISIÓN: '+challenge.goal+'\n'+challenge.steps.map((x,i)=>(i+1)+'. '+x).join('\n');
+ target.style.whiteSpace='pre-wrap';
+}
+E('sceneEvaluate').onclick=()=>{const txt=evaluateSceneChallenge();E('sceneChallenge').textContent=txt;E('sceneChallenge').style.whiteSpace='pre-wrap'};
+function sceneStatus(){
+ const area=E('sceneStatus');if(!area)return;
+ const count=sceneState.objects.length,connected=sceneState.objects.filter(o=>['belt','lamp','traffic','arm','motor'].includes(o.type)&&sceneOutput(o.pin)).length;
+ area.textContent='Objetos: '+count+' · Actuadores con salida energizada: '+connected+' · Señales virtuales habilitadas: '+(sceneState.enabled?'sí':'no')+
+ '. El movimiento, luces y señales corresponden a la simulación didáctica. No hay físicas realistas, cinemática exacta ni control seguro de maquinaria.';
+}
+function refreshSceneInputs(){
+ const panel=E('sceneInputs');if(!panel)return;panel.replaceChildren();
+ const sensors=sceneState.objects.filter(o=>['sensor','switch'].includes(o.type));
+ if(!sensors.length){panel.textContent='No hay sensores ni interruptores en este escenario.';return}
+ for(const o of sensors){
+  const row=document.createElement('div');row.className='scene-input';
+  const name=document.createElement('span');name.textContent=o.label+' · '+(o.pin!=null?portName(nodes.find(n=>n.type==='plc'),o.pin):'sin asignar');
+  const button=document.createElement('button');button.textContent=sceneInput(o.pin)?'ON':'OFF';button.className=sceneInput(o.pin)?'active':'';
+  button.disabled=!simulation;
+  button.onclick=()=>{sceneState.virtual[o.pin]=!sceneInput(o.pin);draw();renderScene();refreshSceneInputs()};
+  row.append(name,button);panel.appendChild(row);
+ }
+}
+function refreshSceneProperties(){
+ const panel=E('sceneProperties');if(!panel)return;panel.replaceChildren();
+ const item=sceneState.objects.find(o=>o.id===sceneState.selected);
+ if(!item){panel.textContent='Selecciona un objeto para cambiar su nombre y asignar señales de entrada o salida.';return}
+ const title=document.createElement('strong');title.textContent=sceneTypes[item.type].name;panel.appendChild(title);
+ const label=document.createElement('label');label.textContent='Nombre';
+ const name=document.createElement('input');name.value=item.label||'';name.maxLength=36;name.disabled=simulation;
+ name.oninput=()=>{item.label=name.value.slice(0,36);renderScene()};label.appendChild(name);panel.appendChild(label);
+ const kind=sceneTypes[item.type].io;
+ if(kind!=='none'){
+  const assign=(field,text,io)=>{
+   const l=document.createElement('label');l.textContent=text;
+   const select=document.createElement('select');select.disabled=simulation;
+   const plc=nodes.find(n=>n.type==='plc');
+   const pins=io==='input'?plcInputPins(plc):plcOutputPins(plc);
+   for(const pin of pins){const op=document.createElement('option');op.value=String(pin);op.textContent=portName(plc,pin)+(plc.ioLabels?.[pin]?' · '+plc.ioLabels[pin]:'');select.appendChild(op)}
+   select.value=String(item[field]??pins[0]);select.onchange=()=>{item[field]=Number(select.value);refreshSceneInputs();renderScene()};l.appendChild(select);panel.appendChild(l);
+  };
+  assign('pin',kind==='input'?'Entrada PLC':'Salida PLC (principal)',kind==='input'?'input':'output');
+  if(kind==='traffic'){assign('pin2','Salida ámbar','output');assign('pin3','Salida verde','output')}
+ }
+ const del=document.createElement('button');del.textContent='Eliminar objeto';del.disabled=simulation;
+ del.onclick=()=>{sceneState.objects=sceneState.objects.filter(o=>o.id!==item.id);sceneState.selected=null;renderScene();refreshSceneInputs();refreshSceneProperties()};
+ panel.appendChild(del);
+}
+function sceneFeedback(){
+ const objs=sceneState.objects,out=[];
+ if(!objs.length)return 'Escenario vacío: agrega elementos y vincúlalos a entradas/salidas.';
+ const plc=nodes.find(n=>n.type==='plc');
+ if(!sceneState.enabled)out.push('Las entradas virtuales están deshabilitadas.');
+ for(const o of objs){
+  const kind=sceneTypes[o.type]?.io;
+  if(kind==='input'&&!plcInputPins(plc).includes(Number(o.pin)))out.push(o.label+': selecciona una entrada digital válida.');
+  if(['output','traffic'].includes(kind)&&!plcOutputPins(plc).includes(Number(o.pin)))out.push(o.label+': selecciona una salida digital válida.');
+  if(kind==='traffic'&&(!plcOutputPins(plc).includes(Number(o.pin2))||!plcOutputPins(plc).includes(Number(o.pin3))))out.push(o.label+': faltan salidas para ámbar o verde.');
+ }
+ if(sceneState.template==='traffic')out.push('El semáforo completo requiere varias salidas y lógica de secuencia; el motor Ladder actual solo programa una salida a la vez.');
+ if(sceneState.template==='robot')out.push('El brazo visualiza una condición digital, no simula control de servo, cinemática, límites o trayectorias.');
+ if(!ladderPlan)out.push('No hay Ladder generado o importado. Abre Programa escalera y asocia una salida.');
+ else if(!objs.some(o=>o.pin===ladderPlan.output&&sceneTypes[o.type]?.io!=='input'))out.push('La salida Ladder elegida no está asignada a ningún actuador de la escena.');
+ if(!out.length)out.push('Escenario listo para la prueba básica. Verifica el circuito físico y el Ladder por separado.');
+ return out.join('\n');
+}
+function sceneTick(){
+ if(!simulation||!sceneState.objects.length)return;
+ let changed=false;
+ const belts=sceneState.objects.filter(o=>o.type==='belt'&&sceneOutput(o.pin));
+ if(belts.length){
+  for(const box of sceneState.objects.filter(o=>o.type==='box')){
+   const b=belts.find(b=>Math.abs(box.y-b.y)<100&&box.x>=b.x-175&&box.x<=b.x+180);
+   if(b){box.x+=3;changed=true;if(box.x>b.x+155)box.x=b.x-160}
+  }
+ }
+ if(sceneState.autoSensor&&sceneState.enabled){
+  for(const sensor of sceneState.objects.filter(o=>o.type==='sensor')){
+   const active=sceneState.objects.some(box=>box.type==='box'&&Math.abs(box.x-sensor.x)<32&&Math.abs(box.y-sensor.y)<65);
+   if(sceneInput(sensor.pin)!==active){sceneState.virtual[sensor.pin]=active;changed=true}
+  }
+ }
+ if(changed){draw();renderScene();refreshSceneInputs()}
+ else if(!E('scenarioPanel').hidden)renderScene();
+}
+function openScenarios(){
+ closeLadder();closeTutor();E('scenarioPanel').hidden=false;
+ if(!sceneState.objects.length)configureSceneTemplate(E('sceneTemplate').value||'conveyor');
+ renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
+}
+function closeScenarios(){E('scenarioPanel').hidden=true}
+E('showScenarios').onclick=openScenarios;
+E('closeScenarios').onclick=closeScenarios;
+E('loadSceneTemplate').onclick=()=>{
+ if(!confirm('¿Crear escenario nuevo? Los objetos de la escena actual se reemplazarán.'))return;
+ configureSceneTemplate(E('sceneTemplate').value);
+};
+E('clearScene').onclick=()=>{if(!confirm('¿Vaciar la escena actual?'))return;sceneState.objects=[];sceneState.virtual={};sceneState.selected=null;renderScene();refreshSceneInputs();refreshSceneProperties()};
+E('addSceneObject').onclick=()=>{
+ const type=E('sceneAddType').value;
+ const o=addSceneObject(type,220+sceneState.objects.length*23,180+sceneState.objects.length*14);
+ if(o){sceneState.selected=o.id;renderScene();refreshSceneInputs();refreshSceneProperties()}
+};
+E('sceneEnabled').onchange=e=>{sceneState.enabled=e.target.checked;draw();renderScene()};
+E('sceneAutoSensor').onchange=e=>{sceneState.autoSensor=e.target.checked;renderScene()};
+E('sceneCanvas').onpointermove=e=>{
+ if(!sceneDrag||simulation)return;
+ const item=sceneState.objects.find(o=>o.id===sceneDrag.id);if(!item)return;
+ const p=sceneCoordinate(e);item.x=Math.max(30,Math.min(770,Math.round((p.x-sceneDrag.dx)/5)*5));
+ item.y=Math.max(30,Math.min(420,Math.round((p.y-sceneDrag.dy)/5)*5));
+ renderScene();
+};
+E('sceneCanvas').onpointerup=()=>sceneDrag=null;
+E('sceneCanvas').onpointercancel=()=>sceneDrag=null;
+E('sceneCanvas').onpointerdown=e=>{if(!simulation&&e.target===E('sceneCanvas')){sceneState.selected=null;refreshSceneProperties();renderScene()}};
+E('sceneCoach').onclick=()=>{const answer=sceneFeedback();openTutor();tutorMessage('REVISIÓN DEL ESCENARIO\n'+answer)};
+
+const tutorLibrary=[
+{id:'basics',title:'Qué es un PLC',terms:'plc controlador cpu automatización funcionamiento',lesson:'Un controlador lógico programable lee señales, ejecuta lógica y actualiza salidas. Su arquitectura incluye CPU, memoria, fuente, entradas, salidas y comunicaciones. La aplicación determina el comportamiento; el dibujo eléctrico determina por dónde llegan señales y energía. En este simulador hay un único controlador didáctico de 24 V CC; no es un gemelo digital de una CPU comercial.',practice:'Identifica qué sensores llegan a I/0 e I/1, y qué actuador depende de O/0.'},
+{id:'scan',title:'Ciclo de escaneo',terms:'scan scan time ciclo barrido lectura entradas salidas',lesson:'Un PLC suele ejecutar: adquisición de entradas, tareas/rutinas, actualización de salidas y comunicaciones/diagnóstico, aunque la secuencia concreta cambia entre plataformas y tareas. La duración del scan afecta a detección de pulsos y temporizadores. Un evento más breve que la adquisición puede no observarse sin hardware o instrucciones específicas.',practice:'Haz un esquema de qué ocurre si el sensor cambia justo después de leer las entradas.'},
+{id:'ladder',title:'Ladder y redes',terms:'ladder escalera contactos bobina rung red instrucciones',lesson:'En LD, cada red expresa una condición lógica de izquierda a derecha. Los contactos representan condiciones booleanas y las bobinas resultados. Los contactos en serie corresponden a Y; los paralelos a O. Un mismo actuador no debe recibir órdenes incompatibles desde varias redes sin una estrategia de prioridad.',practice:'Crea una red con dos contactos en serie que habilite una lámpara.'},
+{id:'contacts',title:'Contactos NA/NC y XIC/XIO',terms:'na nc xic xio normalmente abierto cerrado contacto',lesson:'Separa estado físico del contacto y prueba lógica. Un pulsador NC físico puede entregar 1 al PLC mientras no se presiona. En Rockwell, XIC prueba bit verdadero y XIO prueba bit falso: no son sinónimos obligatorios de contacto físico NA o NC. Comprueba polaridad y estado real desde las entradas.',practice:'Prueba una entrada con pulsador NC y documenta si I vale 1 en reposo.'},
+{id:'timers',title:'TON, TOF y retentivos',terms:'timer temporizador ton tof rto tiempo et pt acc dn',lesson:'TON (retardo a la conexión) activa su finalización tras mantener IN verdadero durante PT. TOF retrasa la desconexión; un temporizador retentivo conserva tiempo según su semántica y necesita reinicio. Este programa actualmente ejecuta TON en las redes admitidas; TOF y RTO son conceptos de estudio, no instrucciones implementadas.',practice:'Programa TON de 3 segundos: verifica ET durante el conteo y Q/DN al finalizar.'},
+{id:'counters',title:'Contadores CTU/CTD',terms:'contador ctu ctd contar piezas pulso cu cd',lesson:'Los contadores incrementan o decrementan por eventos, frecuentemente flancos positivos. Un rebote mecánico puede generar varios conteos si no hay filtrado. El reinicio y límites dependen del controlador. Aquí todavía no se ejecutan contadores genéricos dentro del Ladder.',practice:'Diseña una cinta que cuente cinco cajas y detenga la salida; anota cómo reiniciarías el conteo.'},
+{id:'latch',title:'Marcha, paro y enclavamiento',terms:'arranque paro marcha auto retención enclavamiento set reset latch',lesson:'El enclavamiento mantiene una orden tras soltar Marcha. El Paro debe tener prioridad y, en aplicaciones reales, la función de parada de emergencia se implementa con arquitectura de seguridad apropiada y no solo con una bobina de software. Revisa si tu botón físico de Paro es NC (1 en reposo) o NA (0 en reposo).',practice:'En el generador selecciona enclavamiento, asigna I/0 a Marcha e I/1 a Paro y prueba arranque, soltar y parar.'},
+{id:'power',title:'Alimentación 24 V y comunes',terms:'24v 0v alimentacion dc com m l+ tierra polaridad voltaje',lesson:'Verifica la especificación exacta de cada borne: L+, M, COM, entradas, y alimentación de las salidas. COM puede pertenecer a grupos diferentes y no significa automáticamente 0 V en todas las CPU. Nunca apliques 24 V CC a bornes definidos para 85–264 V CA ni presupongas aislamiento sin revisar el manual del módulo.',practice:'Usa Revisar y localiza cualquier puente incorrecto entre +24 V y 0 V.'},
+{id:'pnpsensors',title:'Sensores PNP, NPN y 3 hilos',terms:'pnp npn inductivo optico capacitivo bn bu bk sensor cable',lesson:'Un sensor de 3 hilos suele usar BN marrón para +V, BU azul para 0 V y BK negro para señal, pero hay variantes: verifica hoja de datos. PNP suministra tensión a la entrada; NPN hunde corriente. Debe existir compatibilidad entre el sensor, la referencia de entrada y los comunes del PLC.',practice:'Conecta un sensor PNP a +24 V, 0 V y a I/0. Prueba ON/OFF y revisa su indicador.'},
+{id:'analog',title:'Señales analógicas y escalamiento',terms:'analogica 4-20 0-10 escalamiento adc resolución raw',lesson:'Las señales 4–20 mA o 0–10 V se convierten en valores de ingeniería utilizando rango eléctrico, conversión A/D y límites del instrumento. Un lazo 4–20 mA puede distinguir cero de proceso (4 mA) de rotura de cable (cerca de 0 mA), si el equipo lo soporta. No conectes una señal de corriente a una entrada de tensión sin configuración compatible.',practice:'Calcula la variable de un transmisor 0–100 bar que entrega 12 mA: aproximadamente 50 bar.'},
+{id:'instrumentation',title:'Instrumentación de proceso',terms:'instrumentacion transmisor sensor presión temperatura caudal nivel',lesson:'La cadena típica es variable física → sensor/transmisor → acondicionamiento → entrada PLC → control → salida → actuador. Identifica rango, exactitud, repetibilidad, tiempo de respuesta, alimentación, calibración y unidad de medida. En procesos críticos se requieren alarmas, diagnósticos y sensores redundantes cuando corresponda.',practice:'Define rango y unidad para un transmisor de nivel y qué alarma activarías ante lectura fuera de rango.'},
+{id:'pid',title:'Control PID',terms:'pid proporcional integral derivativa lazo cerrado setpoint process variable',lesson:'Un PID compara consigna SP y variable de proceso PV, y calcula una acción de control. P responde al error, I corrige el error persistente y D anticipa cambios, con sensibilidad al ruido. Un PID real exige escalamiento, límites de salida, anti-windup, modo manual/automático y ajuste cuidadoso. Este motor didáctico todavía no simula PID completo.',practice:'Describe cómo un PID controlaría la velocidad de una banda a partir de un encoder.'},
+{id:'outputs',title:'Salidas de relé, transistor y triac',terms:'salida relé transistor triac vac vdc carga bobina',lesson:'No todas las salidas de PLC suministran alimentación. Los contactos de relé normalmente conmutan una fuente externa; las salidas transistorizadas pueden ser PNP o NPN; los triacs suelen usarse con cargas de CA. Verifica tensiones, corrientes, fugas, fusibles, comunes y supresión de transitorios de bobinas.',practice:'Comprueba si la carga necesita alimentación externa y cómo regresa a su común.'},
+{id:'grounding',title:'Puesta a tierra y EMC',terms:'tierra protección pe blindaje ruido emc puesta a tierra',lesson:'PE (tierra de protección) no es intercambiable sin más con 0 V de control. Usa criterios del fabricante para apantallamiento, rutas de potencia/señal, referencias, equipotencialidad y separación de cables. Una instalación real requiere cumplimiento de normativa local y evaluación del riesgo eléctrico.',practice:'Marca en tu esquema qué conexiones son 0 V funcional y cuáles son PE.'},
+{id:'safety',title:'Seguridad industrial y E-Stop',terms:'seguridad emergencia e-stop parada guardas sil pl iso 13849',lesson:'El PLC estándar y esta simulación no deben emplearse como función de seguridad certificada. Las paradas de emergencia, puertas, enclavamientos y torque seguro requieren análisis de riesgo y componentes/arquitecturas de seguridad adecuados. Una prueba visual de Ladder no demuestra un nivel SIL/PL.',practice:'Elabora una lista de riesgos para un transportador antes de programar el arranque.'},
+{id:'motor',title:'Motores, contactores y protección',terms:'motor arranque contactor térmico guardamotor trifásico',lesson:'En potencias industriales, la salida PLC suele actuar sobre un contactor, variador o interfaz de control; no alimenta directamente el motor. Incluye protección contra cortocircuito/sobrecarga, realimentación de contactor cuando sea necesaria y condiciones de parada segura.',practice:'Dibuja la diferencia entre circuito de mando de 24 V y circuito de potencia del motor.'},
+{id:'vfd',title:'Variadores de frecuencia',terms:'vfd variador frecuencia rampa hz aceleración velocidad',lesson:'Un variador controla frecuencia/tensión de salida según su aplicación. Puedes ordenar marcha, sentido y velocidad mediante entradas digitales, analógicas o red industrial. Comprueba rampas, límites, fallos, selección local/remoto y STO cuando se necesite. El simulador solo representa una señal booleana de marcha, no el control interno de un VFD.',practice:'Diseña condiciones que deben cumplirse antes de habilitar la marcha del variador.'},
+{id:'robotics',title:'Brazos robóticos y secuencias',terms:'robot brazo servo eje posición home pinza cilindro',lesson:'Un brazo industrial utiliza control de ejes, realimentación, referencias de posición y enclavamientos. En una estación de pick-and-place puede modelarse una secuencia: detectar pieza, posicionar, sujetar, transferir, soltar y volver a HOME. El escenario visual del simulador no resuelve cinemática, trayectorias ni movimientos seguros.',practice:'Enumera seis estados de una estación de agarre y las señales de transición.'},
+{id:'conveyor',title:'Cintas transportadoras',terms:'banda cinta transportador transportadora producto caja',lesson:'Una cinta combina mando de motor, detección de pieza, posible paro por acumulación y temporización. Para aprender, separa sensores, actuaciones y lógica. El movimiento visual del escenario depende de la salida asignada; no simula torque, inercia o fallos mecánicos reales.',practice:'Coloca una banda, una caja y sensor. Enlaza el motor a O/0, el sensor a I/0 y prueba el cambio de estado.'},
+{id:'traffic',title:'Semáforos y máquinas de estados',terms:'semaforo luces rojo verde amarillo fase secuencia',lesson:'Una secuencia semafórica requiere tiempos, fases y salidas mutuamente coherentes. Es útil modelar estados ROJO, VERDE y AMARILLO con transiciones temporizadas, evitando salidas simultáneas incompatibles. Este Ladder básico todavía no ejecuta un secuenciador de tres salidas; el escenario permite visualizar señales que hayas programado.',practice:'Define tiempos de cada fase y construye una tabla con las tres salidas esperadas.'},
+{id:'hmi',title:'HMI, SCADA y alarmas',terms:'hmi scada pantalla supervisión alarma trend historico',lesson:'HMI permite visualizar/operar la máquina; SCADA agrega supervisión, tendencias e historiales según la arquitectura. Evita depender de la HMI para enclavamientos críticos. Las alarmas deben distinguir estado, causa, severidad, reconocimiento y recuperación.',practice:'Diseña tres mensajes de falla para una cinta: emergencia, sobrecarga y sensor bloqueado.'},
+{id:'networks',title:'Redes industriales y protocolos',terms:'modbus ethernetip profinet profibus canopen comunicación red plc',lesson:'Modbus, EtherNet/IP, PROFINET y otros protocolos tienen topologías, modelos de datos y capacidades diferentes. Distingue IP, dirección de esclavo, tipo de dato, byte order, ciclo y diagnóstico. El motor local no emula tráfico de red ni verifica seguridad de comunicaciones.',practice:'Explica qué ocurriría si se pierde comunicación con una salida remota.'},
+{id:'encoder',title:'Encoders y entradas rápidas',terms:'encoder pulsos hsc contador rapido cuadratura rpm',lesson:'Encoders incrementales producen pulsos (A/B y, a veces, Z). Para altas velocidades es necesario un contador rápido o módulo dedicado; una entrada digital convencional puede perder pulsos. Comprueba escalamiento por pulsos por vuelta, sentido, filtrado y cables.',practice:'Si el encoder entrega 1000 pulsos por vuelta y cuentas 250, ¿qué fracción de vuelta recorrió?'},
+{id:'scaling',title:'Conversión de unidades',terms:'conversion unidades porcentaje psi bar kpa voltaje ma sensor',lesson:'La conversión lineal es valor_ingeniería = mínimo + (señal−mínimo_señal)×(máximo−mínimo)/(máximo_señal−mínimo_señal). Aplica detección de señales inválidas y límites. Para cálculos de seguridad exige verificación externa.',practice:'Para 4–20 mA y rango 0–200 °C, calcula la lectura a 8 mA: 50 °C.'},
+{id:'troubleshooting',title:'Diagnóstico de cableado y Ladder',terms:'diagnostico error falla no funciona lámpara encender corregir cableado',lesson:'Depura por niveles: 1) alimentación y comunes, 2) sensor y estado real del borne, 3) valor lógico de entrada, 4) contactos y temporizadores, 5) salida del PLC, 6) alimentación y retorno de la carga. No modifiques el programa a ciegas: localiza el punto donde la señal deja de comportarse como esperas.',practice:'Pulsa «Revisar proyecto» en el tutor y corrige primero los errores, después las advertencias.'},
+{id:'compactlogix',title:'CompactLogix y Studio 5000',terms:'compactlogix logix studio 5000 tag xic xio ote',lesson:'Studio 5000 usa tags y rutinas/tareas de Logix. El direccionamiento real depende de módulos y configuración; no basta con dibujar I/0. El simulador incluye un subconjunto de XIC, XIO, OTE y TON para una red básica, no una ejecución equivalente a Logix 5000.',practice:'Nombra Marcha y Motor con tags diferentes y relaciona cada uno con un borne.'},
+{id:'micrologix',title:'MicroLogix y RSLogix 500',terms:'micrologix rslogix 500 I:0 O:0 T4',lesson:'Familias MicroLogix usan tablas de datos y direcciones como I:0/x, O:0/x y T4:x, cuya validez depende de la CPU/ranura. En archivos reales hay múltiples rungs, bloques y temporizaciones. El lector de este programa admite un subconjunto textual, no archivos RSS binarios.',practice:'Traduce una condición XIC de I:0/0 que active O:0/0 y simula su estado.'},
+{id:'delta',title:'Delta DVP y WPLSoft / ISPSoft',terms:'delta dvp wplsoft ispsoft x y tmr octal',lesson:'Delta DVP suele emplear X/Y para E/S, con convenciones propias de direcciones y temporizadores. Confirma si la CPU utiliza base octal y qué base temporal corresponde a T0. El editor incluido solo maneja operaciones LD, LDI, AND, OR, OUT, SET/RST y un TMR sencillo.',practice:'Escribe LD X0, OUT Y0 y observa cómo cambia Y0 cuando activas X0.'},
+{id:'codesys',title:'CODESYS e IEC 61131-3',terms:'codesys iec 61131 3 ld st fbd sfc ton',lesson:'IEC 61131-3 define lenguajes como LD, ST, FBD y SFC; el soporte concreto varía por runtime. CODESYS organiza dispositivos, aplicaciones, POUs y tareas. El simulador admite algunas expresiones ST booleanas y un TON, no importación completa de proyectos CODESYS.',practice:'Configura entrada %IX0.0 y salida %QX0.0 para una expresión booleana simple.'},
+{id:'commissioning',title:'Puesta en marcha y documentación',terms:'comisionamiento puesta en marcha pruebas fat sat documentación',lesson:'Una entrega profesional requiere lista de E/S, matriz causa-efecto, planos actualizados, versiones del programa, prueba de sensores, verificación de alarmas, FAT/SAT y evidencia de resultados. Documenta límites de simulación y establece aprobaciones para cambios.',practice:'Crea una tabla de cuatro pruebas: estado inicial, acción, salida esperada y resultado observado.'},
+{id:'pneumatics',title:'Neumática e hidráulica',terms:'pneumatica valvula cilindro solenoide hidraulica 5/2',lesson:'Los actuadores neumáticos suelen comandarse por electroválvulas, con sensores de fin de carrera e interbloqueos. Distingue estabilidad de presión, retorno, señal de posición y tiempo de actuación. Un PLC de 24 V suele controlar la bobina a través del módulo adecuado, no mediante un pin sin verificación eléctrica.',practice:'Programa extender cilindro si existe pieza y retraer al alcanzar el final de carrera.'},
+{id:'servo',title:'Servos y control de movimiento',terms:'servo motion posicion velocidad referencia encoder servo drive',lesson:'La lógica booleana simple no sustituye control de movimiento. Los servos requieren drive, referencia, límites, realimentación y rutinas de homing, además de coordinación temporal. Los perfiles específicos de movimiento dependen del fabricante, no se ejecutan en este simulador.',practice:'Define las señales que deben estar correctas antes de habilitar un eje servo.'},
+{id:'lighting',title:'Iluminación y señalización',terms:'lampara piloto iluminacion luz señalizacion baliza',lesson:'Una lámpara piloto muestra un estado del proceso: marcha, falla, espera o alarma. Define significados coherentes para cada color y salida. En una instalación física respeta tensión de alimentación, corriente y protección. El escenario de luces permite representar el estado de salidas digitales.',practice:'Asigna verde a marcha, rojo a falla y amarillo a espera; define su tabla de estados.'}
+];
+const tutorExercises=[
+['conveyor','Diseña una cinta que solo funcione mientras Marcha está pulsado. ¿Cuál es la entrada, salida y condición? Prueba el control directo y el sensor.'],
+['traffic','Elabora una tabla de secuencia rojo→verde→amarillo con tres salidas y tiempos. ¿Qué impediría energizar verde y rojo a la vez?'],
+['robotics','Modela el ciclo HOME→detectar→agarrar→trasladar→soltar→HOME. Señala sensores y actuadores mínimos.'],
+['timers','Usa un TON de 3 segundos: comprueba que la salida no enciende antes de completar PT y se reinicia cuando IN cae.'],
+['latch','Crea Marcha y Paro NC en entradas diferentes. Comprueba marcha, soltar Marcha y Paro con prioridad.'],
+['analog','Escala 4–20 mA a 0–100 bar. ¿Qué presión representa 12 mA y qué falla sugeriría leer 0 mA?'],
+['safety','Redacta una lista de peligros para la cinta y por qué una salida estándar no certifica una parada de emergencia.']
+];
+function tutorMessage(text,isUser=false){
+ const log=E('tutorChat');if(!log)return;
+ const el=document.createElement('div');el.className='tutor-bubble '+(isUser?'user':'bot');el.textContent=String(text).slice(0,7000);log.appendChild(el);
+ while(log.children.length>36)log.removeChild(log.firstChild);
+ log.scrollTop=log.scrollHeight;
+}
+function tutorTopicFor(query){
+ const q=String(query||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const hints=[[/\b(ton|tof|rto|temporizador|timer)\b/,'timers'],[/\b(xic|xio|na|nc)\b/,'contacts'],[/\b(pnp|npn)\b/,'pnpsensors'],[/\b(pid)\b/,'pid'],[/\b(4-20|analogico|analogica)\b/,'analog'],[/\b(semaforo)\b/,'traffic'],[/\b(compactlogix|studio 5000)\b/,'compactlogix'],[/\b(micrologix|rslogix)\b/,'micrologix'],[/\b(codesys)\b/,'codesys']];
+ for(const [re,id] of hints)if(re.test(q))return tutorLibrary.find(t=>t.id===id);
+ let choice=null,high=0;
+ for(const topic of tutorLibrary){
+  const terms=(topic.terms+' '+topic.title).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/\s+/).filter(w=>w.length>2);
+  let score=0;for(const term of terms)if(q.includes(term))score+=term.length>5?2:1;
+  if(score>high){choice=topic;high=score}
+ }
+ return choice;
+}
+function tutorAudit(){
+ const problems=typeof ladderReviewIssues==='function'?ladderReviewIssues():validate();
+ const serious=problems.filter(p=>p.severity==='error'),warnings=problems.filter(p=>p.severity==='warn');
+ const lines=['REVISIÓN DEL PROYECTO',serious.length+' errores, '+warnings.length+' advertencias.'];
+ for(const issue of serious.slice(0,8))lines.push('✗ '+issue.message);
+ for(const issue of warnings.slice(0,8))lines.push('⚠ '+issue.message);
+ if(!serious.length)lines.push('✓ Sin errores básicos identificados; no significa que la instalación sea segura.');
+ if(sceneState?.objects?.length){
+  const s=sceneFeedback();lines.push('ESCENARIO: '+s);
+ }
+ lines.push('Orden sugerido: verifica fuente y COM, después estado de entradas, lógica Ladder, salidas y retorno de cargas. Prueba cada cambio por separado.');
+ lines.push('La verificación es didáctica, no certifica compatibilidad con hardware ni funciones de seguridad.');
+ return lines.join('\n');
+}
+function tutorAnswer(query){
+ const q=String(query||'').trim();
+ if(!q)return 'Escribe tu pregunta o elige un tema para empezar.';
+ if(/revis|error|fall|no enciend|no funciona|cortocircuit|diagnost|retroaliment|prueb/.test(q.toLowerCase()))return tutorAudit();
+ if(/escenario|cinta|semaforo|robot|luces|producci/.test(q.toLowerCase())&&sceneState?.objects?.length)return 'ESCENARIO ACTUAL\n'+sceneFeedback()+'\n\n'+(tutorTopicFor(q)||tutorLibrary[0]).lesson;
+ const match=tutorTopicFor(q);
+ if(!match)return 'Puedo ayudarte con PLC, Ladder, I/O, sensores, automatización, temporizadores, instrumentación, control, robots y diagnóstico. Ejemplos: «¿Qué es XIC?», «¿Cómo conecto un sensor PNP?» o «revisa mi circuito». No tengo acceso a toda la información de cada fabricante ni a un modelo de IA externo; verifica parámetros concretos de tu CPU en su manual.';
+ return match.title.toUpperCase()+'\n\n'+match.lesson+'\n\nPRÁCTICA: '+match.practice+'\n\nConsejo: utiliza «Revisar proyecto» para aplicar comprobaciones al circuito y al Ladder actual.';
+}
+function initTutor(){
+ const select=E('tutorTopic');if(!select)return;
+ select.replaceChildren();
+ for(const topic of tutorLibrary){const op=document.createElement('option');op.value=topic.id;op.textContent=topic.title;select.appendChild(op)}
+ tutorMessage('¡Bienvenido al tutor PLC! Selecciona un tema, describe una dificultad o pulsa «Revisar proyecto». También puedo proponerte ejercicios. Las respuestas son material didáctico local; no sustituyen manuales de fabricantes ni pruebas de seguridad.');
+}
+function openTutor(){
+ closeLadder();
+ E('scenarioPanel').hidden=true;
+ E('tutorPanel').hidden=false;
+}
+function closeTutor(){E('tutorPanel').hidden=true}
+E('showTutor').onclick=openTutor;
+E('openTutorFromLadder').onclick=openTutor;
+E('closeTutor').onclick=closeTutor;
+E('tutorExplain').onclick=()=>{const topic=tutorLibrary.find(t=>t.id===E('tutorTopic').value)||tutorLibrary[0];tutorMessage(tutorAnswer(topic.title))};
+E('tutorReview').onclick=()=>tutorMessage(tutorAudit());
+E('tutorExercise').onclick=()=>{
+ const selected=E('tutorTopic').value;
+ const match=tutorExercises.find(x=>x[0]===selected);
+ const item=match||tutorExercises[Math.floor(Math.random()*tutorExercises.length)];
+ tutorMessage('EJERCICIO\n'+item[1]+'\n\nCuando lo termines, pulsa «Revisar proyecto» para obtener indicaciones sobre el diagrama.');
+};
+E('tutorAsk').onclick=()=>{const value=E('tutorQuestion').value.trim();if(!value)return;tutorMessage(value,true);tutorMessage(tutorAnswer(value));E('tutorQuestion').value=''};
+E('tutorQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();E('tutorAsk').click()}});
+
+function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
  const valid=data.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
@@ -1146,7 +1589,7 @@ function hydrate(data){
  nodes=valid;
  for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));n.ioLabels=n.ioLabels&&typeof n.ioLabels==='object'?n.ioLabels:{}}n.angle=((Number(n.angle)||0)%360+360)%360;n.label=typeof n.label==='string'&&n.label?n.label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC'})[n.type]||types[n.type]?.[0]||n.type}
  wires=data.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
- next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;resetLadderRuntime();ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
+ next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;resetLadderRuntime();ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;normalizeScene(data.scene);E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
 }
 E('saveLocal').onclick=()=>{
  const name=E('projectName').value.trim()||'Proyecto sin título',data=snapshot(),items=listProjects();
@@ -1160,7 +1603,7 @@ E('saveLocal').onclick=()=>{
 };
 E('newProject').onclick=()=>{
  if(!confirm('¿Crear un proyecto nuevo? Los cambios no guardados del actual se perderán.'))return;
- projectId=null;E('projectName').value='Proyecto sin título';reset('empty');ladderPlan=null;renderLadder();simulation=false;refreshProjects();refreshInspector();expansionStatus();
+ projectId=null;E('projectName').value='Proyecto sin título';reset('empty');normalizeScene({template:'conveyor',objects:[],virtual:{}});ladderPlan=null;renderLadder();simulation=false;refreshProjects();refreshInspector();expansionStatus();
 };
 E('savedProjects').onchange=e=>{
  const selected=e.target.value;if(!selected)return;
@@ -1178,7 +1621,7 @@ E('load').onclick=()=>{if(simulation){alert('Activa Editar para cargar un circui
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
 for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));if(!n.ioLabels||typeof n.ioLabels!=='object')n.ioLabels={}}n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC'})[n.type]||types[n.type]?.[0]||n.type;}
-next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;resetLadderRuntime();ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
+next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;resetLadderRuntime();ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;normalizeScene(v.scene);E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
 window.onkeydown=e=>{
 const tag=document.activeElement?.tagName;
 if(['INPUT','TEXTAREA','SELECT'].includes(tag)||document.activeElement?.isContentEditable)return;
@@ -1193,7 +1636,9 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
+initTutor();configureSceneTemplate('conveyor');
 window.setInterval(()=>{if(simulation&&ladderPlan?.mode==='timer'&&ladderRuntime.started&&!ladderRuntime.done)draw()},180);
+window.setInterval(sceneTick,140);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
  const w=Math.round(rect.width),h=Math.round(rect.height);
