@@ -82,7 +82,7 @@ T(g,63,-21,nameOf(n),{'text-anchor':'middle','font-size':11,fill:'#b8d7f5'});
 if(n.on)S('circle',{cx:120,cy:8,r:4,fill:'#19e49c'},g);
 localPorts(n).forEach(([x,y],i)=>term(g,n,i,x,y));
 g.onpointerdown=e=>dragStart(e,n);
-g.onpointerup=()=>{if(drag&&!drag.moved&&['no','nc','selector','ind','opt','cap','limit'].includes(n.type)){n.on=!n.on;draw()}};
+
 }
 function renderRail(n){
 const g=S('g',{class:'device'+(chosen?.kind==='node'&&chosen.id===n.id?' selected':'')});
@@ -117,7 +117,7 @@ nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==
 rub.setAttribute('opacity',first?1:0)}
 function dragStart(e,n){if(e.target.classList.contains('port'))return;e.stopPropagation();chosen={kind:'node',id:n.id};const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
 canvas.onpointermove=e=>{const p=pointer(e);if(drag){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
-canvas.onpointerup=()=>{drag=null};canvas.onpointerdown=()=>{chosen=null;draw()};
+canvas.onpointerup=()=>{if(drag&&!drag.moved){const n=find(drag.id);if(n&&['no','nc','selector','ind','opt','cap','limit'].includes(n.type)&&simulation){n.on=!n.on;drag=null;draw();return}}drag=null};canvas.onpointerdown=()=>{chosen=null;draw()};
 function rotateChosen(delta){if(chosen?.kind!=='node')return;const n=find(chosen.id);if(!n)return;n.angle=((n.angle||0)+delta+360)%360;draw()}
 function remove(){if(!chosen)return;if(chosen.kind==='wire')wires=wires.filter(w=>w.id!==chosen.id);else{const n=find(chosen.id);if(n&&!['railplus','railzero','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}chosen=null;draw()}
 function reset(type){nodes=[];wires=[];next=1;first=null;chosen=null;
