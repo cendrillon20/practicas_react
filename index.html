@@ -245,7 +245,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div class="graphic-ladder">
   <div class="graphic-head"><strong data-i18n="visualEditor">Visual Ladder Editor · Editor gráfico</strong><span id="graphicStatus">Edit Mode</span></div>
   <p class="studio-lead">Construye la lógica haciendo clic en los símbolos. Cada rung puede tener contactos en serie y ramas en paralelo. Al simular, los conductores y contactos activos se iluminan.</p>
-  <div class="graphic-toolbar"><button id="graphicNew" data-i18n="addRung">＋ Rung</button><button id="graphicNo">—| |— NO</button><button id="graphicNc">—|/|— NC</button><button id="graphicWire">──── Wire</button><button id="graphicBranch" data-i18n="parallel">＋ Parallel</button><button id="graphicCoil">—( )— Coil</button><button id="graphicDelete" data-i18n="remove">⌫ Remove</button></div>
+  <div class="graphic-toolbar"><button id="graphicNew" data-i18n="addRung">＋ Rung</button><button id="graphicNo">—| |— NO</button><button id="graphicNc">—|/|— NC</button><button id="graphicWire">──── Wire</button><button id="graphicTon">TON · Timer</button><button id="graphicCtu">CTU · Counter</button><button id="graphicBlink">BLINK · 4×</button><button id="graphicBranch" data-i18n="parallel">＋ Parallel</button><button id="graphicCoil">—( )— Coil</button><button id="graphicDelete" data-i18n="remove">⌫ Remove</button></div>
   <div class="graphic-actions"><button id="graphicMoveUp">↑ Rung</button><button id="graphicMoveDown">↓ Rung</button><button id="graphicRemoveRung" data-i18n="deleteRung">Delete Rung</button><button id="graphicClear" data-i18n="clearLadder">Clear Ladder</button></div>
   <div id="graphicLadderView" class="graphic-view" aria-label="Editable graphical ladder networks"></div>
   <div id="graphicElementEditor" class="graphic-element-editor">Selecciona un contacto o bobina para configurar su entrada o salida.</div>
@@ -2252,12 +2252,12 @@ function initAura(){
 
 /* GRAPHICAL LADDER: each network contains parallel branches of series contacts.
    Contacts read digital inputs or a previous output in the same scan. */
-let graphicLadder={enabled:false,rungs:[],nextId:1},graphicSelection=null,graphicTool='NO',graphicLive={};
+let graphicLadder={enabled:false,rungs:[],nextId:1},graphicSelection=null,graphicTool='NO',graphicLive={},graphicRuntime=new Map(),graphicPrevOutputs=new Set();
 function graphId(){return graphicLadder.nextId++}
 function graphPLC(){return nodes.find(n=>n.type==='plc')}
 function graphPinChoices(kind){const plc=graphPLC();if(!plc)return [];return kind==='output'?plcOutputPins(plc):plcInputPins(plc)}
 function graphItem(type='NO'){
- return {id:graphId(),type,pin:graphPinChoices('input')[0]??3,source:'input'};
+ return {id:graphId(),type,pin:graphPinChoices('input')[0]??3,source:'input',preset:4,seconds:1,onSeconds:0.4,offSeconds:0.4,resetPin:null};
 }
 function graphNewRung(){
  if(simulation){E('graphicMessage').textContent='Cambia a Edit Mode para agregar redes.';return}
@@ -2474,7 +2474,7 @@ function graphicActivate(){
  const problems=graphicValidate();
  if(problems.length){auraSay('Encontré '+problems.length+' problemas en el Ladder gráfico.');return}
  graphicLadder.enabled=true;
- resetLadderRuntime();draw();
+ resetLadderRuntime();graphicRuntime.clear();graphicPrevOutputs.clear();draw();
  E('graphicMessage').textContent='Graphic Ladder ACTIVE. Pulsa Simular, acciona los dispositivos y observa los contactos encenderse en tiempo real.';
  auraTailMagic('¡Listo! Tu Ladder gráfico está conectado al PLC virtual. ¡Ahora pruébalo!');
 }
@@ -2485,19 +2485,19 @@ function graphLoad(raw){
  let max=0;
  for(const row of valid){
   if(!Array.isArray(row.branches)||!Number.isFinite(Number(row.output)))continue;
-  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input'})):[]);
+  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','CTU','BLINK'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null})):[]);
   if(!branches.length)continue;
   for(const branch of branches)for(const item of branch)max=Math.max(max,item.id);
   const rid=Number(row.id)||0;max=Math.max(max,rid);
   graphicLadder.rungs.push({id:rid,output:Number(row.output),branches});
  }
  graphicLadder.nextId=Math.max(max+1,Number(data.nextId)||1);
- graphicSelection=null;graphicRefresh();
+ graphicSelection=null;graphicRuntime.clear();graphicPrevOutputs.clear();graphicRefresh();
 }
 function graphInit(){
  E('graphicNew').onclick=graphNewRung;
- for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicCoil','COIL']]){
-  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
+ for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicTon','TON'],['graphicCtu','CTU'],['graphicBlink','BLINK'],['graphicCoil','COIL']]){
+  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicTon','graphicCtu','graphicBlink','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
  }
  E('graphicBranch').onclick=()=>{if(!graphicLadder.rungs.length)graphNewRung();graphAddBranch(graphicSelection?.rungId||graphicLadder.rungs.at(-1).id)};
  E('graphicDelete').onclick=graphRemoveSelected;
