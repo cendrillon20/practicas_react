@@ -136,7 +136,7 @@ ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:
 green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2],timer:['Temporizador TON','Bloque lógico interno · sin bornes físicos',0]
 };
 const nameOf=n=>n.label||({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type][0];
-let ladderPlan=null,copied=null,pasteNumber=0,multi=new Set(),groupDrag=null,nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,pan=null,pressedButton=null,view={x:0,y:0,w:1200,h:760},simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
+let ladderPlan=null,ladderRuntime={key:null,latch:false,started:0,elapsed:0,done:false,active:false,ready:false},copied=null,pasteNumber=0,multi=new Set(),groupDrag=null,nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,pan=null,pressedButton=null,view={x:0,y:0,w:1200,h:760},simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
 function S(tag,attrs={},parent=layer){const a=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))a.setAttribute(k,v);parent.appendChild(a);return a}
 function T(g,x,y,str,attrs={}){const a=S('text',{x,y,...attrs},g);a.textContent=str;return a}
 function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,ioLabels:type==='plc'?{}:undefined,points:type.startsWith('rail')?7:undefined,extraInputs:type==='plc'?0:undefined,extraOutputs:type==='plc'?0:undefined,label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[type]||types[type][0]};nodes.push(n);return n}
@@ -154,6 +154,41 @@ function portName(n,i){if(n.type!=='plc')return '';if(i<28)return pnames[i]||'';
 function digitalPorts(n){return [3,4,5,6,8,9,10,11,12,13,...Array.from({length:n.extraInputs||0},(_,i)=>28+i),18,20,22,24,25,26,...Array.from({length:n.extraOutputs||0},(_,i)=>34+i)]}
 function terminalText(n,i){return n.ioLabels?.[i]||''}
 function connect(a,ap,b,bp){if(a===b&&ap===bp)return;if(wires.some(w=>(w.a===a&&w.ap===ap&&w.b===b&&w.bp===bp)||(w.a===b&&w.ap===bp&&w.b===a&&w.bp===ap)))return;wires.push({id:next++,a,ap,b,bp})}
+
+function plcInputPins(plc){return [3,4,5,6,8,9,10,11,12,13,...Array.from({length:plc.extraInputs||0},(_,i)=>28+i)]}
+function plcOutputPins(plc){return [18,20,22,24,25,26,...Array.from({length:plc.extraOutputs||0},(_,i)=>34+i)]}
+function resetLadderRuntime(){ladderRuntime={key:null,latch:false,started:0,elapsed:0,done:false,active:false,ready:false}}
+function evaluateLadder(plc,ready){
+ const plan=ladderPlan;if(!plan){ladderRuntime.ready=ready;return null}
+ const key=[plan.mode,plan.start,plan.stop,plan.output,plan.delaySeconds,plan.stopPolarity,plan.timerId].join('|');
+ if(ladderRuntime.key!==key){resetLadderRuntime();ladderRuntime.key=key}
+ ladderRuntime.ready=ready;
+ const inputPins=plcInputPins(plc),a=ins.has(inputPins.indexOf(Number(plan.start))),b=ins.has(inputPins.indexOf(Number(plan.stop)));
+ ladderRuntime.start=!!a;ladderRuntime.stop=!!b;
+ let isOn=false;
+ if(!ready){ladderRuntime.latch=false;ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false}
+ else if(plan.mode==='direct')isOn=a;
+ else if(plan.mode==='inverse')isOn=!a;
+ else if(plan.mode==='and')isOn=a&&b;
+ else if(plan.mode==='or')isOn=a||b;
+ else if(plan.mode==='latch'){
+   const stopPermits=plan.stopPolarity==='no'?!b:b;
+   if(!stopPermits)ladderRuntime.latch=false;
+   else if(a)ladderRuntime.latch=true;
+   isOn=ladderRuntime.latch;
+ }else if(plan.mode==='timer'){
+   const delay=Math.max(100,Math.min(3600000,Number(plan.delaySeconds||3)*1000));
+   if(!a){ladderRuntime.started=0;ladderRuntime.elapsed=0;ladderRuntime.done=false}
+   else {
+     const now=Date.now();if(!ladderRuntime.started)ladderRuntime.started=now;
+     ladderRuntime.elapsed=Math.min(delay,now-ladderRuntime.started);
+     ladderRuntime.done=ladderRuntime.elapsed>=delay;
+   }
+   isOn=ladderRuntime.done;
+ }
+ ladderRuntime.active=!!isOn;
+ return {output:Number(plan.output),active:!!isOn};
+}
 function solve(){live=new Set();zero=new Set();ins=new Set();outs=new Set();activeLoads=new Set();if(!simulation)return;
 const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');if(!plus||!minus||!plc)return;
 const map=new Map(),link=(a,b)=>{if(!map.has(a))map.set(a,[]);map.get(a).push(b)},reach=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const x of map.get(q[i])||[])if(!seen.has(x)){seen.add(x);q.push(x)}return seen};
@@ -165,11 +200,15 @@ for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&potential.ha
 potential=reach(src);
 const ready=potential.has(K(plc,0))&&zero.has(K(plc,1));
 for(let i=0;i<10+(plc.extraInputs||0);i++){const term=i<10?(i<4?i+3:i+4):28+i-10;if(ready&&potential.has(K(plc,term)))ins.add(i)}
-const op=[18,20,22,24,25,26];for(let i=0;i<6+(plc.extraOutputs||0);i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,i<6?op[i]:34+i-6))}
+const configured=evaluateLadder(plc,ready);
+const op=plcOutputPins(plc);
+if(configured){
+ if(ready&&configured.active&&op.includes(configured.output)){const index=op.indexOf(configured.output);outs.add(index);src.push(K(plc,configured.output))}
+}else for(let i=0;i<op.length;i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,op[i]))}
 live=reach(src);
 for(const n of nodes)if(['green','red','amber','blue','white','relay','buzzer'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id);
 shortCircuit=[...zero].some(k=>live.has(k));
-if(shortCircuit){live=new Set();activeLoads=new Set();outs=new Set()}
+if(shortCircuit){live=new Set();activeLoads=new Set();outs=new Set();ladderRuntime.active=false}
 }
 function validate(){
  const issues=[],error=(msg)=>issues.push({severity:'error',message:msg}),warn=(msg)=>issues.push({severity:'warn',message:msg});
@@ -306,7 +345,12 @@ g.setAttribute('transform','translate('+n.x+' '+n.y+') rotate('+(n.angle||0)+' 6
 S('rect',{x:-12,y:-14,width:150,height:111,rx:4,class:'hit'},g);
 drawSymbol(g,n.type,n.on,activeLoads.has(n.id));
 T(g,63,-21,nameOf(n),{'text-anchor':'middle','font-size':11,fill:'#b8d7f5'});
-if(n.on&&n.type!=='timer')S('circle',{cx:120,cy:8,r:4,fill:'#19e49c'},g);
+if(n.type==='timer'){
+ const plan=ladderPlan;
+ const selected=plan?.mode==='timer'&&(plan.timerId===n.id||String(plan.timerId)===String(n.id));
+ T(g,63,102,selected?'ET '+(ladderRuntime.elapsed/1000).toFixed(1)+'s / '+Number(plan.delaySeconds||3).toFixed(1)+'s':'TON · interno',{'text-anchor':'middle','font-size':11,fill:selected&&ladderRuntime.done?'#31e6a1':'#8baed1'});
+ if(selected&&ladderRuntime.done)S('circle',{cx:119,cy:8,r:6,fill:'#19e49c'},g);
+}else if(n.on)S('circle',{cx:120,cy:8,r:4,fill:'#19e49c'},g);
 localPorts(n).forEach(([x,y],i)=>term(g,n,i,x,y));
 g.onpointerdown=e=>dragStart(e,n);g.ondblclick=e=>{e.stopPropagation();chosen={kind:'node',id:n.id};renameChosen()};
 
@@ -499,7 +543,7 @@ function remove(){
  else if(chosen?.kind==='node'){const n=find(chosen.id);if(n&&!['railplus','railzero','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}
  multi.clear();chosen=null;refreshInspector();draw();
 }
-function reset(type){simulation=false;nodes=[];wires=[];next=1;first=null;chosen=null;multi.clear();closeMenu();
+function reset(type){resetLadderRuntime();simulation=false;nodes=[];wires=[];next=1;first=null;chosen=null;multi.clear();closeMenu();
 const positive=A('railplus',295,106),negative=A('railzero',295,671),plc=A('plc',335,399);
 if(type!=='empty'){connect(positive.id,0,plc.id,0);connect(negative.id,0,plc.id,1);
 if(type==='start'){const stop=A('nc',337,230),start=A('no',510,230),lamp=A('green',830,255);
@@ -535,7 +579,7 @@ E('addOutput').onclick=()=>changePLC('output',1);E('dropOutput').onclick=()=>cha
 E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=()=>changeExpansion('railplus',-1);
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
 E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
-E('simulate').onclick=()=>{simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{simulation=false;refreshInspector();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
+E('simulate').onclick=()=>{resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
 const STORAGE_KEY='plc-sim-studio-projects-v1';
 let projectId=null;
 function listProjects(){try{const raw=localStorage.getItem(STORAGE_KEY);const data=raw?JSON.parse(raw):[];return Array.isArray(data)?data:[]}catch{return []}}
@@ -677,7 +721,7 @@ function hydrate(data){
  nodes=valid;
  for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));n.ioLabels=n.ioLabels&&typeof n.ioLabels==='object'?n.ioLabels:{}}n.angle=((Number(n.angle)||0)%360+360)%360;n.label=typeof n.label==='string'&&n.label?n.label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type}
  wires=data.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
- next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
+ next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;resetLadderRuntime();ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
 }
 E('saveLocal').onclick=()=>{
  const name=E('projectName').value.trim()||'Proyecto sin título',data=snapshot(),items=listProjects();
@@ -709,7 +753,7 @@ E('load').onclick=()=>{if(simulation){alert('Activa Editar para cargar un circui
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
 for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));if(!n.ioLabels||typeof n.ioLabels!=='object')n.ioLabels={}}n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type;}
-next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
+next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;resetLadderRuntime();ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
 window.onkeydown=e=>{
 const tag=document.activeElement?.tagName;
 if(['INPUT','TEXTAREA','SELECT'].includes(tag)||document.activeElement?.isContentEditable)return;
