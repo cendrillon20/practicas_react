@@ -262,6 +262,11 @@ for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&potential.ha
 potential=reach(src);
 const ready=potential.has(K(plc,0))&&zero.has(K(plc,1));
 for(let i=0;i<10+(plc.extraInputs||0);i++){const term=i<10?(i<4?i+3:i+4):28+i-10;if(ready&&potential.has(K(plc,term)))ins.add(i)}
+// Las señales de laboratorio se suman explícitamente a las E/S físicas;
+// no representan un voltaje real en el borne ni anulan un corto circuito.
+if(ready&&sceneState.enabled)for(const [pin,on] of Object.entries(sceneState.virtual)){
+ if(on){const i=plcInputPins(plc).indexOf(Number(pin));if(i>=0)ins.add(i)}
+}
 const configured=evaluateLadder(plc,ready);
 const op=plcOutputPins(plc);
 if(configured){
@@ -686,7 +691,7 @@ E('addOutput').onclick=()=>changePLC('output',1);E('dropOutput').onclick=()=>cha
 E('addPower').onclick=()=>changeExpansion('railplus',1);E('dropPower').onclick=()=>changeExpansion('railplus',-1);
 E('addZero').onclick=()=>changeExpansion('railzero',1);E('dropZero').onclick=()=>changeExpansion('railzero',-1);
 E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
-E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
+E('simulate').onclick=()=>{placingJunction=false;resetLadderRuntime();simulation=true;first=null;wireDrag=null;drag=null;closeMenu();refreshInspector();draw()};E('edit').onclick=()=>{resetLadderRuntime();simulation=false;refreshInspector();refreshSceneProperties();refreshSceneInputs();draw()};E('examples').onchange=e=>{if(simulation){alert('Activa Editar para cambiar el ejemplo.');e.target.value='start';return}reset(e.target.value)};E('del').onclick=remove;E('wireColor').oninput=e=>{if(simulation||chosen?.kind!=='wire')return;const w=wires.find(x=>x.id===chosen.id);if(w){w.color=e.target.value;draw()}};
 const STORAGE_KEY='plc-sim-studio-projects-v1';
 let projectId=null;
 function listProjects(){try{const raw=localStorage.getItem(STORAGE_KEY);const data=raw?JSON.parse(raw):[];return Array.isArray(data)?data:[]}catch{return []}}
@@ -1540,7 +1545,7 @@ E('tutorExercise').onclick=()=>{
 E('tutorAsk').onclick=()=>{const value=E('tutorQuestion').value.trim();if(!value)return;tutorMessage(value,true);tutorMessage(tutorAnswer(value));E('tutorQuestion').value=''};
 E('tutorQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();E('tutorAsk').click()}});
 
-function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
+function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
  const valid=data.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
@@ -1549,7 +1554,7 @@ function hydrate(data){
  nodes=valid;
  for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));n.ioLabels=n.ioLabels&&typeof n.ioLabels==='object'?n.ioLabels:{}}n.angle=((Number(n.angle)||0)%360+360)%360;n.label=typeof n.label==='string'&&n.label?n.label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC'})[n.type]||types[n.type]?.[0]||n.type}
  wires=data.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
- next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;resetLadderRuntime();ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
+ next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;chosen=null;multi.clear();first=null;simulation=false;resetLadderRuntime();ladderPlan=data.ladder&&typeof data.ladder==='object'?data.ladder:null;normalizeScene(data.scene);E('projectName').value=data.name||'Proyecto sin título';refreshInspector();expansionStatus();draw();renderLadder();
 }
 E('saveLocal').onclick=()=>{
  const name=E('projectName').value.trim()||'Proyecto sin título',data=snapshot(),items=listProjects();
@@ -1563,7 +1568,7 @@ E('saveLocal').onclick=()=>{
 };
 E('newProject').onclick=()=>{
  if(!confirm('¿Crear un proyecto nuevo? Los cambios no guardados del actual se perderán.'))return;
- projectId=null;E('projectName').value='Proyecto sin título';reset('empty');ladderPlan=null;renderLadder();simulation=false;refreshProjects();refreshInspector();expansionStatus();
+ projectId=null;E('projectName').value='Proyecto sin título';reset('empty');normalizeScene({template:'conveyor',objects:[],virtual:{}});ladderPlan=null;renderLadder();simulation=false;refreshProjects();refreshInspector();expansionStatus();
 };
 E('savedProjects').onchange=e=>{
  const selected=e.target.value;if(!selected)return;
@@ -1581,7 +1586,7 @@ E('load').onclick=()=>{if(simulation){alert('Activa Editar para cargar un circui
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
 for(const n of nodes){if(n.type.startsWith('rail'))n.points=Math.max(2,Math.min(13,n.points||7));if(n.type==='plc'){n.extraInputs=Math.max(0,Math.min(6,n.extraInputs||0));n.extraOutputs=Math.max(0,Math.min(6,n.extraOutputs||0));if(!n.ioLabels||typeof n.ioLabels!=='object')n.ioLabels={}}n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC'})[n.type]||types[n.type]?.[0]||n.type;}
-next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;resetLadderRuntime();ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
+next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;resetLadderRuntime();ladderPlan=v.ladder&&typeof v.ladder==='object'?v.ladder:null;normalizeScene(v.scene);E('projectName').value=v.name||'Proyecto sin título';renderLadder();refreshInspector();draw()}catch(err){alert(err.message)}e.target.value=''};
 window.onkeydown=e=>{
 const tag=document.activeElement?.tagName;
 if(['INPUT','TEXTAREA','SELECT'].includes(tag)||document.activeElement?.isContentEditable)return;
@@ -1596,7 +1601,9 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
+initTutor();configureSceneTemplate('conveyor');
 window.setInterval(()=>{if(simulation&&ladderPlan?.mode==='timer'&&ladderRuntime.started&&!ladderRuntime.done)draw()},180);
+window.setInterval(sceneTick,140);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
  const w=Math.round(rect.width),h=Math.round(rect.height);
