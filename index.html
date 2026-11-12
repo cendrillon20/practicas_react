@@ -159,6 +159,30 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 .studio-drawer#scenarioPanel.studio-floating{left:8vw;top:8vh}
 .studio-drawer#tutorPanel.studio-floating{left:42vw;top:11vh}
 @media(max-width:1000px){.layout.ladder-visible{grid-template-columns:175px minmax(0,1fr)}}
+
+.aura-fox{transition:opacity .3s ease,filter .3s ease;--aura-tail-angle:0deg}
+.aura-fox.aura-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.aura-fox.aura-catching{animation:none!important;cursor:crosshair;transition:left .18s ease,bottom .18s ease}
+.aura-fox.aura-biting{animation:none!important;z-index:130}
+.aura-fox.aura-biting svg{animation:aura-bite .32s ease-in-out infinite alternate}
+.aura-fox.aura-tail-magic svg{animation:aura-tail-wag .24s ease-in-out 8}
+.aura-fox .aura-tail{transform-origin:78px 71px;animation:aura-wag 1.2s ease-in-out infinite alternate}
+.aura-fox .aura-tail-tip{transform-origin:78px 71px;animation:aura-wag 1.2s ease-in-out infinite alternate}
+.aura-speech{position:absolute;bottom:97%;left:48px;transform:translateX(-50%);width:230px;max-width:80vw;background:#133854;border:1px solid #62c7e5;border-radius:12px;padding:10px 13px;box-shadow:0 8px 25px #000a;color:#f3fbff;font-size:12px;line-height:1.45;white-space:normal;pointer-events:none;text-align:center}
+.aura-speech[hidden]{display:none}
+.aura-sparkles{position:absolute;bottom:55px;left:10px;font-size:28px;white-space:nowrap;color:#ffe89b;opacity:0;pointer-events:none}
+.aura-tail-magic .aura-sparkles{animation:aura-sparkle 1.6s ease-out forwards}
+.aura-fox.aura-game-bounce svg{animation:aura-bob .22s infinite alternate}
+.aura-game{position:fixed;bottom:110px;left:15px;width:305px;max-width:90vw;z-index:125;background:#0e2641;border:1px solid #50a8d2;border-radius:13px;padding:14px;box-shadow:0 10px 35px #000a;color:#eff8ff;font-size:12px}
+.aura-game[hidden]{display:none}.aura-game-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.aura-game-head button{background:#1e496a;color:white;border:1px solid #6b94b2;border-radius:7px;font-size:18px;padding:2px 9px}
+.aura-game-stats{display:flex;justify-content:space-between;gap:9px;margin:12px 0;background:#132f4b;border-radius:8px;padding:10px}
+.aura-game-actions{display:flex;gap:8px}.aura-game-actions button{flex:1;padding:8px;background:#146454;color:white;border:1px solid #36ad99;border-radius:8px;cursor:pointer}
+#auraGameFeedback{padding-top:9px;line-height:1.4;color:#aed7ea}
+@keyframes aura-wag{to{transform:rotate(15deg)}}
+@keyframes aura-bite{0%{transform:rotate(-14deg) translateY(3px)}100%{transform:rotate(14deg) translateY(-4px)}}
+@keyframes aura-tail-wag{0%{transform:rotate(-8deg)}100%{transform:rotate(9deg) scale(1.05)}}
+@keyframes aura-sparkle{0%{opacity:0;transform:translateY(5px) scale(.6)}35%{opacity:1;transform:translateY(-7px) scale(1.2)}100%{opacity:0;transform:translateY(-23px) scale(1.5)}}
+@media(prefers-reduced-motion:reduce){.aura-fox .aura-tail,.aura-fox .aura-tail-tip,.aura-fox.aura-biting svg,.aura-fox.aura-tail-magic svg,.aura-fox.aura-game-bounce svg,.aura-tail-magic .aura-sparkles{animation:none!important}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">Scenes</button><button class="push" id="showTutor">Aura · Tutor</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>UNIONES Y RAMIFICACIONES</h4><div class="cards" id="junctions"></div><div class="palette-caption" id="junctionInstructions">Pulsa Punto de unión y haz clic en el espacio donde quieras colocar la conexión.</div><h4>PROGRAMACIÓN INTERNA</h4><div class="cards" id="timers"></div><div class="palette-caption">TON es una instrucción interna: no se conecta con cables físicos.</div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
@@ -219,6 +243,10 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div id="tutorChat" class="tutor-chat" aria-live="polite"></div>
  <label>Pregunta al tutor<textarea id="tutorQuestion" rows="3" placeholder="Ej.: ¿Por qué no enciende la lámpara? ¿Cómo funciona TON?"></textarea></label>
  <button id="tutorAsk" class="studio-accent">Enviar pregunta</button>
+ <div class="studio-actions"><button id="auraPlay">Fox Chase · Mini Game</button><button id="auraHide">Hide Aura · Ocultar</button><button id="auraShow">Call Aura · Llamar</button></div>
+ <label class="scene-toggle"><input id="auraHintsToggle" type="checkbox" checked> Contextual Tips · Avisos de Aura</label>
+ <button id="auraFixLadder" class="studio-accent">Tail Magic · Revisar/Recrear Ladder</button>
+ <small>Las correcciones de programa requieren autorización antes de sustituir contenido. Aura no altera cables físicos automáticamente.</small>
  <label>Software Guide · Guía por plataforma<select id="auraPlatform"><option value="compactlogix">Studio 5000 / CompactLogix</option><option value="micrologix">RSLogix 500 / MicroLogix</option><option value="delta">WPLSoft / ISPSoft / Delta</option><option value="codesys">CODESYS</option></select></label>
  <button id="auraPlatformHelp" class="studio-accent">Show Workflow · Explicar pasos</button>
  <label>English Glossary · Glosario inglés/español<input id="glossarySearch" placeholder="Ej. rung, preset, scan, solenoid"></label>
@@ -226,7 +254,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div class="tutor-references"><strong>Documentación de fabricantes</strong><a href="https://www.rockwellautomation.com/es-es/docs/studio-5000-logix-designer/38-00/contents-ditamap/studio-5000-logix-designer.html" target="_blank" rel="noopener noreferrer">Rockwell Studio 5000 · ayuda oficial</a><a href="https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1762-rm001_-en-p.pdf" target="_blank" rel="noopener noreferrer">Rockwell MicroLogix · instrucciones</a><a href="https://www.deltaww.com/en-US/service-support/faq/326" target="_blank" rel="noopener noreferrer">Delta · WPLSoft / ISPSoft</a><a href="https://content.helpme-codesys.com/es/CODESYS%20LD%20FBD/_cds_programming_in_ld.html" target="_blank" rel="noopener noreferrer">CODESYS · programación LD</a></div>
 </section>
 </div>
-<div id="auraFox" class="aura-fox" role="button" tabindex="0" title="Abrir Aura Tutor" aria-label="Aura, tutor de automatización">
+<div id="auraFox" class="aura-fox" role="button" tabindex="0" title="Jugar con Aura / abrir tutor" aria-label="Aura, zorrita tutora interactiva">
  <svg viewBox="0 0 95 87" aria-hidden="true">
   <path d="M17 35L11 6 37 20 52 17 79 5 73 37Q93 64 56 80Q16 82 10 58Z" fill="#ef9149" stroke="#ae5f37" stroke-width="3"/>
   <path d="M14 45L37 57 48 71 58 58 79 44Q76 77 51 81Q25 81 14 45" fill="#fff1d7"/>
@@ -234,8 +262,18 @@ body.phone-mode main{flex:1 1 0;min-height:0}
   <circle cx="33" cy="45" r="4.5" fill="#132335"/><circle cx="63" cy="45" r="4.5" fill="#132335"/>
   <path d="M43 60Q48 66 53 60L48 55Z" fill="#423040"/>
   <path d="M45 67Q48 70 51 67" stroke="#864a43" fill="none" stroke-width="2"/>
+  <path class="aura-tail" d="M76 66Q108 76 91 32Q105 42 106 60Q118 95 71 83Z" fill="#e68139" stroke="#a95d35" stroke-width="2"/><path class="aura-tail-tip" d="M101 36Q114 56 104 66L90 60Z" fill="#fff1d7"/>
  </svg>
  <span>Aura</span>
+ <div id="auraSpeech" class="aura-speech" hidden role="status" aria-live="polite"></div>
+ <div class="aura-sparkles" aria-hidden="true">✧ ✦ ✧</div>
+</div>
+<div id="auraGame" class="aura-game" hidden aria-label="Mini game con Aura">
+ <div class="aura-game-head"><strong>Fox Chase · Atrapa a Aura</strong><button id="closeAuraGame" title="Cerrar minijuego">×</button></div>
+ <p>Aura va a esconderse y saltar por el tablero. ¡Tócala antes de que se escape!</p>
+ <div class="aura-game-stats"><span>Score: <strong id="auraGameScore">0</strong></span><span>Time: <strong id="auraGameTime">30</strong> s</span><span>Best: <strong id="auraGameBest">0</strong></span></div>
+ <div class="aura-game-actions"><button id="startAuraGame">Start · Jugar</button><button id="stopAuraGame">Stop</button></div>
+ <div id="auraGameFeedback" role="status" aria-live="polite">Presiona Start para comenzar.</div>
 </div>
 <script>
 (()=>{
