@@ -121,7 +121,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 .studio-properties{padding:10px;border:1px solid #365574;border-radius:8px;color:#c3d9ed;display:grid;gap:8px}
 .studio-properties label{display:flex;flex-direction:column}
 .studio-status{font-size:11px;color:#abd4ef;border:1px solid #2e506e;background:#112b40;border-radius:9px;padding:10px;line-height:1.5}
-.scene-input{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2f4864;padding:5px 2px;gap:8px}
+.scene-toggle{display:flex!important;flex-direction:row!important;align-items:center!important}.scene-toggle input{width:auto!important}.scene-input{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2f4864;padding:5px 2px;gap:8px}
 .scene-input button{background:#213b58;color:#e9f4ff;border:1px solid #4c6d8e;padding:5px 10px;border-radius:7px}
 .scene-input button.active{background:#086f58;border-color:#30d1a5}
 .tutor-chat{border:1px solid #345875;background:#09182b;border-radius:10px;min-height:160px;max-height:42vh;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:10px}
@@ -172,7 +172,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <svg id="sceneCanvas" viewBox="0 0 800 480" aria-label="Escena industrial construible"></svg>
  <div class="studio-actions"><select id="sceneAddType"><option value="belt">Cinta</option><option value="box">Caja</option><option value="sensor">Sensor</option><option value="traffic">Semáforo</option><option value="arm">Brazo</option><option value="lamp">Lámpara</option><option value="motor">Motor</option><option value="switch">Interruptor</option></select><button id="addSceneObject">＋ Agregar objeto</button></div>
  <div id="sceneProperties" class="studio-properties">Selecciona un elemento de la escena para editar sus señales, nombre o eliminarlo.</div>
- <strong class="studio-subtitle">Entradas virtuales del escenario</strong>
+ <label class="scene-toggle"><input id="sceneEnabled" type="checkbox" checked> Permitir entradas virtuales en modo Simular</label><label class="scene-toggle"><input id="sceneAutoSensor" type="checkbox"> Activar fotoceldas automáticamente cuando pasa una caja</label><strong class="studio-subtitle">Entradas virtuales del escenario</strong>
  <div id="sceneInputs"></div>
  <div id="sceneStatus" class="studio-status"></div>
  <button id="sceneCoach" class="studio-accent">🎓 Revisar escenario con el tutor</button>
@@ -1181,6 +1181,255 @@ function showLadderReview(){
 }
 E('reviewLadder').onclick=showLadderReview;
 
+
+
+const sceneTypes={
+ belt:{name:'Cinta transportadora',io:'output',width:280},
+ box:{name:'Caja / producto',io:'none',width:44},
+ sensor:{name:'Sensor de paso',io:'input',width:30},
+ traffic:{name:'Semáforo',io:'traffic',width:90},
+ arm:{name:'Brazo robótico',io:'output',width:115},
+ lamp:{name:'Lámpara',io:'output',width:46},
+ motor:{name:'Motor',io:'output',width:55},
+ switch:{name:'Pulsador / interruptor',io:'input',width:42}
+};
+let sceneState={template:'conveyor',objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0},sceneNext=1,sceneDrag=null;
+function sceneSignalPins(type){
+ const plc=nodes.find(n=>n.type==='plc');if(!plc)return [];
+ return sceneTypes[type]?.io==='input'?plcInputPins(plc):plcOutputPins(plc);
+}
+function sceneOutput(pin){
+ if(!simulation)return false;
+ const plc=nodes.find(n=>n.type==='plc');if(!plc||pin===null||pin===undefined)return false;
+ const idx=plcOutputPins(plc).indexOf(Number(pin));return idx>=0&&outs.has(idx);
+}
+function sceneInput(pin){return !!sceneState.virtual[String(pin)]}
+function sceneSVGEl(tag,attrs={},parent=E('sceneCanvas')){
+ const el=document.createElementNS(NS,tag);
+ for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));
+ parent.appendChild(el);return el;
+}
+function sceneLabel(parent,x,y,text,attrs={}){
+ const txt=sceneSVGEl('text',{x,y,'font-size':13,fill:'#c3dff6','text-anchor':'middle','font-family':'Segoe UI,Arial,sans-serif',...attrs},parent);
+ txt.textContent=String(text).slice(0,30);return txt;
+}
+function addSceneObject(type,x=270,y=230,extra={}){
+ if(!sceneTypes[type])return null;
+ const pins=sceneSignalPins(type);
+ const item={id:sceneNext++,type,x,y,label:sceneTypes[type].name,pin:pins[0]??null,...extra};
+ if(type==='traffic'){const out=plcOutputPins(nodes.find(n=>n.type==='plc'));item.pin=out[0]??null;item.pin2=out[1]??null;item.pin3=out[2]??null}
+ sceneState.objects.push(item);return item;
+}
+function normalizeScene(raw){
+ const state=raw&&typeof raw==='object'?raw:{};
+ const elements=Array.isArray(state.objects)?state.objects.filter(o=>o&&sceneTypes[o.type]&&Number.isFinite(o.x)&&Number.isFinite(o.y)).slice(0,40):[];
+ sceneNext=Math.max(0,...elements.map(o=>Number(o.id)||0))+1;
+ sceneState={template:typeof state.template==='string'?state.template:'conveyor',objects:elements,virtual:state.virtual&&typeof state.virtual==='object'?state.virtual:{},selected:null,enabled:state.enabled!==false,autoSensor:state.autoSensor===true,frame:0};
+ E('sceneTemplate').value=sceneState.template;E('sceneEnabled').checked=sceneState.enabled;E('sceneAutoSensor').checked=sceneState.autoSensor;
+ renderScene();refreshSceneProperties();refreshSceneInputs();
+}
+function configureSceneTemplate(which){
+ if(!['conveyor','traffic','robot','lights'].includes(which))which='conveyor';
+ sceneState={template:which,objects:[],virtual:{},selected:null,enabled:true,autoSensor:false,frame:0};sceneNext=1;
+ const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
+ const ip=plcInputPins(plc),op=plcOutputPins(plc);
+ const labels=[
+ ['conveyor',[['belt',165,270,{label:'Transportador M1',pin:op[0]}],['box',210,238,{label:'Pieza A'}],['sensor',490,238,{label:'Fotocelda S1',pin:ip[0]}],['motor',78,315,{label:'Motor M1',pin:op[0]}]]],
+ ['traffic',[['traffic',345,90,{label:'Semáforo 1',pin:op[0],pin2:op[1],pin3:op[2]}],['switch',195,318,{label:'Solicitud peatón',pin:ip[0]}],['lamp',550,318,{label:'Piloto auxiliar',pin:op[3]}]]],
+ ['robot',[['arm',180,125,{label:'Brazo A1',pin:op[0]}],['box',520,305,{label:'Pieza B'}],['sensor',560,250,{label:'Presencia S1',pin:ip[0]}],['lamp',620,100,{label:'Pinza / estado',pin:op[1]}]]],
+ ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]]
+ ];
+ for(const item of labels.find(x=>x[0]===which)[1])addSceneObject(...item);
+ E('sceneTemplate').value=which;E('sceneEnabled').checked=true;E('sceneAutoSensor').checked=false;
+ renderScene();refreshSceneProperties();refreshSceneInputs();sceneStatus();
+}
+function sceneCoordinate(e){
+ const svg=E('sceneCanvas'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+ return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function drawScenarioObject(o){
+ const svg=E('sceneCanvas'),g=sceneSVGEl('g',{'data-scene-id':o.id,transform:'translate('+o.x+' '+o.y+')',style:'cursor:pointer'},svg);
+ const selected=sceneState.selected===o.id,signal=sceneOutput(o.pin),stroke=selected?'#ffcb62':'#8cb5d5';
+ const rect=(x,y,w,height,fill,extra={})=>sceneSVGEl('rect',{x,y,width:w,height,rx:5,fill,stroke,...extra},g);
+ const circ=(x,y,r,fill,extra={})=>sceneSVGEl('circle',{cx:x,cy:y,r,fill,stroke,...extra},g);
+ const line=(x1,y1,x2,y2,extra={})=>sceneSVGEl('line',{x1,y1,x2,y2,stroke:'#bad4f3','stroke-width':5,'stroke-linecap':'round',...extra},g);
+ if(o.type==='belt'){
+  rect(-140,-28,280,58,signal?'#145c5a':'#28445e');
+  for(let i=-112;i<=112;i+=40)circ(i,0,12,'#102e44',{'stroke-width':2});
+  line(-140,30,140,30,{'stroke-width':6});
+  sceneLabel(g,0,-44,'Cinta · '+(signal?'EN MARCHA':'PARADA'),{fill:signal?'#55edbc':'#a6c0dd'});
+ }else if(o.type==='box'){
+  rect(-23,-21,46,42,'#a16e3c',{'stroke-width':3});
+  sceneSVGEl('path',{d:'M-23 -21L0 -10L23 -21M0 -10V21',stroke:'#d7ad70','stroke-width':2,fill:'none'},g);
+ }else if(o.type==='sensor'){
+  const active=sceneInput(o.pin);
+  rect(-17,-18,34,36,active?'#146b53':'#36566c');
+  circ(0,0,6,active?'#5bffc6':'#bad4ec');
+  line(20,-10,58,-10,{'stroke-width':2,'stroke-dasharray':'4 3',stroke:active?'#42e5b1':'#7198ba'});
+  sceneLabel(g,0,-35,active?'SENSOR ON':'SENSOR OFF',{fill:active?'#6ef6ce':'#bfd0ed'});
+ }else if(o.type==='traffic'){
+  rect(-38,-12,76,200,'#182b3e',{'stroke-width':4,rx:13});
+  circ(0,34,22,sceneOutput(o.pin)?'#ff535d':'#512630',{'stroke-width':2});
+  circ(0,89,22,sceneOutput(o.pin2)?'#ffd052':'#514526',{'stroke-width':2});
+  circ(0,144,22,sceneOutput(o.pin3)?'#3bf6a2':'#244c3c',{'stroke-width':2});
+  line(0,189,0,235,{'stroke-width':8});
+ }else if(o.type==='arm'){
+  rect(-44,120,88,21,'#36577a');
+  circ(0,115,17,'#3f7294');
+  const t=signal?0.7:-0.4,elbowX=70*Math.cos(t),elbowY=115-70*Math.sin(t);
+  line(0,115,elbowX,elbowY,{'stroke-width':19,stroke:'#54a7d9'});
+  circ(elbowX,elbowY,12,'#daecfd');
+  line(elbowX,elbowY,elbowX+54,elbowY-42,{'stroke-width':15,stroke:'#77c5f3'});
+  line(elbowX+54,elbowY-42,elbowX+65,elbowY-26,{'stroke-width':5});
+  line(elbowX+54,elbowY-42,elbowX+47,elbowY-23,{'stroke-width':5});
+ }else if(o.type==='lamp'){
+  circ(0,0,28,signal?'#ffd069':'#343f57',{'stroke-width':4,stroke:signal?'#fff9c5':'#7292b2'});
+  if(signal)circ(0,0,40,'#ffd56d',{opacity:.14,stroke:'none'});
+  line(-13,35,13,35);line(-10,44,10,44);
+ }else if(o.type==='motor'){
+  circ(0,0,29,signal?'#146a57':'#36536a',{'stroke-width':3});
+  sceneLabel(g,0,8,'M',{fill:signal?'#6affbf':'#dfebf8','font-size':24,'font-weight':'bold'});
+  line(30,0,56,0);
+ }else if(o.type==='switch'){
+  const active=sceneInput(o.pin);
+  rect(-25,-22,50,45,active?'#0f755b':'#36566c');
+  circ(0,0,12,active?'#7cffe1':'#c0d8ed');
+  sceneLabel(g,0,-38,active?'ACTIVO':'INACTIVO');
+ }
+ if(o.type!=='belt'&&o.type!=='sensor'&&o.type!=='switch')sceneLabel(g,0,o.type==='traffic'?260:o.type==='arm'?166:66,o.label||sceneTypes[o.type].name);
+ const makeHit=()=>{g.onpointerdown=e=>{
+  e.preventDefault();e.stopPropagation();
+  if(simulation){
+   if(['sensor','switch'].includes(o.type)){sceneState.virtual[o.pin]=!sceneInput(o.pin);draw();renderScene();refreshSceneInputs()}
+   return;
+  }
+  sceneState.selected=o.id;refreshSceneProperties();renderScene();
+  const p=sceneCoordinate(e);sceneDrag={id:o.id,dx:p.x-o.x,dy:p.y-o.y};
+  svg.setPointerCapture(e.pointerId);
+ }};
+ makeHit();
+}
+function renderScene(){
+ const svg=E('sceneCanvas');if(!svg)return;svg.replaceChildren();
+ sceneSVGEl('rect',{x:0,y:0,width:800,height:480,fill:'#0b2237',rx:7},svg);
+ for(let x=0;x<=800;x+=40)sceneSVGEl('line',{x1:x,y1:0,x2:x,y2:480,stroke:'#1d3551','stroke-width':.8},svg);
+ for(let y=0;y<=480;y+=40)sceneSVGEl('line',{x1:0,y1:y,x2:800,y2:y,stroke:'#1d3551','stroke-width':.8},svg);
+ sceneSVGEl('line',{x1:0,y1:445,x2:800,y2:445,stroke:'#43647b','stroke-width':3},svg);
+ for(const o of sceneState.objects)drawScenarioObject(o);
+ sceneStatus();
+}
+function sceneStatus(){
+ const area=E('sceneStatus');if(!area)return;
+ const count=sceneState.objects.length,connected=sceneState.objects.filter(o=>['belt','lamp','traffic','arm','motor'].includes(o.type)&&sceneOutput(o.pin)).length;
+ area.textContent='Objetos: '+count+' · Actuadores con salida energizada: '+connected+' · Señales virtuales habilitadas: '+(sceneState.enabled?'sí':'no')+
+ '. El movimiento, luces y señales corresponden a la simulación didáctica. No hay físicas realistas, cinemática exacta ni control seguro de maquinaria.';
+}
+function refreshSceneInputs(){
+ const panel=E('sceneInputs');if(!panel)return;panel.replaceChildren();
+ const sensors=sceneState.objects.filter(o=>['sensor','switch'].includes(o.type));
+ if(!sensors.length){panel.textContent='No hay sensores ni interruptores en este escenario.';return}
+ for(const o of sensors){
+  const row=document.createElement('div');row.className='scene-input';
+  const name=document.createElement('span');name.textContent=o.label+' · '+(o.pin!=null?portName(nodes.find(n=>n.type==='plc'),o.pin):'sin asignar');
+  const button=document.createElement('button');button.textContent=sceneInput(o.pin)?'ON':'OFF';button.className=sceneInput(o.pin)?'active':'';
+  button.disabled=!simulation;
+  button.onclick=()=>{sceneState.virtual[o.pin]=!sceneInput(o.pin);draw();renderScene();refreshSceneInputs()};
+  row.append(name,button);panel.appendChild(row);
+ }
+}
+function refreshSceneProperties(){
+ const panel=E('sceneProperties');if(!panel)return;panel.replaceChildren();
+ const item=sceneState.objects.find(o=>o.id===sceneState.selected);
+ if(!item){panel.textContent='Selecciona un objeto para cambiar su nombre y asignar señales de entrada o salida.';return}
+ const title=document.createElement('strong');title.textContent=sceneTypes[item.type].name;panel.appendChild(title);
+ const label=document.createElement('label');label.textContent='Nombre';
+ const name=document.createElement('input');name.value=item.label||'';name.maxLength=36;name.disabled=simulation;
+ name.oninput=()=>{item.label=name.value.slice(0,36);renderScene()};label.appendChild(name);panel.appendChild(label);
+ const kind=sceneTypes[item.type].io;
+ if(kind!=='none'){
+  const assign=(field,text,io)=>{
+   const l=document.createElement('label');l.textContent=text;
+   const select=document.createElement('select');select.disabled=simulation;
+   const plc=nodes.find(n=>n.type==='plc');
+   const pins=io==='input'?plcInputPins(plc):plcOutputPins(plc);
+   for(const pin of pins){const op=document.createElement('option');op.value=String(pin);op.textContent=portName(plc,pin)+(plc.ioLabels?.[pin]?' · '+plc.ioLabels[pin]:'');select.appendChild(op)}
+   select.value=String(item[field]??pins[0]);select.onchange=()=>{item[field]=Number(select.value);refreshSceneInputs();renderScene()};l.appendChild(select);panel.appendChild(l);
+  };
+  assign('pin',kind==='input'?'Entrada PLC':'Salida PLC (principal)',kind==='input'?'input':'output');
+  if(kind==='traffic'){assign('pin2','Salida ámbar','output');assign('pin3','Salida verde','output')}
+ }
+ const del=document.createElement('button');del.textContent='Eliminar objeto';del.disabled=simulation;
+ del.onclick=()=>{sceneState.objects=sceneState.objects.filter(o=>o.id!==item.id);sceneState.selected=null;renderScene();refreshSceneInputs();refreshSceneProperties()};
+ panel.appendChild(del);
+}
+function sceneFeedback(){
+ const objs=sceneState.objects,out=[];
+ if(!objs.length)return 'Escenario vacío: agrega elementos y vincúlalos a entradas/salidas.';
+ const plc=nodes.find(n=>n.type==='plc');
+ if(!sceneState.enabled)out.push('Las entradas virtuales están deshabilitadas.');
+ for(const o of objs){
+  const kind=sceneTypes[o.type]?.io;
+  if(kind==='input'&&!plcInputPins(plc).includes(Number(o.pin)))out.push(o.label+': selecciona una entrada digital válida.');
+  if(['output','traffic'].includes(kind)&&!plcOutputPins(plc).includes(Number(o.pin)))out.push(o.label+': selecciona una salida digital válida.');
+  if(kind==='traffic'&&(!plcOutputPins(plc).includes(Number(o.pin2))||!plcOutputPins(plc).includes(Number(o.pin3))))out.push(o.label+': faltan salidas para ámbar o verde.');
+ }
+ if(sceneState.template==='traffic')out.push('El semáforo completo requiere varias salidas y lógica de secuencia; el motor Ladder actual solo programa una salida a la vez.');
+ if(sceneState.template==='robot')out.push('El brazo visualiza una condición digital, no simula control de servo, cinemática, límites o trayectorias.');
+ if(!ladderPlan)out.push('No hay Ladder generado o importado. Abre Programa escalera y asocia una salida.');
+ else if(!objs.some(o=>o.pin===ladderPlan.output&&sceneTypes[o.type]?.io!=='input'))out.push('La salida Ladder elegida no está asignada a ningún actuador de la escena.');
+ if(!out.length)out.push('Escenario listo para la prueba básica. Verifica el circuito físico y el Ladder por separado.');
+ return out.join('\n');
+}
+function sceneTick(){
+ if(!simulation||!sceneState.objects.length)return;
+ let changed=false;
+ const belts=sceneState.objects.filter(o=>o.type==='belt'&&sceneOutput(o.pin));
+ if(belts.length){
+  for(const box of sceneState.objects.filter(o=>o.type==='box')){
+   const b=belts.find(b=>Math.abs(box.y-b.y)<100&&box.x>=b.x-175&&box.x<=b.x+180);
+   if(b){box.x+=3;changed=true;if(box.x>b.x+155)box.x=b.x-160}
+  }
+ }
+ if(sceneState.autoSensor&&sceneState.enabled){
+  for(const sensor of sceneState.objects.filter(o=>o.type==='sensor')){
+   const active=sceneState.objects.some(box=>box.type==='box'&&Math.abs(box.x-sensor.x)<32&&Math.abs(box.y-sensor.y)<65);
+   if(sceneInput(sensor.pin)!==active){sceneState.virtual[sensor.pin]=active;changed=true}
+  }
+ }
+ if(changed){draw();renderScene();refreshSceneInputs()}
+ else if(!E('scenarioPanel').hidden)renderScene();
+}
+function openScenarios(){
+ closeLadder();closeTutor();E('scenarioPanel').hidden=false;
+ if(!sceneState.objects.length)configureSceneTemplate(E('sceneTemplate').value||'conveyor');
+ renderScene();refreshSceneProperties();refreshSceneInputs();
+}
+function closeScenarios(){E('scenarioPanel').hidden=true}
+E('showScenarios').onclick=openScenarios;
+E('closeScenarios').onclick=closeScenarios;
+E('loadSceneTemplate').onclick=()=>{
+ if(!confirm('¿Crear escenario nuevo? Los objetos de la escena actual se reemplazarán.'))return;
+ configureSceneTemplate(E('sceneTemplate').value);
+};
+E('clearScene').onclick=()=>{if(!confirm('¿Vaciar la escena actual?'))return;sceneState.objects=[];sceneState.virtual={};sceneState.selected=null;renderScene();refreshSceneInputs();refreshSceneProperties()};
+E('addSceneObject').onclick=()=>{
+ const type=E('sceneAddType').value;
+ const o=addSceneObject(type,220+sceneState.objects.length*23,180+sceneState.objects.length*14);
+ if(o){sceneState.selected=o.id;renderScene();refreshSceneInputs();refreshSceneProperties()}
+};
+E('sceneEnabled').onchange=e=>{sceneState.enabled=e.target.checked;draw();renderScene()};
+E('sceneAutoSensor').onchange=e=>{sceneState.autoSensor=e.target.checked;renderScene()};
+E('sceneCanvas').onpointermove=e=>{
+ if(!sceneDrag||simulation)return;
+ const item=sceneState.objects.find(o=>o.id===sceneDrag.id);if(!item)return;
+ const p=sceneCoordinate(e);item.x=Math.max(30,Math.min(770,Math.round((p.x-sceneDrag.dx)/5)*5));
+ item.y=Math.max(30,Math.min(420,Math.round((p.y-sceneDrag.dy)/5)*5));
+ renderScene();
+};
+E('sceneCanvas').onpointerup=()=>sceneDrag=null;
+E('sceneCanvas').onpointercancel=()=>sceneDrag=null;
+E('sceneCanvas').onpointerdown=e=>{if(!simulation&&e.target===E('sceneCanvas')){sceneState.selected=null;refreshSceneProperties();renderScene()}};
+E('sceneCoach').onclick=()=>{const answer=sceneFeedback();openTutor();tutorMessage('REVISIÓN DEL ESCENARIO\n'+answer)};
 
 const tutorLibrary=[
 {id:'basics',title:'Qué es un PLC',terms:'plc controlador cpu automatización funcionamiento',lesson:'Un controlador lógico programable lee señales, ejecuta lógica y actualiza salidas. Su arquitectura incluye CPU, memoria, fuente, entradas, salidas y comunicaciones. La aplicación determina el comportamiento; el dibujo eléctrico determina por dónde llegan señales y energía. En este simulador hay un único controlador didáctico de 24 V CC; no es un gemelo digital de una CPU comercial.',practice:'Identifica qué sensores llegan a I/0 e I/1, y qué actuador depende de O/0.'},
