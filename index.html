@@ -53,7 +53,7 @@ body.phone-mode main{flex:1;min-height:0}
 .ladder-message{font-size:11px;color:#b1cde9;line-height:1.5}
 .ladder-preview{min-height:125px;overflow-x:auto;background:#091523;border:1px solid #314c6a;border-radius:10px;padding:8px}
 .ladder-preview svg{width:100%;min-width:360px;height:auto;touch-action:auto;user-select:none}
-.ladder-panel small{font-size:11px;color:#91aac8;line-height:1.5}
+.ladder-panel small{font-size:11px;color:#91aac8;line-height:1.5}.ladder-code-title{font-size:12px;color:#c5e2ff}.ladder-code{font:12px/1.55 Consolas,Monaco,monospace;white-space:pre;overflow:auto;border:1px solid #395979;border-radius:9px;padding:11px;background:#061523;color:#b7e9d2;max-height:220px}
 @media(max-width:1000px){
  .layout.ladder-visible{grid-template-columns:190px minmax(0,1fr)}
  .layout.ladder-visible .ladder-panel{position:absolute;right:0;top:56px;bottom:0;width:min(440px,75vw);z-index:9;box-shadow:-10px 0 32px #000a}
@@ -124,6 +124,9 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <label id="ladderDelayWrap">Retardo TON en segundos<input id="ladderDelay" type="number" min="0.1" max="3600" step="0.1" value="3"></label><label id="ladderTimerWrap">Temporizador interno<select id="ladderTimer"></select></label><div class="ladder-wiring"><strong>Datos detectados en el diagrama eléctrico</strong><div id="ladderWiring"></div></div><button id="generateLadder" class="ladder-generate">Validar datos y generar programa Ladder</button><div id="ladderLive" class="ladder-live" aria-live="polite">Aquí aparecerán los estados de las entradas y salidas.</div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
+ <strong class="ladder-code-title">Instrucciones de referencia según la plataforma</strong>
+ <pre id="ladderCode" class="ladder-code">Genera el programa para ver las instrucciones.</pre>
+ <button id="exportLadder" class="ladder-generate" title="Descargar instrucciones de referencia">↓ Exportar borrador Ladder (.txt)</button>
  <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
 </section></div>
 <script>
@@ -682,6 +685,43 @@ function updateLadderMonitor(){
   }
  }
 }
+function ladderPseudoCode(plan){
+ if(!plan)return 'Sin programa';
+ const a=ladderTag(plan.start,'input',plan.platform),b=ladderTag(plan.stop,'input',plan.platform),o=ladderTag(plan.output,'output',plan.platform),t=timerTag(plan);
+ const tsec=Math.max(0.1,Number(plan.delaySeconds||3));
+ const note='// BORRADOR de estudio, NO importable ni listo para un PLC real\n// CPU: '+(plan.controller||'sin especificar')+'\n// '+platformRemark(plan)+'\n\n';
+ if(plan.platform==='codesys'){
+  const lines={
+   direct:o+' := '+a+';',
+   inverse:o+' := NOT '+a+';',
+   and:o+' := '+a+' AND '+b+';',
+   or:o+' := '+a+' OR '+b+';',
+   latch:'IF '+(plan.stopPolarity==='no'?b:'NOT '+b)+' THEN '+o+' := FALSE;\nELSIF '+a+' THEN '+o+' := TRUE;\nEND_IF;',
+   timer:t+'(IN := '+a+', PT := T#'+tsec+'s);\n'+o+' := '+t+'.Q;'
+  };
+  return note+'// Representación textual IEC, no archivo de proyecto CODESYS\n'+(lines[plan.mode]||'');
+ }
+ if(plan.platform==='delta'){
+  const lines={
+   direct:'LD '+a+'\nOUT '+o,
+   inverse:'LDI '+a+'\nOUT '+o,
+   and:'LD '+a+'\nAND '+b+'\nOUT '+o,
+   or:'LD '+a+'\nOR '+b+'\nOUT '+o,
+   latch:'// Paro con prioridad\n'+(plan.stopPolarity==='no'?'LD '+b:'LDI '+b)+'\nRST '+o+'\nLD '+a+'\nSET '+o,
+   timer:'LD '+a+'\nTMR '+t+' K'+Math.round(tsec*10)+'\n// K presupone base 100 ms (verificar en el modelo)\nLD '+t+'\nOUT '+o
+  };
+  return note+'// Mnemónicos Delta de referencia\n'+(lines[plan.mode]||'');
+ }
+ const contacts={
+  direct:'XIC('+a+') OTE('+o+');',
+  inverse:'XIO('+a+') OTE('+o+');',
+  and:'XIC('+a+') XIC('+b+') OTE('+o+');',
+  or:'BST XIC('+a+') NXB XIC('+b+') BND OTE('+o+');',
+  latch:(plan.stopPolarity==='no'?'XIO(':'XIC(')+b+') BST XIC('+a+') NXB XIC('+o+') BND OTE('+o+');',
+  timer:'XIC('+a+') TON('+t+','+Math.round(tsec*1000)+',0);\nXIC('+t+(plan.platform==='micrologix'?'/DN':'.DN')+') OTE('+o+');'
+ };
+ return note+'// Instrucciones estilo Rockwell, ajusta direcciones y sintaxis en el IDE\n'+(contacts[plan.mode]||'');
+}
 function ladderOption(select,label,value){const option=document.createElement('option');option.value=String(value);option.textContent=label;select.appendChild(option)}
 function populateLadderSelectors(){
  const plc=nodes.find(n=>n.type==='plc');if(!plc)return;
@@ -747,9 +787,10 @@ function ladderCoil(root,x,y,label){
 function ladderLabel(i){const plc=nodes.find(n=>n.type==='plc');return plc?portName(plc,i)+(plc.ioLabels?.[i]?' '+plc.ioLabels[i]:''):''}
 function renderLadder(){
  const preview=E('ladderPreview');if(!preview)return;preview.replaceChildren();
- const plan=ladderPlan;if(!plan){
+ const plan=ladderPlan;if(!plan){E('ladderCode').textContent='Genera el programa para ver las instrucciones.';
   const p=document.createElement('p');p.style.color='#9db9d8';p.style.fontSize='12px';p.textContent='Aquí aparecerá el lenguaje escalera después de indicar la tarea y pulsar «Generar programa escalera».';preview.appendChild(p);return;
  }
+ E('ladderCode').textContent=ladderPseudoCode(plan);
  E('ladderGoal').value=plan.goal||'';E('ladderPlatform').value=plan.platform||'compactlogix';E('ladderController').value=plan.controller||'';E('ladderDelay').value=String(plan.delaySeconds||3);E('ladderStopPolaritySelect').value=plan.stopPolarity||'nc';
  E('ladderMode').value=plan.mode||'direct';
  populateLadderSelectors();
@@ -810,6 +851,13 @@ function renderLadder(){
  const info=E('ladderMessage');info.textContent='Tarea documentada: '+plan.goal+'. '+platformRemark(plan)+' Configuración de ejemplo: valida las direcciones y características de tu CPU.';
  updateLadderMonitor();
 }
+E('exportLadder').onclick=()=>{
+ if(!ladderPlan){alert('Genera primero un programa Ladder.');return}
+ const body='TAREA: '+ladderPlan.goal+'\nPLATAFORMA: '+ladderPlan.platform+'\n\n'+ladderPseudoCode(ladderPlan);
+ const blob=new Blob([body],{type:'text/plain;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-ladder-borrador.txt';a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
 E('showLadder').onclick=()=>openLadder();
 E('closeLadder').onclick=()=>closeLadder();
 E('ladderMode').onchange=updatePlatformControls;
