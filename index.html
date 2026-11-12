@@ -174,7 +174,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div id="sceneProperties" class="studio-properties">Selecciona un elemento de la escena para editar sus señales, nombre o eliminarlo.</div>
  <label class="scene-toggle"><input id="sceneEnabled" type="checkbox" checked> Permitir entradas virtuales en modo Simular</label><label class="scene-toggle"><input id="sceneAutoSensor" type="checkbox"> Activar fotoceldas automáticamente cuando pasa una caja</label><strong class="studio-subtitle">Entradas virtuales del escenario</strong>
  <div id="sceneInputs"></div>
- <div id="sceneStatus" class="studio-status"></div>
+ <div id="sceneChallenge" class="studio-status"></div><button id="sceneEvaluate" class="studio-accent">✓ Evaluar práctica</button><div id="sceneStatus" class="studio-status"></div>
  <button id="sceneCoach" class="studio-accent">🎓 Revisar escenario con el tutor</button>
 </section>
 <section id="tutorPanel" class="studio-drawer" hidden aria-label="Tutor didáctico de PLC">
@@ -1231,7 +1231,7 @@ function normalizeScene(raw){
  sceneNext=Math.max(0,...elements.map(o=>Number(o.id)||0))+1;
  sceneState={template:typeof state.template==='string'?state.template:'conveyor',objects:elements,virtual:state.virtual&&typeof state.virtual==='object'?state.virtual:{},selected:null,enabled:state.enabled!==false,autoSensor:state.autoSensor===true,frame:0};
  E('sceneTemplate').value=sceneState.template;E('sceneEnabled').checked=sceneState.enabled;E('sceneAutoSensor').checked=sceneState.autoSensor;
- renderScene();refreshSceneProperties();refreshSceneInputs();
+ renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
 }
 function configureSceneTemplate(which){
  if(!['conveyor','traffic','robot','lights'].includes(which))which='conveyor';
@@ -1246,7 +1246,7 @@ function configureSceneTemplate(which){
  ];
  for(const item of labels.find(x=>x[0]===which)[1])addSceneObject(...item);
  E('sceneTemplate').value=which;E('sceneEnabled').checked=true;E('sceneAutoSensor').checked=false;
- renderScene();refreshSceneProperties();refreshSceneInputs();sceneStatus();
+ renderScene();refreshSceneProperties();refreshSceneInputs();sceneStatus();updateSceneChallenge();
 }
 function sceneCoordinate(e){
  const svg=E('sceneCanvas'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
@@ -1323,6 +1323,39 @@ function renderScene(){
  for(const o of sceneState.objects)drawScenarioObject(o);
  sceneStatus();
 }
+const sceneChallenges={
+ conveyor:{goal:'Control de cinta: crea una banda, una caja y un sensor. Relaciona sensor I/0 con una salida de motor y comprueba su movimiento.',steps:['Coloca cinta, caja y sensor','Configura I/O','Crea Ladder directo o con enclavamiento','Activa entrada y comprueba movimiento']},
+ traffic:{goal:'Semáforo: coloca un señalizador con tres salidas distintas. Documenta fases rojo–verde–ámbar y sus condiciones; esta edición no ejecuta automáticamente la secuencia multisalida.',steps:['Coloca un semáforo','Asigna tres salidas diferentes','Define estados y tiempos','Reconoce el límite actual del Ladder de una sola salida']},
+ robot:{goal:'Brazo: coloca brazo y detector. Haz que la señal de presencia active su salida. La animación solo representa movimiento lógico, no cinemática.',steps:['Coloca brazo y sensor','Asigna una entrada y salida','Genera una red de control','Simula presencia y observa el brazo']},
+ lights:{goal:'Luces: coloca lámparas e interruptor. Relaciona entrada y salida para un control digital y verifica sus estados.',steps:['Coloca luces e interruptor','Asigna pines válidos','Genera Ladder de activación','Comprueba lámpara apagada y encendida']}
+};
+function evaluateSceneChallenge(){
+ const state=sceneState,scene=state.objects,plan=ladderPlan;
+ const exists=type=>scene.some(o=>o.type===type);
+ const pinMatch=()=>plan&&scene.some(o=>['belt','lamp','motor','arm'].includes(o.type)&&Number(o.pin)===Number(plan.output));
+ const sensors=scene.filter(o=>['sensor','switch'].includes(o.type));
+ const inputMatch=()=>plan&&sensors.some(o=>Number(o.pin)===Number(plan.start));
+ let tests=[];
+ if(state.template==='conveyor')tests=[['Hay cinta, caja y sensor',exists('belt')&&exists('box')&&exists('sensor')],['Existe programa Ladder',!!plan],['La salida Ladder controla la cinta',!!(plan&&scene.some(o=>o.type==='belt'&&Number(o.pin)===Number(plan.output)))],['La entrada Ladder corresponde al sensor',!!inputMatch()]];
+ else if(state.template==='robot')tests=[['Hay brazo y sensor',exists('arm')&&exists('sensor')],['Hay Ladder aplicado',!!plan],['La salida controla el brazo',!!(plan&&scene.some(o=>o.type==='arm'&&Number(o.pin)===Number(plan.output)))],['La entrada corresponde al sensor',!!inputMatch()]];
+ else if(state.template==='lights')tests=[['Hay lámpara e interruptor',exists('lamp')&&exists('switch')],['Hay Ladder aplicado',!!plan],['La salida corresponde a una lámpara',!!pinMatch()],['La entrada corresponde al interruptor',!!inputMatch()]];
+ else {
+  const traffic=scene.find(o=>o.type==='traffic');
+  tests=[['Hay semáforo',!!traffic],['Rojo, ámbar y verde usan pines distintos',!!(traffic&&new Set([traffic.pin,traffic.pin2,traffic.pin3]).size===3)],['Hay un Ladder básico configurado',!!plan]];
+ }
+ const good=tests.filter(x=>x[1]).length;
+ const lines=['EVALUACIÓN: '+good+' de '+tests.length+' criterios satisfechos.',...tests.map(([label,ok])=>(ok?'✓ ':'✗ ')+label)];
+ if(state.template==='traffic')lines.push('LÍMITE: la secuencia de tres salidas necesita un ejecutor Ladder de múltiples redes; esta práctica verifica configuración y visualización parcial.');
+ lines.push('Esto es una comprobación educativa. No equivale a FAT, SAT ni validación de seguridad.');
+ return lines.join('\n');
+}
+function updateSceneChallenge(){
+ const target=E('sceneChallenge');if(!target)return;
+ const challenge=sceneChallenges[sceneState.template]||sceneChallenges.conveyor;
+ target.textContent='MISIÓN: '+challenge.goal+'\n'+challenge.steps.map((x,i)=>(i+1)+'. '+x).join('\n');
+ target.style.whiteSpace='pre-wrap';
+}
+E('sceneEvaluate').onclick=()=>{const txt=evaluateSceneChallenge();E('sceneChallenge').textContent=txt;E('sceneChallenge').style.whiteSpace='pre-wrap'};
 function sceneStatus(){
  const area=E('sceneStatus');if(!area)return;
  const count=sceneState.objects.length,connected=sceneState.objects.filter(o=>['belt','lamp','traffic','arm','motor'].includes(o.type)&&sceneOutput(o.pin)).length;
@@ -1407,7 +1440,7 @@ function sceneTick(){
 function openScenarios(){
  closeLadder();closeTutor();E('scenarioPanel').hidden=false;
  if(!sceneState.objects.length)configureSceneTemplate(E('sceneTemplate').value||'conveyor');
- renderScene();refreshSceneProperties();refreshSceneInputs();
+ renderScene();refreshSceneProperties();refreshSceneInputs();updateSceneChallenge();
 }
 function closeScenarios(){E('scenarioPanel').hidden=true}
 E('showScenarios').onclick=openScenarios;
