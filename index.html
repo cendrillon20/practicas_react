@@ -101,8 +101,38 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  .layout>main{flex:1 1 0;min-height:0}
  .layout.ladder-visible .ladder-panel{top:0;bottom:0;width:100%;position:absolute;z-index:12}
 }
+
+.layout{position:relative}
+.studio-drawer{position:absolute;right:0;top:0;bottom:0;width:min(450px,92vw);z-index:15;overflow-y:auto;overscroll-behavior:contain;background:#0b1d30;border-left:1px solid #45698e;box-shadow:-8px 0 22px #0009;padding:14px;display:flex;flex-direction:column;gap:11px;font-size:12px}
+.studio-drawer[hidden]{display:none}
+.studio-drawer-top{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #37577d;padding-bottom:10px}
+.studio-drawer-top strong{font-size:15px}
+.studio-drawer-top button{background:#1c3552;border:1px solid #4a709a;color:#f1f8ff;padding:3px 10px;border-radius:7px;font-size:21px}
+.studio-lead{margin:0;color:#bad2ec;line-height:1.5}
+.studio-drawer label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#c1d7f4}
+.studio-drawer select,.studio-drawer input,.studio-drawer textarea{width:100%;padding:8px;background:#122740;color:#eaf4ff;border:1px solid #3e628b;border-radius:7px;font:inherit}
+.studio-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.studio-actions>*{flex:1 1 auto;min-width:0}
+.studio-drawer button{cursor:pointer}
+.studio-actions button,.studio-accent{padding:8px 10px;background:#1d4061;border:1px solid #4b769e;color:#f3f8ff;border-radius:8px}
+.studio-accent{background:#096e63;border-color:#1bab93}
+.studio-drawer #sceneCanvas{width:100%;height:auto;aspect-ratio:5/3;border:1px solid #3b567c;border-radius:9px;touch-action:none;background:#071523}
+.studio-subtitle{font-size:12px;color:#e5f1ff}
+.studio-properties{padding:10px;border:1px solid #365574;border-radius:8px;color:#c3d9ed;display:grid;gap:8px}
+.studio-properties label{display:flex;flex-direction:column}
+.studio-status{font-size:11px;color:#abd4ef;border:1px solid #2e506e;background:#112b40;border-radius:9px;padding:10px;line-height:1.5}
+.scene-input{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2f4864;padding:5px 2px;gap:8px}
+.scene-input button{background:#213b58;color:#e9f4ff;border:1px solid #4c6d8e;padding:5px 10px;border-radius:7px}
+.scene-input button.active{background:#086f58;border-color:#30d1a5}
+.tutor-chat{border:1px solid #345875;background:#09182b;border-radius:10px;min-height:160px;max-height:42vh;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:10px}
+.tutor-bubble{padding:9px 11px;border-radius:9px;background:#17324b;line-height:1.55;color:#d7eaff;white-space:pre-wrap}
+.tutor-bubble.user{background:#1d465f;align-self:flex-end;color:#f5fdff;max-width:94%}
+.tutor-bubble.bot{align-self:flex-start;max-width:100%}
+.tutor-references{display:flex;flex-direction:column;gap:7px;border-top:1px solid #344b69;padding-top:11px}
+.tutor-references a{color:#82c9ff;text-decoration:underline;font-size:11px}
+@media(max-width:680px){.studio-drawer{width:100%}.studio-drawer #sceneCanvas{max-height:270px}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showScenarios">🏭 Escenarios</button><button class="push" id="showTutor">🎓 Tutor PLC</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
 <div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>UNIONES Y RAMIFICACIONES</h4><div class="cards" id="junctions"></div><div class="palette-caption" id="junctionInstructions">Pulsa Punto de unión y haz clic en el espacio donde quieras colocar la conexión.</div><h4>PROGRAMACIÓN INTERNA</h4><div class="cards" id="timers"></div><div class="palette-caption">TON es una instrucción interna: no se conecta con cables físicos.</div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
 <section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
  <div class="ladder-top"><strong>▤ Programa escalera (Ladder)</strong><button id="closeLadder" title="Cerrar panel">×</button></div>
@@ -125,7 +155,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <div class="ladder-message">El texto describe el objetivo; para ejecutarlo debes elegir una lógica compatible. Solo se simulan las cinco lógicas básicas y TON indicadas. No interpreta automáticamente cualquier proceso industrial.</div>
  <button id="runLadderTests" class="ladder-generate" title="Comprobar comportamiento lógico sin modificar el circuito">▶ Probar lógica Ladder</button>
  <button id="reviewLadder" class="ladder-generate">⚠ Analizar programa y cableado</button>
- <button id="copyAIPrompt" class="ladder-generate" title="Copiar los datos necesarios para revisarlos con una IA externa">✦ Copiar consulta para IA</button>
+ <button id="openTutorFromLadder" class="ladder-generate">🎓 Preguntar al tutor integrado</button>
  <div id="ladderTests" class="ladder-message"></div><div id="ladderReview" class="ladder-review"></div>
  <div id="ladderMessage" class="ladder-message">Describe la tarea, selecciona el tipo de control y sus entradas/salidas.</div>
  <div id="ladderPreview" class="ladder-preview"></div>
@@ -133,7 +163,31 @@ body.phone-mode main{flex:1 1 0;min-height:0}
  <pre id="ladderCode" class="ladder-code">Genera el programa para ver las instrucciones.</pre>
  <button id="exportLadder" class="ladder-generate" title="Descargar instrucciones de referencia">↓ Exportar borrador Ladder (.txt)</button>
  <small>Vista Ladder didáctica. No compila, transfiere ni ejecuta código en un PLC físico. Debes verificar su adecuación al equipo real.</small>
-</section></div>
+</section>
+<section id="scenarioPanel" class="studio-drawer" hidden aria-label="Escenarios industriales interactivos">
+ <div class="studio-drawer-top"><strong>🏭 Laboratorio de escenarios</strong><button id="closeScenarios" title="Cerrar panel">×</button></div>
+ <p class="studio-lead">Construye una escena 2D y vincula sus elementos a entradas y salidas del PLC. Las señales virtuales son didácticas; no sustituyen el cableado real.</p>
+ <label>Escenario inicial<select id="sceneTemplate"><option value="conveyor">Cinta transportadora</option><option value="traffic">Semáforo de tres luces</option><option value="robot">Brazo robótico y estación</option><option value="lights">Iluminación industrial</option></select></label>
+ <div class="studio-actions"><button id="loadSceneTemplate">Crear escenario</button><button id="clearScene">Vaciar escena</button></div>
+ <svg id="sceneCanvas" viewBox="0 0 800 480" aria-label="Escena industrial construible"></svg>
+ <div class="studio-actions"><select id="sceneAddType"><option value="belt">Cinta</option><option value="box">Caja</option><option value="sensor">Sensor</option><option value="traffic">Semáforo</option><option value="arm">Brazo</option><option value="lamp">Lámpara</option><option value="motor">Motor</option><option value="switch">Interruptor</option></select><button id="addSceneObject">＋ Agregar objeto</button></div>
+ <div id="sceneProperties" class="studio-properties">Selecciona un elemento de la escena para editar sus señales, nombre o eliminarlo.</div>
+ <strong class="studio-subtitle">Entradas virtuales del escenario</strong>
+ <div id="sceneInputs"></div>
+ <div id="sceneStatus" class="studio-status"></div>
+ <button id="sceneCoach" class="studio-accent">🎓 Revisar escenario con el tutor</button>
+</section>
+<section id="tutorPanel" class="studio-drawer" hidden aria-label="Tutor didáctico de PLC">
+ <div class="studio-drawer-top"><strong>🎓 Tutor de automatización</strong><button id="closeTutor" title="Cerrar panel">×</button></div>
+ <p class="studio-lead">Tutor integrado, disponible sin conexión. Explica conceptos, revisa tu circuito y plantea ejercicios. Sus respuestas proceden de una base didáctica y reglas de diagnóstico, no de un modelo generativo.</p>
+ <label>Consultar tema<select id="tutorTopic"></select></label>
+ <div class="studio-actions"><button id="tutorExplain">Explicar tema</button><button id="tutorReview">⚠ Revisar proyecto</button><button id="tutorExercise">📝 Proponer ejercicio</button></div>
+ <div id="tutorChat" class="tutor-chat" aria-live="polite"></div>
+ <label>Pregunta al tutor<textarea id="tutorQuestion" rows="3" placeholder="Ej.: ¿Por qué no enciende la lámpara? ¿Cómo funciona TON?"></textarea></label>
+ <button id="tutorAsk" class="studio-accent">Enviar pregunta</button>
+ <div class="tutor-references"><strong>Documentación de fabricantes</strong><a href="https://www.rockwellautomation.com/es-es/docs/studio-5000-logix-designer/38-00/contents-ditamap/studio-5000-logix-designer.html" target="_blank" rel="noopener noreferrer">Rockwell Studio 5000 · ayuda oficial</a><a href="https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1762-rm001_-en-p.pdf" target="_blank" rel="noopener noreferrer">Rockwell MicroLogix · instrucciones</a><a href="https://www.deltaww.com/en-US/service-support/faq/326" target="_blank" rel="noopener noreferrer">Delta · WPLSoft / ISPSoft</a><a href="https://content.helpme-codesys.com/es/CODESYS%20LD%20FBD/_cds_programming_in_ld.html" target="_blank" rel="noopener noreferrer">CODESYS · programación LD</a></div>
+</section>
+</div>
 <script>
 (()=>{
 'use strict';
@@ -1126,16 +1180,6 @@ function showLadderReview(){
  list.appendChild(ul);
 }
 E('reviewLadder').onclick=showLadderReview;
-E('copyAIPrompt').onclick=async()=>{
- const plc=nodes.find(n=>n.type==='plc'),platform=E('ladderPlatform').value,controller=E('ladderController').value;
- const desc=E('ladderGoal').value.trim(),pins=plc?[...plcInputPins(plc),...plcOutputPins(plc)]:[];
- const io=pins.map(pin=>portName(plc,pin)+' / '+(plc.ioLabels?.[pin]||'sin etiqueta')+' / conectado: '+wiringItems(pin).join(', ')).join('\n');
- const request='Revisa este proyecto PLC DIDÁCTICO. Propón un programa Ladder y señala las conexiones y supuestos inseguros. NO inventes características del hardware. Explica cada red y solicita aclaraciones si el proceso no está especificado.\nPlataforma: '+platform+'\nModelo: '+controller+'\nObjetivo: '+desc+'\nEntradas/salidas y conexiones:\n'+io+'\nLadder actual:\n'+E('ladderEditor').value;
- try{
-  if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(request);E('ladderImportFeedback').textContent='Consulta copiada. Pégala en la IA que prefieras para solicitar una revisión; la web no cuenta aún con una conexión directa a un modelo de IA.'}
-  else{E('ladderEditor').value=request;E('ladderImportFeedback').textContent='No se pudo usar el portapapeles; se dejó la consulta en el editor para copiarla manualmente. No la apliques como Ladder.'}
- }catch{E('ladderImportFeedback').textContent='No se pudo copiar. Revisa el permiso del portapapeles de tu navegador.'}
-};
 
 function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
