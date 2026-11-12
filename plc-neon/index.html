@@ -1,74 +1,132 @@
 <!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PLC-Sim Studio</title>
 <style>
-:root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#080e19;--side:#101b30;--card:#1b2941;--edge:#324663;--fg:#eef5ff;--mut:#90a8ca;--cyan:#35d4ff;--green:#00d78f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg)}button,select{font:inherit;cursor:pointer;color:inherit}header{height:55px;display:flex;align-items:center;gap:9px;padding:5px 12px;background:#0c1730;border-bottom:1px solid #24334d}header strong{font-size:18px;line-height:1}header small{display:block;font-size:11px;color:#91afd5}.logo{background:#2a78ed;padding:9px;border-radius:9px}.v{font-size:10px;color:#79d8ff;border:1px solid #285995;background:#132b4d;border-radius:5px;padding:3px}.push{border:1px solid #35506e;background:#1b2b46;padding:9px 13px;border-radius:9px}.run{background:#007f60;border-color:#00aa7d}.edit{background:#725010;border-color:#ad7e20}.spacer{flex:1}select{background:#192941;border:1px solid #2b4264;border-radius:8px;padding:9px;max-width:260px}.layout{height:calc(100vh - 55px);display:grid;grid-template-columns:237px 1fr}aside{background:linear-gradient(180deg,#101e35,#0d1729);border-right:2px solid #2d3f5a;overflow:auto;padding:10px 8px}.side-title{font-weight:800;font-size:13px;color:#a9c4e8;margin:6px 2px 20px}aside h4{font-size:10px;color:#7899c7;letter-spacing:.7px;margin:16px 4px 9px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{min-height:94px;border:1px solid transparent;background:transparent;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:5px}.tile:hover{border-color:var(--cyan);background:#1a273e}.tile svg{width:100px;height:55px;overflow:visible}.tile b{font-size:11px}.tile span{font:10px monospace;color:#85a5d8}main{position:relative;overflow:hidden;background:radial-gradient(circle at center,#0b1625,#070b13 78%)}svg{width:100%;height:100%;touch-action:none}#wireLayer path{stroke:#ffc844;stroke-width:3.2;fill:none;cursor:pointer}.device .symbol{stroke:#d8eeff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}.device .symbol.on{stroke:var(--green)}.device .symbol.emph{stroke-width:3.4}.device .hit{fill:transparent;stroke:none;cursor:move}.device rect{fill:var(--card);stroke:var(--edge);stroke-width:2}.device text{fill:var(--fg);font-size:12px;pointer-events:none}.port{stroke:#9db1ca;stroke-width:2;fill:#0d1b2b;cursor:crosshair}.port.on{fill:var(--green);stroke:var(--green)}.port.pending{stroke:#ff57be;stroke-width:4}.selected .symbol{stroke:var(--cyan)}.selected .hit{stroke:var(--cyan);stroke-dasharray:3 4;stroke-width:1}.note{position:absolute;bottom:13px;left:15px;border:1px solid #31435e;color:#9cb5d8;background:#101c2de6;padding:9px;border-radius:9px;font-size:11px}.plc text{fill:#d8e9ff}.screw{fill:#e7edf2;stroke:#556979}.screw-inner{fill:#172435;stroke:#64788e}.wire-selected{stroke:#ff63c4!important}@media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
+:root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#080e19;--side:#101b30;--card:#1b2941;--edge:#324663;--fg:#eef5ff;--mut:#90a8ca;--cyan:#35d4ff;--green:#00d78f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg)}button,select{font:inherit;cursor:pointer;color:inherit}header{height:55px;display:flex;align-items:center;gap:9px;padding:5px 12px;background:#0c1730;border-bottom:1px solid #24334d}header strong{font-size:18px;line-height:1}header small{display:block;font-size:11px;color:#91afd5}.logo{background:#2a78ed;padding:9px;border-radius:9px}.v{font-size:10px;color:#79d8ff;border:1px solid #285995;background:#132b4d;border-radius:5px;padding:3px}.push{border:1px solid #35506e;background:#1b2b46;padding:9px 13px;border-radius:9px}.run{background:#007f60;border-color:#00aa7d}.edit{background:#725010;border-color:#ad7e20}.spacer{flex:1}select{background:#192941;border:1px solid #2b4264;border-radius:8px;padding:9px;max-width:260px}.layout{height:calc(100vh - 55px);display:grid;grid-template-columns:237px 1fr}aside{background:linear-gradient(180deg,#101e35,#0d1729);border-right:2px solid #2d3f5a;overflow:auto;padding:10px 8px}.side-title{font-weight:800;font-size:13px;color:#a9c4e8;margin:6px 2px 20px}aside h4{font-size:10px;color:#7899c7;letter-spacing:.7px;margin:16px 4px 9px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{min-height:94px;border:1px solid transparent;background:transparent;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:5px}.tile:hover{border-color:var(--cyan);background:#1a273e}.tile svg{width:100px;height:55px;overflow:visible}.inspector{padding:9px;border:1px solid #344966;border-radius:9px;font-size:11px;color:#b3c7e6}.inspector label{display:block;margin-bottom:7px}.inspector input{background:#101e34;color:#fff;padding:9px;border:1px solid #4a688b;border-radius:7px;width:100%;margin-top:5px}.inspector button{margin-top:8px;padding:6px;border-radius:6px;background:#25456c;border:1px solid #46618a;color:#fff}.tile b{font-size:11px}.tile span{font:10px monospace;color:#85a5d8}main{position:relative;overflow:hidden;background:radial-gradient(circle at center,#0b1625,#070b13 78%)}svg{width:100%;height:100%;touch-action:none}#wireLayer path{stroke:#ffc844;stroke-width:3.2;fill:none;cursor:pointer}.device .symbol{stroke:#d8eeff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}.device .symbol.on{stroke:var(--green)}.device .symbol.emph{stroke-width:3.4}.device .hit{fill:transparent;stroke:none;cursor:move}.device rect{fill:var(--card);stroke:var(--edge);stroke-width:2}.device text{fill:var(--fg);font-size:12px;pointer-events:none}.port{stroke:#9db1ca;stroke-width:2;fill:#0d1b2b;cursor:crosshair}.port.on{fill:var(--green);stroke:var(--green)}.port.pending{stroke:#ff57be;stroke-width:4}.selected .symbol{stroke:var(--cyan)}.selected .hit{stroke:var(--cyan);stroke-dasharray:3 4;stroke-width:1}.note{position:absolute;bottom:13px;left:15px;border:1px solid #31435e;color:#9cb5d8;background:#101c2de6;padding:9px;border-radius:9px;font-size:11px}.plc text{fill:#d8e9ff}.screw{fill:#e7edf2;stroke:#556979}.screw-inner{fill:#172435;stroke:#64788e}.wire-selected{stroke:#ff63c4!important}
+.wire-handle{fill:#ffb45c;stroke:#fff;stroke-width:2;cursor:move}
+.device-menu{position:absolute;z-index:5;background:#142541;border:1px solid #48658b;border-radius:12px;padding:10px;min-width:195px;box-shadow:0 12px 32px #0009;max-width:calc(100% - 20px)}
+.device-menu[hidden]{display:none}.device-menu b{display:block;font-size:12px;color:#b5d8ff;margin:0 0 8px}
+.device-menu button{background:#203d61;border:1px solid #42678e;padding:7px 9px;color:#fff;border-radius:7px;margin:3px;cursor:pointer;font-size:12px}
+.device-menu button:hover{background:#2b537d}
+.diagnostic{position:absolute;top:12px;right:13px;width:min(330px,45%);max-height:39vh;overflow:auto;padding:10px 12px;background:#12243ae8;border:1px solid #355575;border-radius:12px;z-index:2;font-size:12px}
+.diagnostic strong{color:#b5dcff}.diagnostic button{border:1px solid #4d718c;background:#213b58;color:#ecf7ff;padding:4px 8px;border-radius:7px;cursor:pointer;float:right}
+.diagnostic ul{margin:7px 0;padding-left:17px}.diagnostic li{margin:7px 0;color:#bed2e8}.diagnostic li.error{color:#ff9baf}.diagnostic li.warn{color:#ffd17e}
+.diagnostic li.ok{color:#75e9bf}
+@media(max-width:800px){.layout{grid-template-columns:190px 1fr}header small,header .v{display:none}select{max-width:140px}header{gap:4px}.push{padding:6px}}@media(max-width:560px){.layout{grid-template-columns:1fr;grid-template-rows:180px 1fr}aside{overflow:auto}.cards{grid-template-columns:repeat(4,110px)}header strong{font-size:12px}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
-<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div class="note">Conecta dos terminales · Arrastra símbolos y ambas barras · R gira 90° · Supr elimina</div></main></div>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Sin Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><button class="push" id="save">↓</button><button class="push" id="load">↑</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
+<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main></div>
 <script>
 (()=>{
 'use strict';
 const NS='http://www.w3.org/2000/svg',E=id=>document.getElementById(id),canvas=E('canvas'),layer=E('devices'),wl=E('wireLayer'),rub=E('rubber');
 const types={
 no:['Pulsador NA','NO (3-4)',2],nc:['Pulsador NC','NC (1-2)',2],selector:['Selector NA','Enclavado',2],
-ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:['Capacitivo','Nivel / Objeto',3],limit:['Final Carrera','Rodillo NA',2],
-green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2]
+ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:['Capacitivo','Nivel / Objeto',3],limit:['Final Carrera','Rodillo NA',2],rollerNC:['Final carrera NC','Rodillo NC',2],rollerLever:['Final carrera palanca','Rodillo con palanca',2],selectorNC:['Selector NC','Contacto NC',2],selector3:['Selector 3 posiciones','Tres posiciones',2],
+green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2]
 };
-const nameOf=n=>({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type][0];
-let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set();
+const nameOf=n=>n.label||({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type][0];
+let nodes=[],wires=[],next=1,first=null,chosen=null,drag=null,wireDrag=null,simulation=true,live=new Set(),zero=new Set(),ins=new Set(),outs=new Set(),activeLoads=new Set(),shortCircuit=false,diagnostics=[];
 function S(tag,attrs={},parent=layer){const a=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))a.setAttribute(k,v);parent.appendChild(a);return a}
 function T(g,x,y,str,attrs={}){const a=S('text',{x,y,...attrs},g);a.textContent=str;return a}
-function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false};nodes.push(n);return n}
+function A(type,x,y){const n={id:next++,type,x,y,angle:0,on:false,label:({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[type]||types[type][0]};nodes.push(n);return n}
 function find(id){return nodes.find(n=>n.id===id)}
 function K(n,i){return n.id+':'+i}
 function localPorts(n){if(n.type==='railplus'||n.type==='railzero')return Array.from({length:7},(_,i)=>[i*103,0]);
-if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[23+i*43,23]),...Array.from({length:13},(_,i)=>[23+i*43,169])];
+if(n.type==='plc')return [...Array.from({length:14},(_,i)=>[25+i*43,23]),...Array.from({length:14},(_,i)=>[25+i*43,170])];
 return types[n.type][2]===3?[[0,27],[0,63],[126,45]]:[[0,45],[126,45]]}
 function center(n){if(n.type.startsWith('rail'))return [309,0];if(n.type==='plc')return [305,96];return [63,45]}
 function rotate(x,y,cx,cy,angle){const r=angle*Math.PI/180,dx=x-cx,dy=y-cy;return[cx+dx*Math.cos(r)-dy*Math.sin(r),cy+dx*Math.sin(r)+dy*Math.cos(r)]}
 function ports(n){const c=center(n);return localPorts(n).map(([x,y])=>{const p=rotate(x,y,c[0],c[1],n.angle||0);return[n.x+p[0],n.y+p[1]]})}
-const pnames=['L+','M','I0','I1','I2','I3','DC COM','I4','I5','I6','I7','I8','I9','COM','L1','L2/N','PE','VAC/VDC','COM','Q0','Q1','Q2','Q3','Q4','Q5','Q6','Q7'];
+const pnames=['+24 V','-','DC COM','I/0','I/1','I/2','I/3','DC COM','I/4','I/5','I/6','I/7','I/8','I/9','L1','L2/N','⏚','VAC/VDC','O/0','VAC/VDC','O/1','VAC/VDC','O/2','VAC/VDC','O/3','O/4','O/5',''];
 function connect(a,ap,b,bp){if(a===b&&ap===bp)return;if(wires.some(w=>(w.a===a&&w.ap===ap&&w.b===b&&w.bp===bp)||(w.a===b&&w.ap===bp&&w.b===a&&w.bp===ap)))return;wires.push({id:next++,a,ap,b,bp})}
 function solve(){live=new Set();zero=new Set();ins=new Set();outs=new Set();activeLoads=new Set();if(!simulation)return;
 const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');if(!plus||!minus||!plc)return;
 const map=new Map(),link=(a,b)=>{if(!map.has(a))map.set(a,[]);map.get(a).push(b)},reach=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const x of map.get(q[i])||[])if(!seen.has(x)){seen.add(x);q.push(x)}return seen};
 for(const bus of [plus,minus])for(let i=0;i<7;i++)for(let j=0;j<7;j++)link(K(bus,i),K(bus,j));
 for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b)continue;link(K(a,w.ap),K(b,w.bp));link(K(b,w.bp),K(a,w.ap))}
-for(const n of nodes){const closed=n.type==='nc'?!n.on:['no','selector','limit'].includes(n.type)&&n.on;if(closed){link(K(n,0),K(n,1));link(K(n,1),K(n,0))}}
+for(const n of nodes){const closed=['nc','rollerNC','selectorNC'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever'].includes(n.type)&&n.on;if(closed){link(K(n,0),K(n,1));link(K(n,1),K(n,0))}}
 const src=Array.from({length:7},(_,i)=>K(plus,i));zero=reach(Array.from({length:7},(_,i)=>K(minus,i)));let potential=reach(src);
 for(const n of nodes)if(['ind','opt','cap'].includes(n.type)&&n.on&&potential.has(K(n,0))&&zero.has(K(n,1)))src.push(K(n,2));
 potential=reach(src);
 const ready=potential.has(K(plc,0))&&zero.has(K(plc,1));
-for(let i=0;i<10;i++){const term=i<4?i+2:i+3;if(ready&&potential.has(K(plc,term)))ins.add(i)}
-for(let i=0;i<6;i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,19+i))}
+for(let i=0;i<10;i++){const term=i<4?i+3:i+4;if(ready&&potential.has(K(plc,term)))ins.add(i)}
+const op=[18,20,22,24,25,26];for(let i=0;i<6;i++)if(ready&&ins.has(i)){outs.add(i);src.push(K(plc,op[i]))}
 live=reach(src);
-for(const n of nodes)if(['green','red','amber','relay'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id)}
+for(const n of nodes)if(['green','red','amber','blue','white','relay','buzzer'].includes(n.type)&&live.has(K(n,0))&&zero.has(K(n,1)))activeLoads.add(n.id);
+shortCircuit=[...zero].some(k=>live.has(k));
+if(shortCircuit){live=new Set();activeLoads=new Set();outs=new Set()}
+}
+function validate(){
+ const issues=[],error=(msg)=>issues.push({severity:'error',message:msg}),warn=(msg)=>issues.push({severity:'warn',message:msg});
+ const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');
+ if(!plus||!minus||!plc){error('Falta la barra de +24 V, la de 0 V o el PLC.');return issues}
+ const adj=new Map(),join=(a,b)=>{if(!adj.has(a))adj.set(a,[]);adj.get(a).push(b)},
+ reachable=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const next of adj.get(q[i])||[])if(!seen.has(next)){seen.add(next);q.push(next)}return seen};
+ for(const bus of [plus,minus])for(let i=0;i<7;i++)for(let j=0;j<7;j++)join(K(bus,i),K(bus,j));
+ for(const w of wires){const a=find(w.a),b=find(w.b);if(a&&b){join(K(a,w.ap),K(b,w.bp));join(K(b,w.bp),K(a,w.ap))}}
+ for(const n of nodes){const closed=['nc','rollerNC','selectorNC'].includes(n.type)?!n.on:['no','selector','selector3','limit','rollerLever'].includes(n.type)&&n.on;
+ if(closed){join(K(n,0),K(n,1));join(K(n,1),K(n,0))}}
+ const p=reachable(Array.from({length:7},(_,i)=>K(plus,i))),z=reachable(Array.from({length:7},(_,i)=>K(minus,i)));
+ if([...p].some(x=>z.has(x)))error('Cortocircuito: +24 V y 0 V están unidos por cables o por un contacto cerrado. Separa los conductores; la simulación se ha bloqueado.');
+ if(!p.has(K(plc,0)))error('PLC: conecta L+ (+24 V) a la barra positiva.');
+ if(!z.has(K(plc,1)))error('PLC: conecta el borne –/M a la barra de 0 V.');
+ if(z.has(K(plc,0)))error('PLC: L+ está conectado a 0 V. Corrige la alimentación.');
+ if(p.has(K(plc,1)))error('PLC: el borne –/M está conectado a +24 V. Corrige la alimentación.');
+ for(const n of nodes){
+  const kind=n.type,what=nameOf(n);
+  if(['ind','opt','cap'].includes(kind)){
+    if(!p.has(K(n,0)))warn(what+': conecta BN (+) a la barra de +24 V.');
+    if(!z.has(K(n,1)))warn(what+': conecta BU (–) a 0 V.');
+    if(!wires.some(w=>(w.a===n.id&&w.ap===2)||(w.b===n.id&&w.bp===2)))warn(what+': conecta BK (salida PNP) a una entrada I/0–I/9 del PLC.');
+  }
+  if(['green','red','amber','blue','white','relay','buzzer'].includes(kind)){
+    const attached0=wires.some(w=>(w.a===n.id&&w.ap===0)||(w.b===n.id&&w.bp===0));
+    const attached1=wires.some(w=>(w.a===n.id&&w.ap===1)||(w.b===n.id&&w.bp===1));
+    if(!attached0)warn(what+': falta conectar la terminal positiva/A1 a una salida del PLC.');
+    if(!attached1)warn(what+': falta conectar la terminal negativa/A2 a 0 V.');
+    if(attached1&&!z.has(K(n,1)))warn(what+': el retorno (–/A2) no llega a la barra de 0 V.');
+  }
+ }
+ for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b)continue;
+  const x=a.type==='plc'?{n:a,i:w.ap}:b.type==='plc'?{n:b,i:w.bp}:null;
+  if(x&&[14,15,16,17,19,21,23].includes(x.i))warn('PLC: la terminal '+pnames[x.i]+' pertenece a una sección de alimentación/VAC no modelada. No conectes 24 V DC suponiendo que se comporta como una salida digital.');
+ }
+ if(!issues.some(i=>i.severity==='error')&&wires.length)issues.unshift({severity:'ok',message:'No se detectaron cortocircuitos ni fallas básicas en los bornes revisados.'});
+ issues.push({severity:'warn',message:'Modelo didáctico: las salidas O/0–O/5 siguen I/0–I/5 por demostración; no equivale al programa real del PLC ni valida las secciones 85–264 VAC de la referencia.'});
+ return issues;
+}
+function renderDiagnostics(){
+ const list=E('diagList');if(!list)return;
+ const issues=validate();list.replaceChildren();
+ const ul=document.createElement('ul');for(const item of issues.slice(0,18)){const li=document.createElement('li');li.className=item.severity;li.textContent=item.message;ul.appendChild(li)}list.appendChild(ul);
+}
 function pointer(ev){const p=canvas.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(canvas.getScreenCTM().inverse())}
-function route(a,b){const mid=(a[1]+b[1])/2;return 'M'+a[0]+' '+a[1]+'V'+mid+'H'+b[0]+'V'+b[1]}
+function elbow(a,b,w){const mx=Number.isFinite(w?.bendX)?w.bendX:(a[0]+b[0])/2;const my=Number.isFinite(w?.bendY)?w.bendY:(a[1]+b[1])/2;return [mx,my]}
+function route(a,b,w){const [x,y]=elbow(a,b,w);return 'M'+a[0]+' '+a[1]+'H'+x+'V'+y+'H'+b[0]+'V'+b[1]}
 function line(g,d,more={}){return S('path',{d,class:'symbol',...more},g)}
 function term(g,n,i,x,y,r=7){const p=S('circle',{cx:x,cy:y,r,class:'port'+(live.has(K(n,i))?' on':'')+(first&&first.id===n.id&&first.i===i?' pending':'')},g);
 p.onpointerdown=ev=>{ev.stopPropagation();ev.preventDefault();if(first){connect(first.id,first.i,n.id,i);first=null}else first={id:n.id,i};draw()}}
 function drawSymbol(g,type,on=false,energized=false){
 const active=on?' on':'';
-if(['no','nc','selector','limit'].includes(type)){
+if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever'].includes(type)){
 line(g,'M0 45 H35 M91 45 H126');
 S('circle',{cx:40,cy:45,r:3,fill:'#cde7ff'},g);S('circle',{cx:86,cy:45,r:3,fill:'#cde7ff'},g);
-if(type==='nc'){line(g,on?'M40 45 L82 32':'M40 45 H86',{class:'symbol'+active});line(g,'M59 25 L70 56');}
+if(['nc','selectorNC','rollerNC'].includes(type)){line(g,on?'M40 45 L82 32':'M40 45 H86',{class:'symbol'+active});line(g,'M59 25 L70 56');}
 else{line(g,on?'M40 45 H86':'M40 45 L82 29',{class:'symbol'+active});}
 line(g,'M63 9 V24');S('circle',{cx:63,cy:7,r:3,stroke:'#d8eeff',fill:'none'},g);
-if(type==='selector')line(g,'M49 15 L77 15 M63 15 V27');
-if(type==='limit'){line(g,'M65 9 L81 2');S('circle',{cx:84,cy:0,r:6,fill:'none',stroke:'#d8eeff','stroke-width':2},g)}
+if(['selector','selectorNC','selector3'].includes(type)){line(g,'M49 15 L77 15 M63 15 V27');if(type==='selector3')line(g,'M72 12 L82 2');}
+if(['limit','rollerNC','rollerLever'].includes(type)){line(g,'M65 9 L81 2');S('circle',{cx:84,cy:0,r:type==='rollerLever'?9:6,fill:'none',stroke:'#d8eeff','stroke-width':2},g);if(type==='rollerLever')line(g,'M76 -10 L86 -17');}
 }else if(['ind','opt','cap'].includes(type)){
 line(g,'M0 27 H29 M0 63 H29 M95 45 H126');
 S('path',{d:'M49 9 L84 45 L49 81 L14 45 Z',stroke:'#d8eeff','stroke-width':2.2,fill:'none'},g);
 if(type==='ind')line(g,'M41 45 Q48 31 55 45 Q62 59 69 45',{class:'symbol'+active});
 if(type==='opt'){line(g,'M35 39 L61 18 M40 48 L66 27');line(g,'M52 20 L62 18 L60 29');}
 if(type==='cap'){line(g,'M46 30 V60 M58 30 V60 M62 45 H80');}
-}else if(['green','red','amber'].includes(type)){
+}else if(['green','red','amber','blue','white'].includes(type)){
 line(g,'M0 45 H42 M84 45 H126');
-const color={green:'#18de91',red:'#ff5876',amber:'#ffc83c'}[type];
+const color={green:'#18de91',red:'#ff5876',amber:'#ffc83c',blue:'#55baff',white:'#e9f5ff'}[type];
 S('circle',{cx:63,cy:45,r:20,fill:energized?color:'none',opacity:energized?'.7':'1',stroke:color,'stroke-width':2.5},g);
 line(g,'M49 31 L77 59 M77 31 L49 59',{stroke:energized?'#071524':color,class:'symbol'});
-}else if(type==='relay'){
+}else if(type==='buzzer'){line(g,'M0 45 H39 M87 45 H126');S('path',{d:'M40 30 H60 L77 19 V71 L60 60 H40 Z',stroke:'#b8dfff',fill:'none','stroke-width':2.3},g);line(g,'M83 31 Q95 45 83 59');}else if(type==='relay'){
 line(g,'M0 45 H40 M86 45 H126');S('rect',{x:40,y:29,width:46,height:32,fill:'none',stroke:'#6ecaff','stroke-width':2.5},g);
 T(g,63,49,'K1',{'text-anchor':'middle','font-size':13,fill:'#bceaff'});
 }
@@ -81,7 +139,7 @@ drawSymbol(g,n.type,n.on,activeLoads.has(n.id));
 T(g,63,-21,nameOf(n),{'text-anchor':'middle','font-size':11,fill:'#b8d7f5'});
 if(n.on)S('circle',{cx:120,cy:8,r:4,fill:'#19e49c'},g);
 localPorts(n).forEach(([x,y],i)=>term(g,n,i,x,y));
-g.onpointerdown=e=>dragStart(e,n);
+g.onpointerdown=e=>dragStart(e,n);g.ondblclick=e=>{e.stopPropagation();chosen={kind:'node',id:n.id};renameChosen()};
 
 }
 function renderRail(n){
@@ -90,56 +148,96 @@ g.setAttribute('transform','translate('+n.x+' '+n.y+') rotate('+(n.angle||0)+' 3
 const positive=n.type==='railplus',color=positive?'#ff648b':'#648efb';
 S('rect',{x:-30,y:-28,width:675,height:56,class:'hit'},g);
 S('path',{d:'M-20 0 H638',stroke:color,'stroke-width':5,fill:'none'},g);
-T(g,-16,-14,positive?'+24 V DC':'0 V DC',{'font-size':15,'font-weight':'bold',fill:color});
+T(g,-16,-14,nameOf(n),{'font-size':15,'font-weight':'bold',fill:color});
 localPorts(n).forEach(([x,y],i)=>term(g,n,i,x,y,8));
 g.onpointerdown=e=>dragStart(e,n);
 }
 function renderPLC(n){
 const g=S('g',{class:'device plc'+(chosen?.kind==='node'&&chosen.id===n.id?' selected':'')});
 g.setAttribute('transform','translate('+n.x+' '+n.y+') rotate('+(n.angle||0)+' 305 96)');
-S('rect',{x:0,y:0,width:610,height:192,rx:5,fill:'#202d40',stroke:'#6b7d91','stroke-width':2},g);
-S('rect',{x:7,y:7,width:596,height:39,fill:'#f7f7f7',stroke:'#a2a8ad'},g);
-S('rect',{x:7,y:148,width:596,height:39,fill:'#f7f7f7',stroke:'#a2a8ad'},g);
-T(g,15,91,'PLC INDUSTRIAL · ENTRADAS Y SALIDAS',{'font-size':15,'font-weight':'bold',fill:'#d5e9ff'});
-T(g,15,116,'24 V DC · conexión física',{'font-size':12,fill:'#a6c5df'});
-localPorts(n).forEach(([x,y],i)=>{S('rect',{x:x-20,y:y-18,width:40,height:37,fill:'#fafafa',stroke:'#7c858d'},g);
-S('circle',{cx:x,cy:y,r:15,fill:'#e7edf2',stroke:'#566d84'},g);
-S('circle',{cx:x,cy:y,r:11,fill:'#172435',stroke:'#64788e'},g);
-T(g,x,y+(i<14?34:-25),pnames[i]||'',{'font-size':10,'text-anchor':'middle',fill:'#b1cde5'});
-term(g,n,i,x,y,8)});
+const strip=(y,isTop)=>{
+ S('rect',{x:5,y,width:600,height:91,fill:'#f7f7f5',stroke:'#303439','stroke-width':1.25},g);
+ // La primera franja de la referencia muestra bornes arriba y nombres abajo.
+ // La segunda muestra nombres arriba y bornes abajo.
+ if(isTop){S('rect',{x:8,y:y+5,width:594,height:37,fill:'#fff',stroke:'#444','stroke-width':1},g);}
+ else{S('rect',{x:8,y:y+51,width:594,height:37,fill:'#fff',stroke:'#444','stroke-width':1},g);}
+ for(let j=0;j<14;j++){
+   const i=isTop?j:j+14,x=25+j*43,cy=isTop?y+23:y+69;
+   S('rect',{x:x-19,y:cy-20,width:38,height:40,fill:'#fafafa',stroke:'#3b3b3b','stroke-width':1.2},g);
+   S('circle',{cx:x,cy,r:15.5,fill:'#fff',stroke:'#333','stroke-width':1.2},g);
+   S('circle',{cx:x,cy,r:12.3,fill:'none',stroke:'#888','stroke-width':.8},g);
+   if(isTop){T(g,x,y+58,pnames[i],{'font-size':i===2||i===7?8:10,'text-anchor':'middle',fill:'#222','font-family':'Arial,sans-serif'});}
+   else{T(g,x,y+24,pnames[i],{'font-size':[17,19,21,23].includes(i)?8:10,'text-anchor':'middle',fill:'#222','font-family':'Arial,sans-serif'});}
+   term(g,n,i,x,cy,8);
+ }
+};
+strip(0,true);strip(101,false);
+T(g,305,98,nameOf(n),{'font-size':12,'text-anchor':'middle',fill:'#cde6ff'});
+// Conexiones internas ilustrativas de la foto: agrupación de comunes y alimentación
+S('path',{d:'M10 78 H284 M314 78 H600',stroke:'#555','stroke-width':1.1,fill:'none'},g);
 g.onpointerdown=e=>dragStart(e,n);
+g.ondblclick=e=>{e.stopPropagation();chosen={kind:'node',id:n.id};renameChosen()};
 }
-function draw(){solve();layer.replaceChildren();wl.replaceChildren();
+function draw(){solve();layer.replaceChildren();wl.replaceChildren();renderDiagnostics();
 for(const w of wires){const a=find(w.a),b=find(w.b);if(!a||!b||!ports(a)[w.ap]||!ports(b)[w.bp])continue;
-const p=S('path',{d:route(ports(a)[w.ap],ports(b)[w.bp]),class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
-p.onpointerdown=e=>{e.stopPropagation();chosen={kind:'wire',id:w.id};draw()}}
+const aPort=ports(a)[w.ap],bPort=ports(b)[w.bp];
+const p=S('path',{d:route(aPort,bPort,w),class:chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':''},wl);
+p.onpointerdown=e=>{e.stopPropagation();chosen={kind:'wire',id:w.id};refreshInspector();draw();showMenu(e,w,'wire')};
+if(chosen?.kind==='wire'&&chosen.id===w.id){
+ const [x,y]=elbow(aPort,bPort,w);
+ const handle=S('circle',{cx:x,cy:y,r:9,class:'wire-handle'},wl);
+ handle.onpointerdown=e=>{e.stopPropagation();e.preventDefault();closeMenu();wireDrag={id:w.id};canvas.setPointerCapture(e.pointerId)};
+}
 nodes.forEach(n=>n.type==='railplus'||n.type==='railzero'?renderRail(n):n.type==='plc'?renderPLC(n):renderGeneric(n));
 rub.setAttribute('opacity',first?1:0)}
-function dragStart(e,n){if(e.target.classList.contains('port'))return;e.stopPropagation();chosen={kind:'node',id:n.id};const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
-canvas.onpointermove=e=>{const p=pointer(e);if(drag){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
-canvas.onpointerup=()=>{if(drag&&!drag.moved){const n=find(drag.id);if(n&&['no','nc','selector','ind','opt','cap','limit'].includes(n.type)&&simulation){n.on=!n.on;drag=null;draw();return}}drag=null};canvas.onpointerdown=()=>{chosen=null;draw()};
-function rotateChosen(delta){if(chosen?.kind!=='node')return;const n=find(chosen.id);if(!n)return;n.angle=((n.angle||0)+delta+360)%360;draw()}
-function remove(){if(!chosen)return;if(chosen.kind==='wire')wires=wires.filter(w=>w.id!==chosen.id);else{const n=find(chosen.id);if(n&&!['railplus','railzero','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}chosen=null;draw()}
-function reset(type){nodes=[];wires=[];next=1;first=null;chosen=null;
+function dragStart(e,n){if(e.button!==0||e.target.classList.contains('port'))return;e.stopPropagation();closeMenu();chosen={kind:'node',id:n.id};refreshInspector();const p=pointer(e);drag={id:n.id,x:n.x,y:n.y,p,moved:false};canvas.setPointerCapture(e.pointerId);draw()}
+canvas.onpointermove=e=>{const p=pointer(e);if(wireDrag){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag){const n=find(drag.id);if(n){n.x=Math.round((drag.x+p.x-drag.p.x)/10)*10;n.y=Math.round((drag.y+p.y-drag.p.y)/10)*10;drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
+canvas.onpointerup=e=>{if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null};
+canvas.onpointerdown=()=>{closeMenu();chosen=null;refreshInspector();draw()};
+function closeMenu(){E('menu').hidden=true}
+function showMenu(e,obj,kind){
+ const m=E('menu'),base=canvas.getBoundingClientRect();
+ let x=e.clientX-base.left+12,y=e.clientY-base.top+10;
+ x=Math.min(Math.max(8,x),base.width-215);y=Math.min(Math.max(8,y),base.height-155);
+ m.style.left=x+'px';m.style.top=y+'px';m.replaceChildren();m.hidden=false;
+ const title=document.createElement('b');title.textContent=kind==='node'?nameOf(obj):'Cable #'+obj.id;m.appendChild(title);
+ const button=(name,act)=>{const b=document.createElement('button');b.textContent=name;b.onclick=ev=>{ev.stopPropagation();closeMenu();act()};m.appendChild(b)};
+ if(kind==='node'){
+  button('Cambiar nombre',()=>{chosen={kind:'node',id:obj.id};renameChosen()});
+  button('↶ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(-90)});
+  button('↷ Girar',()=>{chosen={kind:'node',id:obj.id};rotateChosen(90)});
+  if(['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].includes(obj.type))button('Alternar estado',()=>{obj.on=!obj.on;draw()});
+  if(!['railplus','railzero','plc'].includes(obj.type))button('Eliminar',()=>{chosen={kind:'node',id:obj.id};remove()});
+ }else{
+  button('Reacomodar cable',()=>{chosen={kind:'wire',id:obj.id};draw()});
+  button('Restablecer ruta',()=>{delete obj.bendX;delete obj.bendY;draw()});
+  button('Eliminar cable',()=>{chosen={kind:'wire',id:obj.id};remove()});
+ }
+}
+function refreshInspector(){const pane=E('inspector');pane.replaceChildren();const n=chosen?.kind==='node'?find(chosen.id):null;if(!n){pane.textContent=chosen?.kind==='wire'?'Cable seleccionado: arrastra su punto naranja para ajustar las curvas.':'Selecciona un símbolo, barra o PLC para cambiar su nombre.';return}const label=document.createElement('label');label.textContent='Nombre o referencia';const input=document.createElement('input');input.value=nameOf(n);input.maxLength=50;input.oninput=()=>{n.label=input.value;draw()};label.appendChild(input);pane.appendChild(label);const helper=document.createElement('div');helper.textContent='Tipo: '+(types[n.type]?.[0]||n.type)+' · Rotación: '+(n.angle||0)+'°';pane.appendChild(helper)}
+function renameChosen(){const n=chosen?.kind==='node'?find(chosen.id):null;if(!n)return;const val=prompt('Nuevo nombre o referencia del componente:',nameOf(n));if(val!==null){n.label=val.trim().slice(0,50)||nameOf(n);refreshInspector();draw()}}
+function rotateChosen(delta){if(chosen?.kind!=='node')return;const n=find(chosen.id);if(!n)return;n.angle=((n.angle||0)+delta+360)%360;refreshInspector();draw()}
+function remove(){if(!chosen)return;if(chosen.kind==='wire')wires=wires.filter(w=>w.id!==chosen.id);else{const n=find(chosen.id);if(n&&!['railplus','railzero','plc'].includes(n.type)){nodes=nodes.filter(x=>x.id!==n.id);wires=wires.filter(w=>w.a!==n.id&&w.b!==n.id)}}chosen=null;refreshInspector();draw()}
+function reset(type){nodes=[];wires=[];next=1;first=null;chosen=null;closeMenu();
 const positive=A('railplus',295,106),negative=A('railzero',295,671),plc=A('plc',335,454);
 if(type!=='empty'){connect(positive.id,0,plc.id,0);connect(negative.id,0,plc.id,1);
 if(type==='start'){const stop=A('nc',337,230),start=A('no',510,230),lamp=A('green',830,255);
-connect(positive.id,1,stop.id,0);connect(stop.id,1,start.id,0);connect(start.id,1,plc.id,2);connect(plc.id,19,lamp.id,0);connect(negative.id,1,lamp.id,1)
+connect(positive.id,1,stop.id,0);connect(stop.id,1,start.id,0);connect(start.id,1,plc.id,3);connect(plc.id,18,lamp.id,0);connect(negative.id,1,lamp.id,1)
 }else{const sn=A('ind',440,223),lamp=A('red',830,260);sn.on=true;
-connect(positive.id,1,sn.id,0);connect(negative.id,1,sn.id,1);connect(sn.id,2,plc.id,2);connect(plc.id,19,lamp.id,0);connect(negative.id,2,lamp.id,1)}}
+connect(positive.id,1,sn.id,0);connect(negative.id,1,sn.id,1);connect(sn.id,2,plc.id,3);connect(plc.id,18,lamp.id,0);connect(negative.id,2,lamp.id,1)}}
 draw()}
 function icon(tgt,kind){const d=types[kind],b=document.createElement('button');b.className='tile';const art=document.createElementNS(NS,'svg');art.setAttribute('viewBox','-10 -14 146 103');art.style.width='100%';art.style.height='65px';
 drawSymbol(art,kind,false,false);const label=document.createElement('span');label.textContent=d[0];b.append(art,label);b.title=d[0]+' · '+d[1];b.onclick=()=>{const n=A(kind,430+Math.floor(Math.random()*300),235+Math.floor(Math.random()*100));chosen={kind:'node',id:n.id};draw()};tgt.appendChild(b)}
-['no','nc','selector','ind','opt','cap','limit'].forEach(k=>icon(E('sensors'),k));['green','red','amber','relay'].forEach(k=>icon(E('loads'),k));
-E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
+['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap'].forEach(k=>icon(E('sensors'),k));['green','red','amber','blue','white','relay','buzzer'].forEach(k=>icon(E('loads'),k));
+E('diagnose').onclick=()=>{E('diagnostic').style.display='block';renderDiagnostics()};E('hideDiag').onclick=()=>E('diagnostic').style.display='none';E('rotL').onclick=()=>rotateChosen(-90);E('rotR').onclick=()=>rotateChosen(90);
 E('simulate').onclick=()=>{simulation=true;draw()};E('edit').onclick=()=>{simulation=false;draw()};E('examples').onchange=e=>reset(e.target.value);E('del').onclick=remove;
 E('save').onclick=()=>{const blob=new Blob([JSON.stringify({version:3,nodes,wires},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plc-sim-circuito.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 E('load').onclick=()=>E('file').click();E('file').onchange=async e=>{try{const file=e.target.files?.[0];if(!file)return;const v=JSON.parse(await file.text());if(!Array.isArray(v.nodes)||!Array.isArray(v.wires))throw Error('Archivo inválido');
 nodes=v.nodes.filter(n=>['railplus','railzero','plc'].includes(n.type)||types[n.type]).filter(n=>Number.isFinite(n.x)&&Number.isFinite(n.y)).slice(0,150);
 wires=v.wires.filter(w=>{const a=find(w.a),b=find(w.b);return a&&b&&Number.isInteger(w.ap)&&Number.isInteger(w.bp)&&w.ap>=0&&w.bp>=0&&w.ap<localPorts(a).length&&w.bp<localPorts(b).length}).slice(0,600);
-for(const n of nodes)n.angle=((Number(n.angle)||0)%360+360)%360;
+for(const n of nodes){n.angle=((Number(n.angle)||0)%360+360)%360;if(!n.label)n.label=({railplus:'+24 V DC',railzero:'0 V DC',plc:'PLC industrial'})[n.type]||types[n.type]?.[0]||n.type;}
 next=Math.max(0,...nodes.map(n=>n.id),...wires.map(w=>w.id))+1;first=null;chosen=null;draw()}catch(err){alert(err.message)}e.target.value=''};
-window.onkeydown=e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='Escape'){first=null;draw()}if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);if(e.key==='Delete'||e.key==='Backspace')remove()};
-reset('start');
+window.onkeydown=e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='Escape'){first=null;closeMenu();draw()}if(e.key==='r'||e.key==='R')rotateChosen(e.shiftKey?-90:90);if(e.key==='F2')renameChosen();if(e.key==='Delete'||e.key==='Backspace')remove()};
+reset('start');refreshInspector();
 })();
 </script></html>
