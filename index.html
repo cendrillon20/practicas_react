@@ -1181,6 +1181,116 @@ function showLadderReview(){
 }
 E('reviewLadder').onclick=showLadderReview;
 
+
+const tutorLibrary=[
+{id:'basics',title:'Qué es un PLC',terms:'plc controlador cpu automatización funcionamiento',lesson:'Un controlador lógico programable lee señales, ejecuta lógica y actualiza salidas. Su arquitectura incluye CPU, memoria, fuente, entradas, salidas y comunicaciones. La aplicación determina el comportamiento; el dibujo eléctrico determina por dónde llegan señales y energía. En este simulador hay un único controlador didáctico de 24 V CC; no es un gemelo digital de una CPU comercial.',practice:'Identifica qué sensores llegan a I/0 e I/1, y qué actuador depende de O/0.'},
+{id:'scan',title:'Ciclo de escaneo',terms:'scan scan time ciclo barrido lectura entradas salidas',lesson:'Un PLC suele ejecutar: adquisición de entradas, tareas/rutinas, actualización de salidas y comunicaciones/diagnóstico, aunque la secuencia concreta cambia entre plataformas y tareas. La duración del scan afecta a detección de pulsos y temporizadores. Un evento más breve que la adquisición puede no observarse sin hardware o instrucciones específicas.',practice:'Haz un esquema de qué ocurre si el sensor cambia justo después de leer las entradas.'},
+{id:'ladder',title:'Ladder y redes',terms:'ladder escalera contactos bobina rung red instrucciones',lesson:'En LD, cada red expresa una condición lógica de izquierda a derecha. Los contactos representan condiciones booleanas y las bobinas resultados. Los contactos en serie corresponden a Y; los paralelos a O. Un mismo actuador no debe recibir órdenes incompatibles desde varias redes sin una estrategia de prioridad.',practice:'Crea una red con dos contactos en serie que habilite una lámpara.'},
+{id:'contacts',title:'Contactos NA/NC y XIC/XIO',terms:'na nc xic xio normalmente abierto cerrado contacto',lesson:'Separa estado físico del contacto y prueba lógica. Un pulsador NC físico puede entregar 1 al PLC mientras no se presiona. En Rockwell, XIC prueba bit verdadero y XIO prueba bit falso: no son sinónimos obligatorios de contacto físico NA o NC. Comprueba polaridad y estado real desde las entradas.',practice:'Prueba una entrada con pulsador NC y documenta si I vale 1 en reposo.'},
+{id:'timers',title:'TON, TOF y retentivos',terms:'timer temporizador ton tof rto tiempo et pt acc dn',lesson:'TON (retardo a la conexión) activa su finalización tras mantener IN verdadero durante PT. TOF retrasa la desconexión; un temporizador retentivo conserva tiempo según su semántica y necesita reinicio. Este programa actualmente ejecuta TON en las redes admitidas; TOF y RTO son conceptos de estudio, no instrucciones implementadas.',practice:'Programa TON de 3 segundos: verifica ET durante el conteo y Q/DN al finalizar.'},
+{id:'counters',title:'Contadores CTU/CTD',terms:'contador ctu ctd contar piezas pulso cu cd',lesson:'Los contadores incrementan o decrementan por eventos, frecuentemente flancos positivos. Un rebote mecánico puede generar varios conteos si no hay filtrado. El reinicio y límites dependen del controlador. Aquí todavía no se ejecutan contadores genéricos dentro del Ladder.',practice:'Diseña una cinta que cuente cinco cajas y detenga la salida; anota cómo reiniciarías el conteo.'},
+{id:'latch',title:'Marcha, paro y enclavamiento',terms:'arranque paro marcha auto retención enclavamiento set reset latch',lesson:'El enclavamiento mantiene una orden tras soltar Marcha. El Paro debe tener prioridad y, en aplicaciones reales, la función de parada de emergencia se implementa con arquitectura de seguridad apropiada y no solo con una bobina de software. Revisa si tu botón físico de Paro es NC (1 en reposo) o NA (0 en reposo).',practice:'En el generador selecciona enclavamiento, asigna I/0 a Marcha e I/1 a Paro y prueba arranque, soltar y parar.'},
+{id:'power',title:'Alimentación 24 V y comunes',terms:'24v 0v alimentacion dc com m l+ tierra polaridad voltaje',lesson:'Verifica la especificación exacta de cada borne: L+, M, COM, entradas, y alimentación de las salidas. COM puede pertenecer a grupos diferentes y no significa automáticamente 0 V en todas las CPU. Nunca apliques 24 V CC a bornes definidos para 85–264 V CA ni presupongas aislamiento sin revisar el manual del módulo.',practice:'Usa Revisar y localiza cualquier puente incorrecto entre +24 V y 0 V.'},
+{id:'pnpsensors',title:'Sensores PNP, NPN y 3 hilos',terms:'pnp npn inductivo optico capacitivo bn bu bk sensor cable',lesson:'Un sensor de 3 hilos suele usar BN marrón para +V, BU azul para 0 V y BK negro para señal, pero hay variantes: verifica hoja de datos. PNP suministra tensión a la entrada; NPN hunde corriente. Debe existir compatibilidad entre el sensor, la referencia de entrada y los comunes del PLC.',practice:'Conecta un sensor PNP a +24 V, 0 V y a I/0. Prueba ON/OFF y revisa su indicador.'},
+{id:'analog',title:'Señales analógicas y escalamiento',terms:'analogica 4-20 0-10 escalamiento adc resolución raw',lesson:'Las señales 4–20 mA o 0–10 V se convierten en valores de ingeniería utilizando rango eléctrico, conversión A/D y límites del instrumento. Un lazo 4–20 mA puede distinguir cero de proceso (4 mA) de rotura de cable (cerca de 0 mA), si el equipo lo soporta. No conectes una señal de corriente a una entrada de tensión sin configuración compatible.',practice:'Calcula la variable de un transmisor 0–100 bar que entrega 12 mA: aproximadamente 50 bar.'},
+{id:'instrumentation',title:'Instrumentación de proceso',terms:'instrumentacion transmisor sensor presión temperatura caudal nivel',lesson:'La cadena típica es variable física → sensor/transmisor → acondicionamiento → entrada PLC → control → salida → actuador. Identifica rango, exactitud, repetibilidad, tiempo de respuesta, alimentación, calibración y unidad de medida. En procesos críticos se requieren alarmas, diagnósticos y sensores redundantes cuando corresponda.',practice:'Define rango y unidad para un transmisor de nivel y qué alarma activarías ante lectura fuera de rango.'},
+{id:'pid',title:'Control PID',terms:'pid proporcional integral derivativa lazo cerrado setpoint process variable',lesson:'Un PID compara consigna SP y variable de proceso PV, y calcula una acción de control. P responde al error, I corrige el error persistente y D anticipa cambios, con sensibilidad al ruido. Un PID real exige escalamiento, límites de salida, anti-windup, modo manual/automático y ajuste cuidadoso. Este motor didáctico todavía no simula PID completo.',practice:'Describe cómo un PID controlaría la velocidad de una banda a partir de un encoder.'},
+{id:'outputs',title:'Salidas de relé, transistor y triac',terms:'salida relé transistor triac vac vdc carga bobina',lesson:'No todas las salidas de PLC suministran alimentación. Los contactos de relé normalmente conmutan una fuente externa; las salidas transistorizadas pueden ser PNP o NPN; los triacs suelen usarse con cargas de CA. Verifica tensiones, corrientes, fugas, fusibles, comunes y supresión de transitorios de bobinas.',practice:'Comprueba si la carga necesita alimentación externa y cómo regresa a su común.'},
+{id:'grounding',title:'Puesta a tierra y EMC',terms:'tierra protección pe blindaje ruido emc puesta a tierra',lesson:'PE (tierra de protección) no es intercambiable sin más con 0 V de control. Usa criterios del fabricante para apantallamiento, rutas de potencia/señal, referencias, equipotencialidad y separación de cables. Una instalación real requiere cumplimiento de normativa local y evaluación del riesgo eléctrico.',practice:'Marca en tu esquema qué conexiones son 0 V funcional y cuáles son PE.'},
+{id:'safety',title:'Seguridad industrial y E-Stop',terms:'seguridad emergencia e-stop parada guardas sil pl iso 13849',lesson:'El PLC estándar y esta simulación no deben emplearse como función de seguridad certificada. Las paradas de emergencia, puertas, enclavamientos y torque seguro requieren análisis de riesgo y componentes/arquitecturas de seguridad adecuados. Una prueba visual de Ladder no demuestra un nivel SIL/PL.',practice:'Elabora una lista de riesgos para un transportador antes de programar el arranque.'},
+{id:'motor',title:'Motores, contactores y protección',terms:'motor arranque contactor térmico guardamotor trifásico',lesson:'En potencias industriales, la salida PLC suele actuar sobre un contactor, variador o interfaz de control; no alimenta directamente el motor. Incluye protección contra cortocircuito/sobrecarga, realimentación de contactor cuando sea necesaria y condiciones de parada segura.',practice:'Dibuja la diferencia entre circuito de mando de 24 V y circuito de potencia del motor.'},
+{id:'vfd',title:'Variadores de frecuencia',terms:'vfd variador frecuencia rampa hz aceleración velocidad',lesson:'Un variador controla frecuencia/tensión de salida según su aplicación. Puedes ordenar marcha, sentido y velocidad mediante entradas digitales, analógicas o red industrial. Comprueba rampas, límites, fallos, selección local/remoto y STO cuando se necesite. El simulador solo representa una señal booleana de marcha, no el control interno de un VFD.',practice:'Diseña condiciones que deben cumplirse antes de habilitar la marcha del variador.'},
+{id:'robotics',title:'Brazos robóticos y secuencias',terms:'robot brazo servo eje posición home pinza cilindro',lesson:'Un brazo industrial utiliza control de ejes, realimentación, referencias de posición y enclavamientos. En una estación de pick-and-place puede modelarse una secuencia: detectar pieza, posicionar, sujetar, transferir, soltar y volver a HOME. El escenario visual del simulador no resuelve cinemática, trayectorias ni movimientos seguros.',practice:'Enumera seis estados de una estación de agarre y las señales de transición.'},
+{id:'conveyor',title:'Cintas transportadoras',terms:'banda cinta transportador transportadora producto caja',lesson:'Una cinta combina mando de motor, detección de pieza, posible paro por acumulación y temporización. Para aprender, separa sensores, actuaciones y lógica. El movimiento visual del escenario depende de la salida asignada; no simula torque, inercia o fallos mecánicos reales.',practice:'Coloca una banda, una caja y sensor. Enlaza el motor a O/0, el sensor a I/0 y prueba el cambio de estado.'},
+{id:'traffic',title:'Semáforos y máquinas de estados',terms:'semaforo luces rojo verde amarillo fase secuencia',lesson:'Una secuencia semafórica requiere tiempos, fases y salidas mutuamente coherentes. Es útil modelar estados ROJO, VERDE y AMARILLO con transiciones temporizadas, evitando salidas simultáneas incompatibles. Este Ladder básico todavía no ejecuta un secuenciador de tres salidas; el escenario permite visualizar señales que hayas programado.',practice:'Define tiempos de cada fase y construye una tabla con las tres salidas esperadas.'},
+{id:'hmi',title:'HMI, SCADA y alarmas',terms:'hmi scada pantalla supervisión alarma trend historico',lesson:'HMI permite visualizar/operar la máquina; SCADA agrega supervisión, tendencias e historiales según la arquitectura. Evita depender de la HMI para enclavamientos críticos. Las alarmas deben distinguir estado, causa, severidad, reconocimiento y recuperación.',practice:'Diseña tres mensajes de falla para una cinta: emergencia, sobrecarga y sensor bloqueado.'},
+{id:'networks',title:'Redes industriales y protocolos',terms:'modbus ethernetip profinet profibus canopen comunicación red plc',lesson:'Modbus, EtherNet/IP, PROFINET y otros protocolos tienen topologías, modelos de datos y capacidades diferentes. Distingue IP, dirección de esclavo, tipo de dato, byte order, ciclo y diagnóstico. El motor local no emula tráfico de red ni verifica seguridad de comunicaciones.',practice:'Explica qué ocurriría si se pierde comunicación con una salida remota.'},
+{id:'encoder',title:'Encoders y entradas rápidas',terms:'encoder pulsos hsc contador rapido cuadratura rpm',lesson:'Encoders incrementales producen pulsos (A/B y, a veces, Z). Para altas velocidades es necesario un contador rápido o módulo dedicado; una entrada digital convencional puede perder pulsos. Comprueba escalamiento por pulsos por vuelta, sentido, filtrado y cables.',practice:'Si el encoder entrega 1000 pulsos por vuelta y cuentas 250, ¿qué fracción de vuelta recorrió?'},
+{id:'scaling',title:'Conversión de unidades',terms:'conversion unidades porcentaje psi bar kpa voltaje ma sensor',lesson:'La conversión lineal es valor_ingeniería = mínimo + (señal−mínimo_señal)×(máximo−mínimo)/(máximo_señal−mínimo_señal). Aplica detección de señales inválidas y límites. Para cálculos de seguridad exige verificación externa.',practice:'Para 4–20 mA y rango 0–200 °C, calcula la lectura a 8 mA: 50 °C.'},
+{id:'troubleshooting',title:'Diagnóstico de cableado y Ladder',terms:'diagnostico error falla no funciona lámpara encender corregir cableado',lesson:'Depura por niveles: 1) alimentación y comunes, 2) sensor y estado real del borne, 3) valor lógico de entrada, 4) contactos y temporizadores, 5) salida del PLC, 6) alimentación y retorno de la carga. No modifiques el programa a ciegas: localiza el punto donde la señal deja de comportarse como esperas.',practice:'Pulsa «Revisar proyecto» en el tutor y corrige primero los errores, después las advertencias.'},
+{id:'compactlogix',title:'CompactLogix y Studio 5000',terms:'compactlogix logix studio 5000 tag xic xio ote',lesson:'Studio 5000 usa tags y rutinas/tareas de Logix. El direccionamiento real depende de módulos y configuración; no basta con dibujar I/0. El simulador incluye un subconjunto de XIC, XIO, OTE y TON para una red básica, no una ejecución equivalente a Logix 5000.',practice:'Nombra Marcha y Motor con tags diferentes y relaciona cada uno con un borne.'},
+{id:'micrologix',title:'MicroLogix y RSLogix 500',terms:'micrologix rslogix 500 I:0 O:0 T4',lesson:'Familias MicroLogix usan tablas de datos y direcciones como I:0/x, O:0/x y T4:x, cuya validez depende de la CPU/ranura. En archivos reales hay múltiples rungs, bloques y temporizaciones. El lector de este programa admite un subconjunto textual, no archivos RSS binarios.',practice:'Traduce una condición XIC de I:0/0 que active O:0/0 y simula su estado.'},
+{id:'delta',title:'Delta DVP y WPLSoft / ISPSoft',terms:'delta dvp wplsoft ispsoft x y tmr octal',lesson:'Delta DVP suele emplear X/Y para E/S, con convenciones propias de direcciones y temporizadores. Confirma si la CPU utiliza base octal y qué base temporal corresponde a T0. El editor incluido solo maneja operaciones LD, LDI, AND, OR, OUT, SET/RST y un TMR sencillo.',practice:'Escribe LD X0, OUT Y0 y observa cómo cambia Y0 cuando activas X0.'},
+{id:'codesys',title:'CODESYS e IEC 61131-3',terms:'codesys iec 61131 3 ld st fbd sfc ton',lesson:'IEC 61131-3 define lenguajes como LD, ST, FBD y SFC; el soporte concreto varía por runtime. CODESYS organiza dispositivos, aplicaciones, POUs y tareas. El simulador admite algunas expresiones ST booleanas y un TON, no importación completa de proyectos CODESYS.',practice:'Configura entrada %IX0.0 y salida %QX0.0 para una expresión booleana simple.'},
+{id:'commissioning',title:'Puesta en marcha y documentación',terms:'comisionamiento puesta en marcha pruebas fat sat documentación',lesson:'Una entrega profesional requiere lista de E/S, matriz causa-efecto, planos actualizados, versiones del programa, prueba de sensores, verificación de alarmas, FAT/SAT y evidencia de resultados. Documenta límites de simulación y establece aprobaciones para cambios.',practice:'Crea una tabla de cuatro pruebas: estado inicial, acción, salida esperada y resultado observado.'},
+{id:'pneumatics',title:'Neumática e hidráulica',terms:'pneumatica valvula cilindro solenoide hidraulica 5/2',lesson:'Los actuadores neumáticos suelen comandarse por electroválvulas, con sensores de fin de carrera e interbloqueos. Distingue estabilidad de presión, retorno, señal de posición y tiempo de actuación. Un PLC de 24 V suele controlar la bobina a través del módulo adecuado, no mediante un pin sin verificación eléctrica.',practice:'Programa extender cilindro si existe pieza y retraer al alcanzar el final de carrera.'},
+{id:'servo',title:'Servos y control de movimiento',terms:'servo motion posicion velocidad referencia encoder servo drive',lesson:'La lógica booleana simple no sustituye control de movimiento. Los servos requieren drive, referencia, límites, realimentación y rutinas de homing, además de coordinación temporal. Los perfiles específicos de movimiento dependen del fabricante, no se ejecutan en este simulador.',practice:'Define las señales que deben estar correctas antes de habilitar un eje servo.'},
+{id:'lighting',title:'Iluminación y señalización',terms:'lampara piloto iluminacion luz señalizacion baliza',lesson:'Una lámpara piloto muestra un estado del proceso: marcha, falla, espera o alarma. Define significados coherentes para cada color y salida. En una instalación física respeta tensión de alimentación, corriente y protección. El escenario de luces permite representar el estado de salidas digitales.',practice:'Asigna verde a marcha, rojo a falla y amarillo a espera; define su tabla de estados.'}
+];
+const tutorExercises=[
+['conveyor','Diseña una cinta que solo funcione mientras Marcha está pulsado. ¿Cuál es la entrada, salida y condición? Prueba el control directo y el sensor.'],
+['traffic','Elabora una tabla de secuencia rojo→verde→amarillo con tres salidas y tiempos. ¿Qué impediría energizar verde y rojo a la vez?'],
+['robotics','Modela el ciclo HOME→detectar→agarrar→trasladar→soltar→HOME. Señala sensores y actuadores mínimos.'],
+['timers','Usa un TON de 3 segundos: comprueba que la salida no enciende antes de completar PT y se reinicia cuando IN cae.'],
+['latch','Crea Marcha y Paro NC en entradas diferentes. Comprueba marcha, soltar Marcha y Paro con prioridad.'],
+['analog','Escala 4–20 mA a 0–100 bar. ¿Qué presión representa 12 mA y qué falla sugeriría leer 0 mA?'],
+['safety','Redacta una lista de peligros para la cinta y por qué una salida estándar no certifica una parada de emergencia.']
+];
+function tutorMessage(text,isUser=false){
+ const log=E('tutorChat');if(!log)return;
+ const el=document.createElement('div');el.className='tutor-bubble '+(isUser?'user':'bot');el.textContent=String(text).slice(0,7000);log.appendChild(el);
+ while(log.children.length>36)log.removeChild(log.firstChild);
+ log.scrollTop=log.scrollHeight;
+}
+function tutorTopicFor(query){
+ const q=String(query||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ let choice=null,high=0;
+ for(const topic of tutorLibrary){
+  const terms=(topic.terms+' '+topic.title).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/\s+/).filter(w=>w.length>2);
+  let score=0;for(const term of terms)if(q.includes(term))score+=term.length>5?2:1;
+  if(score>high){choice=topic;high=score}
+ }
+ return choice;
+}
+function tutorAudit(){
+ const problems=typeof ladderReviewIssues==='function'?ladderReviewIssues():validate();
+ const serious=problems.filter(p=>p.severity==='error'),warnings=problems.filter(p=>p.severity==='warn');
+ const lines=['REVISIÓN DEL PROYECTO',serious.length+' errores, '+warnings.length+' advertencias.'];
+ for(const issue of serious.slice(0,8))lines.push('✗ '+issue.message);
+ for(const issue of warnings.slice(0,8))lines.push('⚠ '+issue.message);
+ if(!serious.length)lines.push('✓ Sin errores básicos identificados; no significa que la instalación sea segura.');
+ if(sceneState?.objects?.length){
+  const s=sceneFeedback();lines.push('ESCENARIO: '+s);
+ }
+ lines.push('Orden sugerido: verifica fuente y COM, después estado de entradas, lógica Ladder, salidas y retorno de cargas. Prueba cada cambio por separado.');
+ lines.push('La verificación es didáctica, no certifica compatibilidad con hardware ni funciones de seguridad.');
+ return lines.join('\n');
+}
+function tutorAnswer(query){
+ const q=String(query||'').trim();
+ if(!q)return 'Escribe tu pregunta o elige un tema para empezar.';
+ if(/revis|error|fall|no enciend|no funciona|cortocircuit|diagnost|retroaliment|prueb/.test(q.toLowerCase()))return tutorAudit();
+ if(/escenario|cinta|semaforo|robot|luces|producci/.test(q.toLowerCase())&&sceneState?.objects?.length)return 'ESCENARIO ACTUAL\n'+sceneFeedback()+'\n\n'+(tutorTopicFor(q)||tutorLibrary[0]).lesson;
+ const match=tutorTopicFor(q);
+ if(!match)return 'Puedo ayudarte con PLC, Ladder, I/O, sensores, automatización, temporizadores, instrumentación, control, robots y diagnóstico. Ejemplos: «¿Qué es XIC?», «¿Cómo conecto un sensor PNP?» o «revisa mi circuito». No tengo acceso a toda la información de cada fabricante ni a un modelo de IA externo; verifica parámetros concretos de tu CPU en su manual.';
+ return match.title.toUpperCase()+'\n\n'+match.lesson+'\n\nPRÁCTICA: '+match.practice+'\n\nConsejo: utiliza «Revisar proyecto» para aplicar comprobaciones al circuito y al Ladder actual.';
+}
+function initTutor(){
+ const select=E('tutorTopic');if(!select)return;
+ select.replaceChildren();
+ for(const topic of tutorLibrary){const op=document.createElement('option');op.value=topic.id;op.textContent=topic.title;select.appendChild(op)}
+ tutorMessage('¡Bienvenido al tutor PLC! Selecciona un tema, describe una dificultad o pulsa «Revisar proyecto». También puedo proponerte ejercicios. Las respuestas son material didáctico local; no sustituyen manuales de fabricantes ni pruebas de seguridad.');
+}
+function openTutor(){
+ closeLadder();
+ E('scenarioPanel').hidden=true;
+ E('tutorPanel').hidden=false;
+}
+function closeTutor(){E('tutorPanel').hidden=true}
+E('showTutor').onclick=openTutor;
+E('openTutorFromLadder').onclick=openTutor;
+E('closeTutor').onclick=closeTutor;
+E('tutorExplain').onclick=()=>{const topic=tutorLibrary.find(t=>t.id===E('tutorTopic').value)||tutorLibrary[0];tutorMessage(tutorAnswer(topic.title))};
+E('tutorReview').onclick=()=>tutorMessage(tutorAudit());
+E('tutorExercise').onclick=()=>{
+ const selected=E('tutorTopic').value;
+ const match=tutorExercises.find(x=>x[0]===selected);
+ const item=match||tutorExercises[Math.floor(Math.random()*tutorExercises.length)];
+ tutorMessage('EJERCICIO\n'+item[1]+'\n\nCuando lo termines, pulsa «Revisar proyecto» para obtener indicaciones sobre el diagrama.');
+};
+E('tutorAsk').onclick=()=>{const value=E('tutorQuestion').value.trim();if(!value)return;tutorMessage(value,true);tutorMessage(tutorAnswer(value));E('tutorQuestion').value=''};
+E('tutorQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();E('tutorAsk').click()}});
+
 function snapshot(){return {version:6,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
