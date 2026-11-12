@@ -2157,6 +2157,273 @@ function initAura(){
  window.setInterval(auraWanderTick,24000);
 }
 
+
+/* GRAPHICAL LADDER: each network contains parallel branches of series contacts.
+   Contacts read digital inputs or a previous output in the same scan. */
+let graphicLadder={enabled:false,rungs:[],nextId:1},graphicSelection=null,graphicTool='NO',graphicLive={};
+function graphId(){return graphicLadder.nextId++}
+function graphPLC(){return nodes.find(n=>n.type==='plc')}
+function graphPinChoices(kind){const plc=graphPLC();if(!plc)return [];return kind==='output'?plcOutputPins(plc):plcInputPins(plc)}
+function graphItem(type='NO'){
+ return {id:graphId(),type,pin:graphPinChoices('input')[0]??3,source:'input'};
+}
+function graphNewRung(){
+ if(simulation){E('graphicMessage').textContent='Cambia a Edit Mode para agregar redes.';return}
+ if(graphicLadder.rungs.length>=16){E('graphicMessage').textContent='Máximo 16 redes en este laboratorio.';return}
+ const rung={id:graphId(),branches:[[graphItem('NO')]],output:graphPinChoices('output')[0]??18};
+ graphicLadder.rungs.push(rung);graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:0,index:0};
+ graphicRefresh();draw();
+}
+function graphFindRung(id){return graphicLadder.rungs.find(r=>r.id===Number(id))}
+function graphInputValue(item,outputs,plc){
+ const pin=Number(item.pin);
+ if(item.source==='output')return outputs.has(pin);
+ return ins.has(plcInputPins(plc).indexOf(pin));
+}
+function evaluateGraphicLadder(plc,ready){
+ const results=[],outputs=new Set(),status={};
+ for(const rung of graphicLadder.rungs){
+  let rungOn=false;
+  for(let bi=0;bi<rung.branches.length;bi++){
+   const branch=rung.branches[bi];
+   let path=!!ready;
+   for(let ci=0;ci<branch.length;ci++){
+    const item=branch[ci],read=item.type==='WIRE'||graphInputValue(item,outputs,plc);
+    const pass=item.type==='WIRE'?true:item.type==='NC'?!read:read;
+    path=path&&pass;
+    status['c:'+item.id]=path;
+    status['test:'+item.id]=pass;
+   }
+   status['b:'+rung.id+':'+bi]=path;
+   rungOn=rungOn||path;
+  }
+  status['r:'+rung.id]=rungOn;
+  if(rungOn)outputs.add(Number(rung.output));
+  results.push({rungId:rung.id,output:Number(rung.output),active:rungOn});
+ }
+ graphicLive=status;
+ return results;
+}
+function graphSvg(parent,tag,attrs={}){
+ const el=document.createElementNS(NS,tag);
+ for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));
+ parent.appendChild(el);return el;
+}
+function graphSvgText(parent,x,y,content,extra={}){
+ const el=graphSvg(parent,'text',{x,y,'text-anchor':'middle','font-size':13,fill:'#bfdcf3','font-family':'ui-monospace,Consolas,monospace',...extra});
+ el.textContent=String(content);return el;
+}
+function graphLine(parent,x1,y1,x2,y2,key){
+ return graphSvg(parent,'line',{x1,y1,x2,y2,stroke:'#86aac5','stroke-width':2.5,'data-graph-powered':key||''});
+}
+function graphSetSelected(rid,branch,index){graphicSelection={rungId:Number(rid),branch:Number(branch),index:Number(index)};graphicRefreshInspector();renderGraphicLadder()}
+function graphSelectCoil(rid){graphicSelection={rungId:Number(rid),branch:-1,index:-1};graphicRefreshInspector();renderGraphicLadder()}
+function graphMakeContact(svg,item,x,y,rid,bi,ci){
+ const g=graphSvg(svg,'g',{'data-symbol-id':item.id,class:'graphic-symbol'+(graphicSelection?.rungId===rid&&graphicSelection?.branch===bi&&graphicSelection?.index===ci?' selected':'')});
+ graphSvg(g,'rect',{x:x-31,y:y-34,width:62,height:65,rx:5,fill:'#102840',stroke:'transparent',class:'graphic-hit'});
+ graphLine(g,x-42,y,x-14,y,'c:'+item.id);graphLine(g,x+14,y,x+42,y,'c:'+item.id);
+ if(item.type==='WIRE')graphLine(g,x-14,y,x+14,y,'c:'+item.id);
+ else{
+  graphLine(g,x-13,y-17,x-13,y+17,'c:'+item.id);graphLine(g,x+13,y-17,x+13,y+17,'c:'+item.id);
+  if(item.type==='NC')graphLine(g,x-17,y+20,x+17,y-20,'c:'+item.id);
+ }
+ let label='Wire';
+ const plc=graphPLC();
+ if(item.type!=='WIRE'&&plc)label=ladderTag(item.pin,item.source==='output'?'output':'input',E('ladderPlatform').value);
+ graphSvgText(g,x,y-22,label,{'font-size':11,class:'graphic-label'});
+ g.addEventListener('click',e=>{e.stopPropagation();graphSetSelected(rid,bi,ci)});
+ g.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();graphSetSelected(rid,bi,ci)}});
+ g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',item.type+' '+label);
+}
+function graphMakeCoil(svg,rung,y){
+ const x=553,g=graphSvg(svg,'g',{class:'graphic-symbol'+(graphicSelection?.rungId===rung.id&&graphicSelection?.branch===-1?' selected':'')});
+ graphSvg(g,'rect',{x:x-45,y:y-31,width:90,height:65,rx:7,fill:'#102840',stroke:'transparent',class:'graphic-hit'});
+ graphLine(g,x-45,y,x-22,y,'r:'+rung.id);graphLine(g,x+22,y,x+46,y,'r:'+rung.id);
+ const paths='M '+(x-21)+' '+(y-19)+' Q '+(x-5)+' '+y+' '+(x-21)+' '+(y+19)+' M '+(x+21)+' '+(y-19)+' Q '+(x+5)+' '+y+' '+(x+21)+' '+(y+19);
+ graphSvg(g,'path',{d:paths,fill:'none',stroke:'#86aac5','stroke-width':3,'data-graph-powered':'r:'+rung.id});
+ graphSvgText(g,x,y-24,ladderTag(rung.output,'output',E('ladderPlatform').value),{'font-size':11,class:'graphic-label'});
+ g.addEventListener('click',e=>{e.stopPropagation();graphSelectCoil(rung.id)});
+ g.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();graphSelectCoil(rung.id)}});
+ g.setAttribute('role','button');g.setAttribute('tabindex','0');g.setAttribute('aria-label','Output Coil');
+}
+function renderGraphicLadder(){
+ const root=E('graphicLadderView');if(!root)return;root.replaceChildren();
+ if(!graphicLadder.rungs.length){const msg=document.createElement('p');msg.className='studio-lead';msg.textContent='No hay rungs. Presiona ＋ Rung para crear tu primera red Ladder gráfica.';root.appendChild(msg);return}
+ for(let ri=0;ri<graphicLadder.rungs.length;ri++){
+  const rung=graphicLadder.rungs[ri],wrapper=document.createElement('div');
+  wrapper.className='graphic-rung'+(graphicSelection?.rungId===rung.id?' selected':'');
+  const header=document.createElement('div');header.className='graphic-rung-head';
+  const title=document.createElement('span');title.textContent='Rung '+(ri+1)+' · '+rung.branches.length+' parallel path(s)';
+  const branchBtn=document.createElement('button');branchBtn.textContent='+ Parallel';branchBtn.disabled=simulation;branchBtn.onclick=()=>graphAddBranch(rung.id);
+  header.append(title,branchBtn);wrapper.appendChild(header);
+  const height=90+Math.max(0,rung.branches.length-1)*82;
+  const svg=graphSvg(wrapper,'svg',{viewBox:'0 0 650 '+height,role:'img','aria-label':'Rung '+(ri+1)+' with contacts and output coil'});
+  graphSvg(svg,'rect',{x:0,y:0,width:650,height,fill:'#091a2a',rx:6});
+  graphLine(svg,22,14,22,height-16);graphLine(svg,628,14,628,height-16);
+  const mainY=48;
+  graphLine(svg,22,mainY,95,mainY,'b:'+rung.id+':0');
+  for(let bi=0;bi<rung.branches.length;bi++){
+   const branch=rung.branches[bi],y=mainY+bi*82;
+   if(bi>0){graphLine(svg,95,mainY,95,y,'b:'+rung.id+':'+bi);graphLine(svg,95,y,123,y,'b:'+rung.id+':'+bi)}
+   const count=Math.min(5,branch.length);
+   const xs=Array.from({length:count},(_,i)=>160+i*67);
+   let current=bi===0?95:123;
+   for(let ci=0;ci<count;ci++){
+    graphLine(svg,current,y,xs[ci]-42,y,'b:'+rung.id+':'+bi);
+    graphMakeContact(svg,branch[ci],xs[ci],y,rung.id,bi,ci);current=xs[ci]+42;
+   }
+   graphLine(svg,current,y,470,y,'b:'+rung.id+':'+bi);
+   if(bi>0){graphLine(svg,470,mainY,470,y,'b:'+rung.id+':'+bi)}
+  }
+  graphLine(svg,470,mainY,508,mainY,'r:'+rung.id);
+  graphMakeCoil(svg,rung,mainY);
+  graphLine(svg,599,mainY,628,mainY,'r:'+rung.id);
+  const addMore=document.createElement('button');addMore.textContent='＋ Contact / Wire';addMore.disabled=simulation;
+  addMore.onclick=()=>{graphSetSelected(rung.id,0,rung.branches[0].length-1);graphInsert(graphicTool)};
+  const tools=document.createElement('div');tools.className='graphic-rung-head';tools.append(addMore);
+  if(rung.branches.length>1){const removeBranch=document.createElement('button');removeBranch.textContent='− Last Parallel';removeBranch.disabled=simulation;removeBranch.onclick=()=>{rung.branches.pop();graphicRefresh()};tools.append(removeBranch)}
+  wrapper.append(tools);root.append(wrapper);
+ }
+ updateGraphicLive();
+}
+function updateGraphicLive(){
+ const root=E('graphicLadderView');if(!root)return;
+ for(const el of root.querySelectorAll('[data-graph-powered]'))el.classList.toggle('graphic-powered',!!graphicLive[el.getAttribute('data-graph-powered')]);
+ for(const g of root.querySelectorAll('[data-symbol-id]')){
+  g.classList.toggle('graphic-powered',!!graphicLive['c:'+g.getAttribute('data-symbol-id')]);
+ }
+ const status=E('graphicStatus');if(status)status.textContent=simulation?(graphicLadder.enabled?'● Online Monitor':'○ No Graphic Program'):'■ Edit Mode';
+}
+function graphicRefresh(){renderGraphicLadder();graphicRefreshInspector()}
+function graphInsert(type){
+ if(simulation){E('graphicMessage').textContent='Cambia a Edit para modificar contactos.';return}
+ if(!graphicLadder.rungs.length)graphNewRung();
+ const sel=graphicSelection||{rungId:graphicLadder.rungs.at(-1).id,branch:0,index:0};
+ const rung=graphFindRung(sel.rungId)||graphicLadder.rungs.at(-1);
+ if(type==='COIL'){graphSelectCoil(rung.id);return}
+ const bi=Math.max(0,Math.min(rung.branches.length-1,sel.branch));
+ const row=rung.branches[bi];
+ if(row.length>=5){E('graphicMessage').textContent='Máximo 5 símbolos por rama para conservar la lectura visual.';return}
+ const item=graphItem(type);
+ row.splice(sel.index>=0?sel.index+1:row.length,0,item);
+ graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:bi,index:row.indexOf(item)};
+ graphicRefresh();draw();
+}
+function graphAddBranch(id){
+ if(simulation)return;
+ const rung=graphFindRung(id);if(!rung)return;
+ if(rung.branches.length>=4){E('graphicMessage').textContent='Máximo 4 ramas en paralelo por rung.';return}
+ const item=graphItem('NO');rung.branches.push([item]);
+ graphicSelection={rungId:rung.id,branch:rung.branches.length-1,index:0};
+ graphicLadder.enabled=true;graphicRefresh();draw();
+}
+function graphRemoveSelected(){
+ if(simulation)return;
+ const s=graphicSelection;if(!s)return;
+ const rung=graphFindRung(s.rungId);if(!rung)return;
+ if(s.branch<0){E('graphicMessage').textContent='La bobina es obligatoria en una red. Usa Delete Rung para quitarla.';return}
+ const b=rung.branches[s.branch];if(!b)return;
+ b.splice(s.index,1);if(!b.length)b.push(graphItem('WIRE'));
+ graphicSelection={rungId:rung.id,branch:s.branch,index:Math.min(s.index,b.length-1)};
+ graphicRefresh();draw();
+}
+function graphMoveRung(delta){
+ if(simulation||!graphicSelection)return;
+ const i=graphicLadder.rungs.findIndex(r=>r.id===graphicSelection.rungId),j=i+delta;
+ if(i<0||j<0||j>=graphicLadder.rungs.length)return;
+ [graphicLadder.rungs[i],graphicLadder.rungs[j]]=[graphicLadder.rungs[j],graphicLadder.rungs[i]];
+ graphicRefresh();
+}
+function graphicRefreshInspector(){
+ const panel=E('graphicElementEditor');if(!panel)return;panel.replaceChildren();
+ const s=graphicSelection,rung=s&&graphFindRung(s.rungId);
+ if(!rung){panel.textContent='Selecciona un contacto o bobina para asignar su señal. Usa NO, NC, Wire y Parallel para construir la red.';return}
+ const mkSelect=(heading,choices,value,onChange)=>{
+  const label=document.createElement('label');label.textContent=heading;const sel=document.createElement('select');
+  for(const choice of choices){const option=document.createElement('option');option.value=String(choice.value);option.textContent=choice.text;sel.appendChild(option)}
+  sel.value=String(value);sel.disabled=simulation;sel.onchange=()=>onChange(sel.value);label.appendChild(sel);panel.appendChild(label);
+ };
+ const plc=graphPLC();
+ if(s.branch===-1){
+  mkSelect('Output Coil · Bobina',graphPinChoices('output').map(pin=>({value:pin,text:ladderTag(pin,'output',E('ladderPlatform').value)+' · '+portName(plc,pin)})),rung.output,v=>{rung.output=Number(v);graphicRefresh();draw()});
+ }else{
+  const item=rung.branches[s.branch]?.[s.index];if(!item){panel.textContent='Contacto no encontrado';return}
+  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'}],item.type,v=>{item.type=v;graphicRefresh();draw()});
+  if(item.type!=='WIRE'){
+   mkSelect('Signal Source · Origen',[{value:'input',text:'Digital Input · Entrada'},{value:'output',text:'Output Feedback · Realimentación'}],item.source,v=>{item.source=v;item.pin=graphPinChoices(v)[0]??0;graphicRefresh();draw()});
+   const pins=graphPinChoices(item.source);
+   mkSelect('Assigned Pin · Borne',pins.map(pin=>({value:pin,text:ladderTag(pin,item.source,E('ladderPlatform').value)+' · '+portName(plc,pin)})),item.pin,v=>{item.pin=Number(v);graphicRefresh();draw()});
+  }
+  const del=document.createElement('button');del.textContent='Remove Symbol · Quitar';del.disabled=simulation;del.onclick=graphRemoveSelected;panel.appendChild(del);
+ }
+ const hint=document.createElement('small');hint.textContent='NO conduce si la señal es 1; NC conduce si es 0. Las ramas paralelas implementan OR; los contactos en serie implementan AND.';panel.appendChild(hint);
+}
+function graphicValidate(){
+ const problems=[],rungs=graphicLadder.rungs,outputCount=new Map(),plc=graphPLC();
+ if(!rungs.length)problems.push('No hay rungs: agrega una red Ladder.');
+ for(const [i,rung] of rungs.entries()){
+  if(!plcOutputPins(plc).includes(Number(rung.output)))problems.push('Rung '+(i+1)+': bobina sin salida PLC válida.');
+  outputCount.set(rung.output,(outputCount.get(rung.output)||0)+1);
+  for(const branch of rung.branches){
+   if(!branch.length)problems.push('Rung '+(i+1)+': rama vacía.');
+   for(const item of branch)if(item.type!=='WIRE'){
+    const pins=item.source==='output'?plcOutputPins(plc):plcInputPins(plc);
+    if(!pins.includes(Number(item.pin)))problems.push('Rung '+(i+1)+': el contacto '+item.id+' no tiene borne válido.');
+   }
+  }
+ }
+ for(const [pin,n] of outputCount)if(n>1)problems.push('La bobina '+portName(plc,Number(pin))+' aparece en '+n+' redes; evita múltiples bobinas sobre una misma salida.');
+ const text=problems.length?problems.join(' '):'Ladder gráfico coherente para simulación booleana. Comprueba estados físicos y alimentación.';
+ E('graphicMessage').textContent=text;return problems;
+}
+function graphicActivate(){
+ if(simulation){E('graphicMessage').textContent='Cambia a Edit para modificar qué programa ejecuta el PLC.';return}
+ if(!graphicLadder.rungs.length)graphNewRung();
+ const problems=graphicValidate();
+ if(problems.length){auraSay('Encontré '+problems.length+' problemas en el Ladder gráfico.');return}
+ graphicLadder.enabled=true;
+ resetLadderRuntime();draw();
+ E('graphicMessage').textContent='Graphic Ladder ACTIVE. Pulsa Simular, acciona los dispositivos y observa los contactos encenderse en tiempo real.';
+ auraTailMagic('¡Listo! Tu Ladder gráfico está conectado al PLC virtual. ¡Ahora pruébalo!');
+}
+function graphLoad(raw){
+ const data=raw&&typeof raw==='object'?raw:{};
+ const valid=Array.isArray(data.rungs)?data.rungs.slice(0,16):[];
+ graphicLadder={enabled:!!data.enabled,rungs:[],nextId:1};
+ let max=0;
+ for(const row of valid){
+  if(!Array.isArray(row.branches)||!Number.isFinite(Number(row.output)))continue;
+  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input'})):[]);
+  if(!branches.length)continue;
+  for(const branch of branches)for(const item of branch)max=Math.max(max,item.id);
+  const rid=Number(row.id)||0;max=Math.max(max,rid);
+  graphicLadder.rungs.push({id:rid,output:Number(row.output),branches});
+ }
+ graphicLadder.nextId=Math.max(max+1,Number(data.nextId)||1);
+ graphicSelection=null;graphicRefresh();
+}
+function graphInit(){
+ E('graphicNew').onclick=graphNewRung;
+ for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicCoil','COIL']]){
+  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
+ }
+ E('graphicBranch').onclick=()=>{if(!graphicLadder.rungs.length)graphNewRung();graphAddBranch(graphicSelection?.rungId||graphicLadder.rungs.at(-1).id)};
+ E('graphicDelete').onclick=graphRemoveSelected;
+ E('graphicMoveUp').onclick=()=>graphMoveRung(-1);
+ E('graphicMoveDown').onclick=()=>graphMoveRung(1);
+ E('graphicRemoveRung').onclick=()=>{
+  if(simulation||!graphicSelection)return;
+  graphicLadder.rungs=graphicLadder.rungs.filter(r=>r.id!==graphicSelection.rungId);
+  if(!graphicLadder.rungs.length)graphicLadder.enabled=false;
+  graphicSelection=null;graphicRefresh();draw();
+ };
+ E('graphicClear').onclick=()=>{if(simulation||!confirm('¿Borrar todas las redes Ladder gráficas?'))return;graphLoad(null);draw()};
+ E('graphicValidate').onclick=()=>{graphicValidate();auraReviewAndReact()};
+ E('graphicActivate').onclick=graphicActivate;
+ E('ladderPlatform').addEventListener('change',()=>{graphicRefresh();draw()});
+ graphicRefresh();
+}
+
 function snapshot(){return {version:7,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
