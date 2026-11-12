@@ -61,9 +61,49 @@ body.phone-mode main{flex:1;min-height:0}
 @media(max-width:650px){
  .layout.ladder-visible .ladder-panel,body.phone-mode .layout.ladder-visible .ladder-panel{position:absolute;top:56px;right:0;bottom:0;width:100%;z-index:9;box-shadow:none}
 }
+
+/* Responsive layout: screen height belongs to the app, not each child */
+html,body{height:100%;width:100%;overflow:hidden}
+body{display:flex;flex-direction:column;min-width:0}
+header{height:auto;min-height:55px;max-height:34dvh;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;gap:6px;padding:7px 9px;align-content:center}
+header>div:not(.project-controls){min-width:100px}
+header .push{padding:7px 9px;font-size:12px;white-space:nowrap}
+header label{display:flex;align-items:center;gap:5px;min-width:0;font-size:12px}
+header select{max-width:145px;padding:7px;font-size:12px}
+header .spacer{flex:1 1 18px;min-width:0}
+.project-controls{flex:0 1 auto;min-width:0;flex-wrap:wrap}
+.project-controls input{width:135px;max-width:135px}
+.project-controls select{max-width:140px}
+.layout,.layout.ladder-visible{height:auto!important;min-height:0;min-width:0;flex:1 1 0;grid-template-columns:195px minmax(0,1fr)}
+.layout.ladder-visible{grid-template-columns:195px minmax(0,1fr) minmax(300px,380px)}
+.layout>aside,.layout>main{min-width:0;min-height:0}
+main{min-width:0;min-height:0;isolation:isolate}
+main>#canvas{display:block;width:100%;height:100%}
+body.phone-mode .layout{height:auto!important;flex:1 1 0;min-height:0}
+body.phone-mode aside{flex:0 0 164px}
+body.phone-mode main{flex:1 1 0;min-height:0}
+@media(max-width:1100px){
+ header{max-height:31dvh}
+ header .spacer{display:none}
+ header .push{padding:6px 8px;font-size:11px}
+ .layout,.layout.ladder-visible{grid-template-columns:185px minmax(0,1fr)}
+}
+@media(max-width:740px){
+ header{max-height:36dvh;padding:5px;gap:4px}
+ header .push{padding:6px;font-size:11px}
+ header .v,header small{display:none}
+ header label{font-size:11px}
+ header select{max-width:120px}
+ .layout,.layout.ladder-visible{display:flex;flex-direction:column;height:auto!important;min-height:0}
+ .layout>aside{height:155px;flex:0 0 155px;overflow:auto;border-right:0;border-bottom:2px solid #2d3f5a}
+ .layout>aside .cards{display:flex;overflow-x:auto;gap:7px}
+ .layout>aside .tile{flex:0 0 95px;min-height:82px}
+ .layout>main{flex:1 1 0;min-height:0}
+ .layout.ladder-visible .ladder-panel{top:0;bottom:0;width:100%;position:absolute;z-index:12}
+}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><button class="push run" id="simulate">▶ Simular</button><button class="push edit" id="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera">▤ Programa escalera</button><button class="push" id="diagnose">⚠ Revisar</button><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button><input type="file" id="file" accept=".json" hidden></header>
-<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect width="1200" height="760" fill="url(#grid)"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
+<div class="layout"><aside><div class="side-title">COMPONENTES ELÉCTRICOS <small style="color:var(--cyan);float:right">CLIC / ARRASTRAR</small></div><h4>MANDOS Y SENSORES</h4><div class="cards" id="sensors"></div><h4>ACTUADORES Y CARGAS</h4><div class="cards" id="loads"></div><h4>SELECCIÓN / CABLES</h4><div class="inspector" id="wireColorPanel"><label>Color del cable seleccionado</label><input id="wireColor" type="color" value="#ffc844"><div class="palette-caption">Ctrl o Shift + clic: selecciona varios símbolos. Supr: borra selección. Arrastra uno para mover el conjunto.</div></div><h4>COMPONENTE SELECCIONADO</h4><div id="inspector" class="inspector"><span>Selecciona un símbolo, barra o PLC para cambiar su nombre.</span></div><h4>AMPLIAR PLC Y BARRAS</h4><div class="expand-tools"><div><button id="addInput">+ Entrada I</button><button id="dropInput">− Entrada I</button></div><div><button id="addOutput">+ Salida O</button><button id="dropOutput">− Salida O</button></div><div><button id="addPower">+ Punto 24 V</button><button id="dropPower">− Punto 24 V</button></div><div><button id="addZero">+ Punto 0 V</button><button id="dropZero">− Punto 0 V</button></div><small id="expansionInfo">Los bornes se distribuyen con separación fija. No se montan unos sobre otros.</small></div><h4>ALIMENTACIÓN</h4><div style="font-size:11px;color:#98b5d6;padding:8px">Símbolos sin cajas. Arrastra las barras o cualquier componente para moverlos; selecciónalo y usa ↶/↷ o tecla R para girar.</div></aside><main><svg viewBox="0 0 1200 760" id="canvas"><defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#20304a"/></pattern></defs><rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" pointer-events="none"/><g id="wireLayer"></g><g id="devices"></g><path id="rubber" fill="none" stroke="#ff66cb" stroke-width="2" stroke-dasharray="6 4"/></svg><div id="menu" class="device-menu" hidden></div><section id="diagnostic" class="diagnostic"><strong>Diagnóstico de cableado</strong><button id="hideDiag">Ocultar</button><div id="diagList"></div></section><div class="note">Clic izquierdo: opciones · Bornes: cablear · Cable seleccionado: arrastra el punto naranja para acomodarlo · R gira</div></main>
 <section id="ladderPanel" class="ladder-panel" hidden aria-label="Programa en lenguaje escalera">
  <div class="ladder-top"><strong>▤ Programa escalera (Ladder)</strong><button id="closeLadder" title="Cerrar panel">×</button></div>
  <label for="ladderGoal">¿Qué tarea quieres que realice el PLC?</label>
@@ -349,19 +389,38 @@ drag={id:n.id,x:n.x,y:n.y,p,moved:false};
 groupDrag=nodes.filter(x=>multi.has(x.id)).map(x=>({id:x.id,x:x.x,y:x.y}));
 canvas.setPointerCapture(e.pointerId);draw();
 }
-canvas.onpointermove=e=>{if(pan){const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag&&!simulation){const dx=Math.round((p.x-drag.p.x)/10)*10,dy=Math.round((p.y-drag.p.y)/10)*10;for(const original of groupDrag||[]){const n=find(original.id);if(n){n.x=original.x+dx;n.y=original.y+dy}}drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
+canvas.onpointermove=e=>{if(pan){manualZoom=true;const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){w.bendX=Math.round(p.x/10)*10;w.bendY=Math.round(p.y/10)*10;draw()}return}if(drag&&!simulation){const dx=Math.round((p.x-drag.p.x)/10)*10,dy=Math.round((p.y-drag.p.y)/10)*10;for(const original of groupDrag||[]){const n=find(original.id);if(n){n.x=original.x+dx;n.y=original.y+dy}}drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
 canvas.onpointerup=e=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw();return}if(pan){pan=null;return}if(wireDrag){wireDrag=null;draw();return}if(drag&&!drag.moved&&multi.size<2){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null;groupDrag=null};
 canvas.onpointerdown=e=>{e.preventDefault();if(e.button===1||e.shiftKey){e.preventDefault();pan={x:e.clientX,y:e.clientY,view:{...view}};canvas.setPointerCapture(e.pointerId);return}closeMenu();chosen=null;multi.clear();refreshInspector();draw()};
+let manualZoom=false,fitPending=false,lastCanvasWidth=0,lastCanvasHeight=0;
 function updateView(){canvas.setAttribute('viewBox',[view.x,view.y,view.w,view.h].join(' '));E('zoomValue').textContent=Math.round(1200/view.w*100)+'%'}
+function fitCircuit(){
+ const container=canvas.getBoundingClientRect();
+ if(container.width<40||container.height<40)return;
+ const boxes=nodes.map(block);
+ if(!boxes.length){view={x:0,y:0,w:1200,h:760};updateView();return}
+ const left=Math.min(...boxes.map(b=>b[0]))-55,right=Math.max(...boxes.map(b=>b[2]))+55;
+ const top=Math.min(...boxes.map(b=>b[1]))-55,bottom=Math.max(...boxes.map(b=>b[3]))+55;
+ const middleX=(left+right)/2,middleY=(top+bottom)/2;
+ const aspect=container.width/container.height;
+ let w=Math.max(250,right-left),height=Math.max(190,bottom-top);
+ if(w/height<aspect)w=height*aspect;else height=w/aspect;
+ view={x:middleX-w/2,y:middleY-height/2,w,h:height};updateView()
+}
+function scheduleFit(){
+ if(fitPending)return;fitPending=true;
+ requestAnimationFrame(()=>{fitPending=false;if(!manualZoom)fitCircuit()});
+}
 function zoom(factor,mouse){
+ manualZoom=true;
  const x=mouse?.[0]??(view.x+view.w/2),y=mouse?.[1]??(view.y+view.h/2);
  const w=Math.max(350,Math.min(2400,view.w/factor)),height=w*760/1200;
  const rx=(x-view.x)/view.w,ry=(y-view.y)/view.h;
  view={x:x-rx*w,y:y-ry*height,w,h:height};updateView()
 }
-E('phoneMode').onclick=()=>{document.body.classList.toggle('phone-mode');E('phoneMode').textContent=document.body.classList.contains('phone-mode')?'🖥 Escritorio':'📱 Móvil'};
+E('phoneMode').onclick=()=>{document.body.classList.toggle('phone-mode');E('phoneMode').textContent=document.body.classList.contains('phone-mode')?'🖥 Escritorio':'📱 Móvil';scheduleFit()};
 E('zoomIn').onclick=()=>zoom(1.2);E('zoomOut').onclick=()=>zoom(1/1.2);
-E('zoomValue').onclick=()=>{view={x:0,y:0,w:1200,h:760};updateView()};
+E('zoomValue').onclick=()=>{manualZoom=false;fitCircuit()};
 canvas.addEventListener('wheel',e=>{e.preventDefault();const pos=pointer(e);zoom(e.deltaY<0?1.12:1/1.12,[pos.x,pos.y])},{passive:false});
 canvas.addEventListener('pointercancel',()=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw()}pan=null;drag=null;wireDrag=null});
 window.addEventListener('pointerup',()=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw()}});
@@ -505,11 +564,11 @@ function populateLadderSelectors(){
 }
 function openLadder(){
  const panel=E('ladderPanel');panel.hidden=false;E('canvas').closest('.layout').classList.add('ladder-visible');
- populateLadderSelectors();renderLadder();
+ populateLadderSelectors();renderLadder();scheduleFit();
  E('ladderGoal').focus();
 }
 function closeLadder(){
- E('ladderPanel').hidden=true;E('canvas').closest('.layout').classList.remove('ladder-visible');
+ E('ladderPanel').hidden=true;E('canvas').closest('.layout').classList.remove('ladder-visible');scheduleFit();
 }
 function ladderEl(tag,attrs={},parent){
  const el=document.createElementNS(NS,tag);
@@ -665,5 +724,17 @@ if(e.key==='F2')renameChosen();
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=true;refreshInspector();expansionStatus();updateView();refreshProjects();
+new ResizeObserver(entries=>{
+ const rect=entries[0]?.contentRect;if(!rect)return;
+ const w=Math.round(rect.width),h=Math.round(rect.height);
+ if(w===lastCanvasWidth&&h===lastCanvasHeight)return;
+ lastCanvasWidth=w;lastCanvasHeight=h;
+ if(manualZoom){
+  // Preserve user zoom level while updating the SVG viewport's aspect ratio.
+  const ratio=w/Math.max(1,h),centerX=view.x+view.w/2,centerY=view.y+view.h/2;
+  const height=view.w/Math.max(.1,ratio);view.y=centerY-height/2;view.h=height;view.x=centerX-view.w/2;updateView();
+ }else scheduleFit();
+}).observe(canvas.parentElement);
+window.addEventListener('resize',scheduleFit);scheduleFit();
 })();
 </script></html>
