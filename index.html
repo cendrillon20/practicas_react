@@ -2494,13 +2494,20 @@ function graphBindPhysicalItem(item,pins,index,messages,parts){
 function graphBindOutput(rung,index,messages,parts){
  const plc=parts.plc,pin=Number(rung.output);
  if(!plcOutputPins(plc).includes(pin)){messages.push('Bobina '+rung.id+': salida inválida.');return}
+ let owned=find(rung.physicalId);
+ if(owned&&graphIsOwned(owned)){
+  for(const w of [...wires])if(w.graphAutoWire&&((w.a===plc.id&&w.b===owned.id)||(w.b===plc.id&&w.a===owned.id))){
+   const assigned=w.a===plc.id?w.ap:w.bp;
+   if(assigned!==pin)wires=wires.filter(x=>x.id!==w.id);
+  }
+ }
  const existing=graphConnectedToPLC(pin);
  if(existing){
   messages.push('Salida '+portName(plc,pin)+' ya cableada. No se modifica su carga.');
   return;
  }
  const position=plcOutputPins(plc).indexOf(pin);
- let lamp=find(rung.physicalId);
+ let lamp=owned||find(rung.physicalId);
  if(!lamp||!graphIsOwned(lamp)){
   lamp=A('green',1020,155+(position%6)*85);
   lamp.graphAutoOwned=true;lamp.graphAutoPin=pin;
@@ -2508,7 +2515,7 @@ function graphBindOutput(rung,index,messages,parts){
   rung.physicalId=lamp.id;
  }
  graphWireOwned(plc.id,pin,lamp.id,0);
- graphWireOwned(parts.negative.id,(position+1)%localPorts(parts.negative).length,lamp.id,1);
+ if(!wires.some(w=>w.a===lamp.id&&w.ap===1||w.b===lamp.id&&w.bp===1))graphWireOwned(parts.negative.id,(position+1)%localPorts(parts.negative).length,lamp.id,1);
  messages.push('Bobina '+portName(plc,pin)+' → '+lamp.label+' → 0V conectada.');
 }
 function graphSyncElectrical(force=false){
@@ -2871,14 +2878,14 @@ function graphicRefreshInspector(){
  };
  const plc=graphPLC();
  if(s.branch===-1){
-  mkSelect('Output Coil · Bobina',graphPinChoices('output').map(pin=>({value:pin,text:ladderTag(pin,'output',E('ladderPlatform').value)+' · '+portName(plc,pin)})),rung.output,v=>{rung.output=Number(v);graphicRefresh();draw()});
+  mkSelect('Output Coil · Bobina',graphPinChoices('output').map(pin=>({value:pin,text:ladderTag(pin,'output',E('ladderPlatform').value)+' · '+portName(plc,pin)})),rung.output,v=>{rung.output=Number(v);graphAutoSyncAndRedraw()});
  }else{
   const item=rung.branches[s.branch]?.[s.index];if(!item){panel.textContent='Contacto no encontrado';return}
-  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'},{value:'TON',text:'TON · Timer On Delay'},{value:'TOF',text:'TOF · Timer Off Delay'},{value:'CTU',text:'CTU · Counter Up'},{value:'CTD',text:'CTD · Counter Down'},{value:'CMP',text:'CMP · Compare'},{value:'BLINK',text:'BLINK · Flash and latch'}],item.type,v=>{item.type=v;graphicRefresh();draw()});
+  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'},{value:'TON',text:'TON · Timer On Delay'},{value:'TOF',text:'TOF · Timer Off Delay'},{value:'CTU',text:'CTU · Counter Up'},{value:'CTD',text:'CTD · Counter Down'},{value:'CMP',text:'CMP · Compare'},{value:'BLINK',text:'BLINK · Flash and latch'}],item.type,v=>{item.type=v;graphAutoSyncAndRedraw()});
   if(['NO','NC'].includes(item.type)){
-   mkSelect('Signal Source · Origen',[{value:'input',text:'Digital Input · Entrada'},{value:'output',text:'Output Feedback · Realimentación'}],item.source,v=>{item.source=v;item.pin=graphPinChoices(v)[0]??0;graphicRefresh();draw()});
+   mkSelect('Signal Source · Origen',[{value:'input',text:'Digital Input · Entrada'},{value:'output',text:'Output Feedback · Realimentación'}],item.source,v=>{item.source=v;item.pin=graphPinChoices(v)[0]??0;graphAutoSyncAndRedraw()});
    const pins=graphPinChoices(item.source);
-   mkSelect('Assigned Pin · Borne',pins.map(pin=>({value:pin,text:ladderTag(pin,item.source,E('ladderPlatform').value)+' · '+portName(plc,pin)})),item.pin,v=>{item.pin=Number(v);graphicRefresh();draw()});
+   mkSelect('Assigned Pin · Borne',pins.map(pin=>({value:pin,text:ladderTag(pin,item.source,E('ladderPlatform').value)+' · '+portName(plc,pin)})),item.pin,v=>{item.pin=Number(v);graphAutoSyncAndRedraw()});
   }
   if(['TON','TOF','CTU','CTD','CMP','BLINK'].includes(item.type)){
    const field=(labelText,key,min,max,step)=>{
