@@ -426,6 +426,18 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
 .fluid-mascot .fluid-mascot-art{transition:transform .22s ease}.fluid-mascot:hover .fluid-mascot-art{transform:rotate(-5deg) scale(1.08)}
 .fluid-dog{left:280px}.fluid-cat{left:367px}.fluid-lion{left:454px}
 @media(max-width:700px){.aura-fox,.antonio-duck,.joan-penguin,.nagi-raccoon,.tranny-crab,.fluid-mascot{width:64px!important;min-width:64px;max-width:64px}.aura-fox>svg,.antonio-duck>svg,.joan-penguin>svg,.nagi-raccoon>svg,.tranny-crab>svg,.fluid-mascot-art>svg,.fluid-mascot-art{width:59px!important;height:59px!important}.fluid-dog{left:12vw}.fluid-cat{left:30vw}.fluid-lion{left:48vw}}
+
+/* Unified baby-animal face styling and occasional playtime */
+.aura-fox>svg,.antonio-duck>svg,.joan-penguin>svg,.nagi-raccoon>svg{filter:drop-shadow(0 2px 1px #0003)}
+.cute-detail{pointer-events:none}
+.aura-fox:hover>svg,.antonio-duck:hover>svg,.joan-penguin:hover>svg,.nagi-raccoon:hover>svg{filter:drop-shadow(0 0 6px #ffbbde88)}
+.mascot-playing{animation:mascot-play-hop .55s ease-in-out 5 alternate!important;z-index:110!important}
+.mascot-playing>svg,.mascot-playing .fluid-mascot-art{animation:mascot-play-tilt .65s ease-in-out 4 alternate!important}
+.mascot-play-sparkle{position:fixed;z-index:115;pointer-events:none;font-size:25px;animation:mascot-sparkle 3.1s ease-out forwards}
+@keyframes mascot-play-hop{from{translate:0 0}to{translate:9px -20px}}
+@keyframes mascot-play-tilt{from{rotate:-9deg}to{rotate:9deg}}
+@keyframes mascot-sparkle{0%{opacity:0;transform:scale(.5) translateY(12px)}25%{opacity:1}85%{opacity:1}100%{opacity:0;transform:scale(1.25) translateY(-34px)}}
+@media(prefers-reduced-motion:reduce){.mascot-playing,.mascot-playing>svg,.mascot-playing .fluid-mascot-art,.mascot-play-sparkle{animation:none!important}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="dialog" aria-modal="true" aria-label="Editor neumático e hidráulico">
@@ -565,7 +577,7 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
   <path d="M57 93Q60 96 63 93" fill="none" stroke="#6f7d7f" stroke-width="2"/>
   <path class="nagi-tail" d="M92 97Q127 100 112 58Q124 80 111 106Q105 120 85 108Z" fill="#60717e" stroke="#364555" stroke-width="3"/>
   <path d="M100 103L113 102M104 88L117 87M110 73L117 71" stroke="#b2bac2" stroke-width="5"/>
- </svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
+ <g class="cute-detail"><ellipse cx="27" cy="83" rx="11" ry="7" fill="#ffb7c5" opacity=".6"/><ellipse cx="94" cy="83" rx="11" ry="7" fill="#ffb7c5" opacity=".6"/><ellipse cx="42" cy="104" rx="13" ry="9" fill="#b6bec7"/><ellipse cx="78" cy="104" rx="13" ry="9" fill="#b6bec7"/><circle cx="41" cy="62" r="2" fill="#fff"/><circle cx="77" cy="62" r="2" fill="#fff"/><path d="M47 94Q60 101 73 94" stroke="#8c9ca7" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
  <span>Nagi</span><div id="nagiSpeech" class="nagi-speech" hidden role="status"></div>
 </div>
 <section id="nagiPanel" class="companion-panel nagi-panel" hidden aria-label="Nagi platform walkthrough">
@@ -601,7 +613,7 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
   <path d="M48 52L56 60L65 52Z" fill="#f6b953" stroke="#c1812e" stroke-width="2"/>
   <path d="M36 111L30 120L48 118M70 118L83 120L76 110" stroke="#eaa744" stroke-width="5" stroke-linecap="round" fill="none"/>
   <path d="M25 16Q56 -1 87 17" stroke="#78d5e9" stroke-width="5" stroke-linecap="round" fill="none"/>
- </svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
+ <g class="cute-detail"><ellipse cx="32" cy="60" rx="9" ry="6" fill="#ffb7c5" opacity=".65"/><ellipse cx="81" cy="60" rx="9" ry="6" fill="#ffb7c5" opacity=".65"/><ellipse cx="42" cy="108" rx="14" ry="10" fill="#f9d77b"/><ellipse cx="76" cy="108" rx="14" ry="10" fill="#f9d77b"/><circle cx="45" cy="37" r="2" fill="#fff"/><circle cx="72" cy="37" r="2" fill="#fff"/><path d="M39 19Q56 11 74 19" stroke="#d1eaff" stroke-width="4" fill="none" stroke-linecap="round"/></g></svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
  <span>Joan</span><div id="joanSpeech" class="joan-speech" hidden role="status"></div>
 </div>
 <section id="joanPanel" class="companion-panel" hidden aria-label="Joan component assistant">
@@ -639,7 +651,7 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
  <path d="M61 42Q78 37 92 46Q82 62 62 55Z" fill="#f39c45" stroke="#b9762b" stroke-width="2"/>
  <path class="antonio-wing" d="M25 68Q6 56 1 79Q13 89 33 83Q48 79 43 69Z" fill="#ffe68f" stroke="#b99132" stroke-width="2"/>
  <path d="M43 112L38 120M70 113L75 120" stroke="#c87933" stroke-width="4" stroke-linecap="round"/>
- </svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div><span>Antonio</span><div id="antonioSpeech" class="antonio-speech" hidden role="status"></div>
+ <g class="cute-detail"><ellipse cx="45" cy="47" rx="11" ry="7" fill="#ffb4b6" opacity=".7"/><ellipse cx="91" cy="62" rx="9" ry="6" fill="#ffb4b6" opacity=".65"/><ellipse cx="42" cy="101" rx="13" ry="10" fill="#ffe99d"/><ellipse cx="80" cy="101" rx="13" ry="10" fill="#ffe99d"/><circle cx="56" cy="28" r="2" fill="#fff"/><circle cx="81" cy="29" r="2" fill="#fff"/><path d="M46 15Q58 7 69 16" stroke="#fff1ad" stroke-width="5" fill="none" stroke-linecap="round"/></g></svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div><span>Antonio</span><div id="antonioSpeech" class="antonio-speech" hidden role="status"></div>
 </div>
 <div id="antonioPanel" class="antonio-panel" hidden aria-label="Antonio guided learning">
  <div class="studio-drawer-top"><strong>Antonio · Guided Learning</strong><button id="closeAntonio" aria-label="Cerrar Antonio">×</button></div>
@@ -661,7 +673,7 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
   <path d="M43 60Q48 66 53 60L48 55Z" fill="#423040"/>
   <path d="M45 67Q48 70 51 67" stroke="#864a43" fill="none" stroke-width="2"/>
   <path class="aura-tail" d="M76 66Q108 76 91 32Q105 42 106 60Q118 95 71 83Z" fill="#e68139" stroke="#a95d35" stroke-width="2"/><path class="aura-tail-tip" d="M101 36Q114 56 104 66L90 60Z" fill="#fff1d7"/>
- </svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
+ <g class="cute-detail"><ellipse cx="30" cy="57" rx="9" ry="5" fill="#ffb6aa" opacity=".7"/><ellipse cx="70" cy="57" rx="9" ry="5" fill="#ffb6aa" opacity=".7"/><path d="M23 80Q33 91 43 81M57 81Q68 92 79 80" fill="none" stroke="#ffce9a" stroke-width="6" stroke-linecap="round"/><circle cx="35" cy="43" r="1.7" fill="#fff"/><circle cx="65" cy="43" r="1.7" fill="#fff"/></g></svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
  <span>Aura</span>
  <div id="auraSpeech" class="aura-speech" hidden role="status" aria-live="polite"></div>
  <div class="aura-sparkles" aria-hidden="true">✧ ✦ ✧</div>
@@ -4193,6 +4205,24 @@ function fluidMascotInit(){for(const [name,d] of Object.entries(fluidMascotInfo)
  let drag=null;el.addEventListener('pointerdown',e=>{if(e.button!==0||companionSleep.sleeping)return;const b=el.getBoundingClientRect();drag={pointer:e.pointerId,startX:e.clientX,startY:e.clientY,dx:e.clientX-b.left,dy:e.clientY-b.top,moved:false};el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation()});el.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointer)return;if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>6)drag.moved=true;if(drag.moved){el.classList.add('fluid-mascot-dragging');el.style.left=Math.max(4,Math.min(innerWidth-90,e.clientX-drag.dx))+'px';el.style.top=Math.max(4,Math.min(innerHeight-100,e.clientY-drag.dy))+'px';el.style.bottom='auto'}});el.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.pointer)return;const moved=drag.moved;drag=null;el.classList.remove('fluid-mascot-dragging');if(moved){const b=el.getBoundingClientRect();try{localStorage.setItem(key,JSON.stringify({x:b.left/innerWidth,y:b.top/innerHeight}))}catch{}fluidMascotSay(name,'¡Aquí me quedo!')}else{fluidMascotSay(name,d.tips[Math.floor(Math.random()*d.tips.length)]);E(d.button).click()}});el.addEventListener('pointercancel',()=>{drag=null;el.classList.remove('fluid-mascot-dragging')});el.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!companionSleep.sleeping){e.preventDefault();E(d.button).click()}})}
  const studio=E('fluidStudio');studio.addEventListener('pointerdown',e=>{if(!e.target.closest('#fluidCanvas')||companionSleep.sleeping)return;const selected=E('fluidMode').value;const name=selected==='hydraulic'?'leonardo':'bryan';if(Math.random()<.12)fluidMascotSay(name,fluidMascotInfo[name].tips[Math.floor(Math.random()*fluidMascotInfo[name].tips.length)])});}
 
+
+/* Gentle spontaneous mascot play: temporary visual movement only, no position overrides. */
+const mascotPlayIds=['auraFox','antonioDuck','joanPenguin','nagiRaccoon','trannyCrab','leonardoPet','bryanPet','mayPet'];
+let mascotPlayBusy=false;
+function mascotPlayMoment(){
+ if(mascotPlayBusy||companionSleep.sleeping||companionWorking||document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!E('fluidStudio').hidden||!E('petHouse').hidden||auraRuntime.dragging||antonioState.drag||joanRuntime.drag||nagiRuntime.drag||trannyState.drag)return;
+ const available=mascotPlayIds.filter(id=>{const e=E(id);return e&&!e.classList.contains('companion-working-tucked')&&!e.classList.contains('aura-hidden')&&!e.classList.contains('nagi-hidden')&&!e.classList.contains('hide-duck')});
+ if(available.length<2)return;
+ const first=available[Math.floor(Math.random()*available.length)],second=available.filter(id=>id!==first)[Math.floor(Math.random()*(available.length-1))];
+ const a=E(first),b=E(second);mascotPlayBusy=true;
+ a.classList.add('mascot-playing');b.classList.add('mascot-playing');
+ const sparkle=document.createElement('div');sparkle.className='mascot-play-sparkle';sparkle.textContent=['💗','✨','🌟','🫧','💕'][Math.floor(Math.random()*5)];sparkle.setAttribute('aria-hidden','true');
+ const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();sparkle.style.left=Math.max(12,Math.min(innerWidth-70,(ar.left+br.left)/2))+'px';sparkle.style.top=Math.max(15,Math.min(innerHeight-90,Math.min(ar.top,br.top)-28))+'px';document.body.append(sparkle);
+ setTimeout(()=>{a.classList.remove('mascot-playing');b.classList.remove('mascot-playing');sparkle.remove();mascotPlayBusy=false},3200);
+}
+function mascotPlayInit(){window.setInterval(()=>{if(Math.random()<.45)mascotPlayMoment()},22000)}
+
 /* Optional private generative model through local Ollama. No cloud token,
    remote prompt injection actions, or background data transmission. */
 const AURA_AI_ORIGIN='http://127.0.0.1:11434';
@@ -4345,7 +4375,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();fluidMascotInit();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();fluidMascotInit();companionSleepInitialize();mascotPlayInit();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
