@@ -507,8 +507,25 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
 .aura-fox.companion-sleeping>svg,.antonio-duck.companion-sleeping>svg,.joan-penguin.companion-sleeping>svg,.tranny-crab.companion-sleeping>svg{animation:none!important}
 .aura-fox>span,.antonio-duck>span,.joan-penguin>span,.nagi-raccoon>span,.tranny-crab>span,.fluid-mascot>strong{display:none!important}
 @media(prefers-reduced-motion:reduce){.aura-fox>svg,.antonio-duck>svg,.joan-penguin>svg,.tranny-crab>svg,.aura-eyes,.antonio-eyes,.joan-eyes,.tranny-eyes{animation:none!important}}
+
+/* Compact three-dot overflow: preserve all existing button IDs and handlers. */
+header{position:relative;overflow:visible!important}
+.main-overflow{position:relative;z-index:300;flex-shrink:0}
+.main-overflow>summary{list-style:none;display:grid;place-items:center;width:42px;height:40px;border-radius:13px;border:1px solid #c17cff;background:linear-gradient(145deg,#63388f,#234f74);font-size:27px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 0 18px #a86dff66}
+.main-overflow>summary::-webkit-details-marker{display:none}
+.main-overflow[open]>summary{background:linear-gradient(135deg,#ae4b9f,#4669a9)}
+.main-overflow-panel{position:absolute;right:0;top:calc(100% + 10px);width:min(680px,calc(100vw - 20px));max-height:min(76dvh,650px);overflow:auto;padding:15px;display:flex;align-items:center;align-content:flex-start;gap:9px;flex-wrap:wrap;background:linear-gradient(140deg,#241b40,#102d43);border:1px solid #a979df;border-radius:17px;box-shadow:0 20px 60px #000c,0 0 22px #9959dc35}
+.main-overflow-panel .header-more-items{z-index:320}
+.main-overflow-panel .project-controls{display:flex;flex-wrap:wrap;gap:6px}
+.main-overflow-panel button,.main-overflow-panel select{min-height:35px}
+.mascot-activity{width:226px;max-height:220px;overflow:hidden;z-index:75!important}
+.mascot-mini-scene{height:86px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(90deg,#2c425b 0 22px,#324b65 22px 44px);border-radius:9px}
+.mascot-mini-prop{font-size:25px;white-space:nowrap;animation:mascot-curious-tilt 2s ease-in-out infinite}
+.mascot-idle-stage{max-height:142px;overflow:hidden}
+@media(max-width:700px){.main-overflow-panel{right:-4px;max-height:72dvh}.mascot-activity{width:170px}.mascot-mini-prop{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.mascot-mini-prop{animation:none}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><details id="mainOverflow" class="main-overflow"><summary aria-label="Abrir menú de herramientas" title="Herramientas y apartados">⋮</summary><div class="main-overflow-panel"><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="region" aria-label="Espacio de trabajo neumático e hidráulico">
 <div class="fluid-head"><strong>💨 Fluid Studio · Neumática e hidráulica</strong><button id="fluidSave" title="Exportar diagrama JSON">↓ JSON</button><button id="fluidLoad" title="Importar diagrama JSON">↑ JSON</button><input type="file" id="fluidFile" accept=".json" hidden><button id="fluidClose" aria-label="Volver al esquema eléctrico" title="Volver al esquema eléctrico">↩ Esquema</button></div>
 <div class="fluid-companions"><button id="fluidLeonardo" title="Leonardo · Hidráulica" aria-label="Leonardo · Hidráulica">🐕</button><button id="fluidBryan" title="Bryan · Neumática" aria-label="Bryan · Neumática">🐈</button><button id="fluidMay" title="May · Autoaprendizaje" aria-label="May · Autoaprendizaje">🦁</button></div><div id="fluidLearning" class="fluid-learning" hidden aria-live="polite"></div><div class="fluid-tools"><label>Tipo de circuito <select id="fluidMode"><option value="pneumatic">💨 Neumático</option><option value="hydraulic">💧 Hidráulico</option></select></label><button id="fluidConnect" aria-pressed="true" title="Conectar puertos: clic-clic o arrastrar de un puerto a otro">🔗 Cablear: ON</button><button id="fluidCancel" title="Cancelar conexión (Esc)">✕ Cancelar</button><button id="fluidDelete">⌫ Eliminar seleccionado</button><button id="fluidClear">Vaciar</button><button id="fluidArrange">✨ Acomodar</button></div>
@@ -4317,38 +4334,52 @@ function mascotIdleBoardStop(){if(mascotIdleTimer){clearInterval(mascotIdleTimer
 function mascotIdleBoardStart(plc){
  mascotIdleBoardStop();
  if(document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- const board=document.createElement('div');board.className='mascot-idle-board';board.setAttribute('aria-label','Mascotas jugando serpientes y escaleras en espera');
+ const board=document.createElement('div');board.className='mascot-idle-board mascot-activity';board.setAttribute('aria-label','Juegos de mascotas durante la espera');
  const title=document.createElement('div');title.className='mascot-idle-title';board.append(title);
  const spectators=document.createElement('div');spectators.className='mascot-idle-spectators';board.append(spectators);
- const grid=document.createElement('div');grid.className='mascot-idle-grid';
- for(let i=24;i>=1;i--){const c=document.createElement('span');c.className='mascot-idle-cell';c.textContent=i===24?'🏆':i===7||i===18?'🪜':i===13||i===21?'🐍':String(i);c.dataset.square=String(i);grid.append(c)}
- board.append(grid);const footer=document.createElement('div');footer.className='mascot-idle-turn';board.append(footer);
+ const stage=document.createElement('div');stage.className='mascot-idle-stage';board.append(stage);
+ const footer=document.createElement('div');footer.className='mascot-idle-turn';board.append(footer);
  document.body.append(board);mascotIdleBoard=board;
- const x=Math.max(8,Math.min(innerWidth-242,plc.left.x+plc.width/2-110)),y=Math.max(70,Math.min(innerHeight-300,plc.left.y-340));board.style.left=x+'px';board.style.top=y+'px';
- let players=[],positions=[],turn=0,throws=0;
- function newRound(){
-  mascotIdleRound++;
+ // Place the mini-game below the PLC, keeping the sleeping animals unobstructed.
+ const plcBottom=plc.left.y+85;
+ board.style.left=Math.max(8,Math.min(innerWidth-240,plc.left.x+plc.width/2-110))+'px';
+ board.style.top=Math.max(65,Math.min(innerHeight-230,plcBottom+12))+'px';
+ let players=[],positions=[],turn=0,throws=0,round=0,mode='';
+ const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+ function nextRound(){
+  round++;mode=pick(['board','snack','wires','ball']);
   const pool=mascotPlayers.filter(([id])=>{const el=E(id);return el&&!el.classList.contains('aura-hidden')&&!el.classList.contains('nagi-hidden')&&!el.classList.contains('hide-duck')});
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
-  const size=Math.min(pool.length,2+Math.floor(Math.random()*Math.min(5,Math.max(1,pool.length-1))));
-  players=pool.slice(0,size);positions=players.map(()=>1);turn=0;throws=0;
-  title.textContent='🎲 Ronda '+mascotIdleRound+' · '+players.length+' jugadores';
-  spectators.replaceChildren();
-  for(const [id,emoji,name] of players){const item=document.createElement('span');item.textContent=emoji;item.title=name;item.setAttribute('aria-label',name);spectators.append(item)}
-  footer.textContent=players.map(p=>p[1]).join(' ')+' · ¡A jugar!';
-  for(const [id] of mascotPlayers){const el=E(id);if(el)el.classList.toggle('mascot-spectator',players.some(p=>p[0]===id))}
- }
- function move(){
-  if(!companionSleep.sleeping||document.hidden){mascotIdleBoardStop();return}
-  if(throws>=18||positions.some(p=>p>=24))newRound();
+  players=pool.slice(0,Math.min(pool.length,2+Math.floor(Math.random()*Math.max(1,pool.length-1))));
   if(!players.length)return;
-  const index=turn%players.length,roll=1+Math.floor(Math.random()*6);
-  let pos=Math.min(24,positions[index]+roll);if(pos===7)pos=15;if(pos===18)pos=23;if(pos===13)pos=5;if(pos===21)pos=12;positions[index]=pos;
-  for(const c of grid.children){const n=Number(c.dataset.square),here=players.filter((p,i)=>positions[i]===n);c.classList.toggle('mascot-idle-occupied',here.length>0);c.textContent=here.length?here.map(p=>p[1]).join(''):n===24?'🏆':n===7||n===18?'🪜':n===13||n===21?'🐍':String(n);c.title=here.map(p=>p[2]).join(', ')}
-  footer.textContent=players[index][1]+' '+players[index][2]+' sacó '+roll+' 🎲'+(pos===24?' ¡Ganó! 🏆':'');
+  positions=players.map(()=>1);turn=0;throws=0;
+  title.textContent=({board:'🎲 Serpientes y escaleras',snack:'🍪 Merienda de componentes',wires:'🧶 Jugando con cables',ball:'⚽ Pelota entre mascotas'})[mode];
+  spectators.replaceChildren();for(const [id,emoji,name] of players){const el=document.createElement('span');el.textContent=emoji;el.title=name;spectators.append(el)}
+  stage.replaceChildren();
+  if(mode==='board'){const grid=document.createElement('div');grid.className='mascot-idle-grid';for(let i=24;i>=1;i--){const cell=document.createElement('span');cell.className='mascot-idle-cell';cell.dataset.square=String(i);cell.textContent=i===24?'🏆':i===7||i===18?'🪜':i===13||i===21?'🐍':i;grid.append(cell)}stage.append(grid)}
+  else{const scene=document.createElement('div');scene.className='mascot-mini-scene';stage.append(scene)}
+  footer.textContent='Ronda '+round+' · '+players.map(p=>p[1]).join(' ');
+ }
+ function tick(){
+  if(!companionSleep.sleeping||document.hidden){mascotIdleBoardStop();return}
+  if(throws>=10||positions.some(p=>p>=24))nextRound();
+  if(!players.length)return;
+  const index=turn%players.length,who=players[index],roll=1+Math.floor(Math.random()*6);
+  if(mode==='board'){
+   let p=Math.min(24,positions[index]+roll);if(p===7)p=15;if(p===18)p=23;if(p===13)p=5;if(p===21)p=12;positions[index]=p;
+   for(const cell of stage.querySelectorAll('.mascot-idle-cell')){const n=Number(cell.dataset.square),here=players.filter((p,i)=>positions[i]===n);cell.classList.toggle('mascot-idle-occupied',here.length>0);cell.textContent=here.length?here.map(p=>p[1]).join(''):n===24?'🏆':n===7||n===18?'🪜':n===13||n===21?'🐍':n}
+   footer.textContent=who[1]+' 🎲 '+roll;
+  }else{
+   const scene=stage.firstElementChild;scene.replaceChildren();
+   const prop=document.createElement('span');prop.className='mascot-mini-prop';
+   if(mode==='snack'){prop.textContent=throws%2?'🔌 ➜ 😋 ➜ 🔌':'🔋 ➜ 😋 ➜ 🔋';footer.textContent=who[1]+' juega a comer y devolver componentes'}
+   if(mode==='wires'){prop.textContent=throws%2?'〰️ 🧶 ⚡ 〰️':'🔌 🧵 ➰ 🔌';footer.textContent=who[1]+' juega con líneas de colores'}
+   if(mode==='ball'){prop.textContent=players.map(p=>p[1]).join(' ⚽ ');footer.textContent='¡Pásala! '+who[1]}
+   scene.append(prop);
+  }
   turn++;throws++;
  }
- newRound();move();mascotIdleTimer=setInterval(move,2800);
+ nextRound();tick();mascotIdleTimer=setInterval(tick,2600);
 }
 
 /* Gentle spontaneous mascot play: temporary visual movement only, no position overrides. */
