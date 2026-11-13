@@ -2429,12 +2429,122 @@ function graphPinChoices(kind){const plc=graphPLC();if(!plc)return [];return kin
 function graphItem(type='NO'){
  return {id:graphId(),type,pin:graphPinChoices('input')[0]??3,source:'input',preset:4,seconds:1,onSeconds:0.4,offSeconds:0.4,resetPin:null,compareOp:'EQ',compareThreshold:1};
 }
+
+/* GRAPH ↔ ELECTRICAL synchronization uses actual model terminals, never invented PLC pins.
+   Contacts on feedback and function blocks are software-only.
+   An existing wired pin is reused, not joined to a second power source. */
+function graphConnectedToPLC(pin){
+ const plc=graphPLC();return !!plc&&wires.some(w=>(w.a===plc.id&&w.ap===pin)||(w.b===plc.id&&w.bp===pin));
+}
+function graphIsOwned(n){return !!n?.graphAutoOwned}
+function graphEnsurePower(messages){
+ const plc=graphPLC(),positive=nodes.find(n=>n.type==='railplus'),negative=nodes.find(n=>n.type==='railzero');
+ if(!plc||!positive||!negative){messages.push('Falta PLC o alguna barra de alimentación.');return null}
+ if(!graphConnectedToPLC(0)){connect(positive.id,0,plc.id,0);messages.push('PLC L+ conectado a +24V.')}
+ if(!graphConnectedToPLC(1)){connect(negative.id,0,plc.id,1);messages.push('PLC M conectado a 0V.')}
+ return {plc,positive,negative};
+}
+function graphWireOwned(a,ap,b,bp){
+ const length=wires.length;connect(a,ap,b,bp);
+ if(wires.length>length)wires[wires.length-1].graphAutoWire=true;
+}
+function graphNextPin(kind){
+ const plc=graphPLC();if(!plc)return null;
+ const available=kind==='output'?plcOutputPins(plc):plcInputPins(plc);
+ const used=new Set(graphicLadder.rungs.flatMap(r=>kind==='output'?[r.output]:r.branches.flatMap(b=>b.filter(i=>['NO','NC'].includes(i.type)&&i.source==='input').map(i=>i.pin))));
+ return available.find(pin=>!used.has(pin))??available[0];
+}
+function graphBindPhysicalItem(item,pins,index,messages,parts){
+ const plc=parts.plc;
+ if(!['NO','NC'].includes(item.type)||item.source!=='input')return;
+ const pin=Number(item.pin);
+ if(!plcInputPins(plc).includes(pin)){messages.push('Contacto '+item.id+': entrada inválida.');return}
+ let physical=find(item.physicalId);
+ if(physical&&!graphIsOwned(physical))physical=null;
+ // If a previously managed component has been remapped, only its own graph-created pin connection is moved.
+ if(physical){
+  for(const w of [...wires])if(w.graphAutoWire&&((w.a===plc.id&&w.b===physical.id)||(w.b===plc.id&&w.a===physical.id))){
+   const assigned=w.a===plc.id?w.ap:w.bp;
+   if(assigned!==pin)wires=wires.filter(x=>x.id!==w.id);
+  }
+ }
+ if(graphConnectedToPLC(pin)){
+  if(!physical){const direct=wires.find(w=>w.a===plc.id&&w.ap===pin||w.b===plc.id&&w.bp===pin);
+   const candidate=direct&&find(direct.a===plc.id?direct.b:direct.a);
+   if(candidate&&['no','nc','selector','selectorNC','limit','pressure','level','ind','opt','cap'].includes(candidate.type))item.physicalId=candidate.id;
+  }
+  messages.push('Entrada '+portName(plc,pin)+' ya cableada; se reutiliza. Comprueba que el contacto NO/NC físico coincide con Ladder.');
+  return;
+ }
+ if(!physical){
+  const type=item.type==='NC'?'nc':'no',col=index%5,row=Math.floor(index/5);
+  physical=A(type,290+col*146,130+row*105);
+  physical.graphAutoOwned=true;physical.graphAutoPin=pin;
+  physical.label=(item.type==='NC'?'NC':'NO')+' '+portName(plc,pin)+' · Ladder';
+  item.physicalId=physical.id;
+  messages.push('Creado '+physical.label+'.');
+ }
+ // A physical input is supplied through its contact and returned to its digital terminal.
+ const supplyConnected=wires.some(w=>w.a===physical.id&&w.ap===0||w.b===physical.id&&w.bp===0);
+ if(!supplyConnected)graphWireOwned(parts.positive.id,index%localPorts(parts.positive).length,physical.id,0);
+ graphWireOwned(physical.id,1,plc.id,pin);
+ physical.graphAutoPin=pin;
+ messages.push(portName(plc,pin)+' ← '+physical.label+' conectado.');
+}
+function graphBindOutput(rung,index,messages,parts){
+ const plc=parts.plc,pin=Number(rung.output);
+ if(!plcOutputPins(plc).includes(pin)){messages.push('Bobina '+rung.id+': salida inválida.');return}
+ const existing=graphConnectedToPLC(pin);
+ if(existing){
+  messages.push('Salida '+portName(plc,pin)+' ya cableada. No se modifica su carga.');
+  return;
+ }
+ const position=plcOutputPins(plc).indexOf(pin);
+ let lamp=find(rung.physicalId);
+ if(!lamp||!graphIsOwned(lamp)){
+  lamp=A('green',1020,155+(position%6)*85);
+  lamp.graphAutoOwned=true;lamp.graphAutoPin=pin;
+  lamp.label='Lamp '+portName(plc,pin)+' · Ladder';
+  rung.physicalId=lamp.id;
+ }
+ graphWireOwned(plc.id,pin,lamp.id,0);
+ graphWireOwned(parts.negative.id,(position+1)%localPorts(parts.negative).length,lamp.id,1);
+ messages.push('Bobina '+portName(plc,pin)+' → '+lamp.label+' → 0V conectada.');
+}
+function graphSyncElectrical(force=false){
+ if(simulation)return ['Entra en Edit Mode para sincronizar el esquema.'];
+ if(!force&&!E('graphicAutoWire')?.checked)return ['Auto Sync Electrical está desactivado.'];
+ const messages=[],parts=graphEnsurePower(messages);
+ if(!parts)return messages;
+ let idx=0;
+ for(const rung of graphicLadder.rungs){
+  for(const branch of rung.branches)for(const item of branch)graphBindPhysicalItem(item,null,idx++,messages,parts);
+ }
+ for(let i=0;i<graphicLadder.rungs.length;i++)graphBindOutput(graphicLadder.rungs[i],i,messages,parts);
+ const note=messages.length?messages.join(' '):'TON/TOF, comparadores y bobinas internas no requieren bornes propios.';
+ E('graphicSyncFeedback').textContent=note+' Las conexiones se muestran en el esquema y pueden editarse o deshacerse manualmente.';
+ return messages;
+}
+function graphAutoSyncAndRedraw(){
+ graphSyncElectrical(false);
+ graphicRefresh();draw();
+}
+function graphRemovePhysicalFor(item,pet){
+ const id=Number(item?.physicalId),n=find(id);
+ if(!n||!n.graphAutoOwned)return;
+ const stillUsed=graphicLadder.rungs.some(r=>Number(r.physicalId)===id||r.branches.some(b=>b.some(i=>Number(i.physicalId)===id)));
+ if(stillUsed){return}
+ if(confirm((pet?'¿Dejar que la mascota se coma también ':'¿Eliminar también ')+nameOf(n)+' y sus cables en el esquema eléctrico?')){
+  nodes=nodes.filter(x=>x.id!==id);wires=wires.filter(w=>w.a!==id&&w.b!==id);
+ }
+}
+
 function graphNewRung(){
  if(simulation){E('graphicMessage').textContent='Cambia a Edit Mode para agregar redes.';return}
  if(graphicLadder.rungs.length>=16){E('graphicMessage').textContent='Máximo 16 redes en este laboratorio.';return}
- const rung={id:graphId(),branches:[[graphItem('NO')]],output:graphPinChoices('output')[0]??18};
+ const rung={id:graphId(),branches:[[graphItem('NO')]],output:graphNextPin('output')??18};
  graphicLadder.rungs.push(rung);graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:0,index:0};
- graphicRefresh();draw();
+ graphAutoSyncAndRedraw();
 }
 function graphFindRung(id){return graphicLadder.rungs.find(r=>r.id===Number(id))}
 function graphInputValue(item,outputs,plc){
@@ -2621,18 +2731,18 @@ function graphInsert(type){
  const bi=Math.max(0,Math.min(rung.branches.length-1,sel.branch));
  const row=rung.branches[bi];
  if(row.length>=5){E('graphicMessage').textContent='Máximo 5 símbolos por rama para conservar la lectura visual.';return}
- const item=graphItem(type);
+ const item=graphItem(type);if(['NO','NC'].includes(type))item.pin=graphNextPin('input')??item.pin;
  row.splice(sel.index>=0?sel.index+1:row.length,0,item);
  graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:bi,index:row.indexOf(item)};
- graphicRefresh();draw();
+ graphAutoSyncAndRedraw();
 }
 function graphAddBranch(id){
  if(simulation)return;
  const rung=graphFindRung(id);if(!rung)return;
  if(rung.branches.length>=4){E('graphicMessage').textContent='Máximo 4 ramas en paralelo por rung.';return}
- const item=graphItem('NO');rung.branches.push([item]);
+ const item=graphItem('NO');item.pin=graphNextPin('input')??item.pin;rung.branches.push([item]);
  graphicSelection={rungId:rung.id,branch:rung.branches.length-1,index:0};
- graphicLadder.enabled=true;graphicRefresh();draw();
+ graphicLadder.enabled=true;graphAutoSyncAndRedraw();
 }
 function graphRemoveSelected(){
  if(simulation)return;
@@ -2728,7 +2838,7 @@ function graphicActivate(){
  const problems=graphicValidate();
  if(problems.length){auraSay('Encontré '+problems.length+' problemas en el Ladder gráfico.');return}
  graphicLadder.enabled=true;
- resetLadderRuntime();graphicRuntime.clear();graphicPrevOutputs.clear();draw();
+ graphSyncElectrical(false);resetLadderRuntime();graphicRuntime.clear();graphicPrevOutputs.clear();draw();
  E('graphicMessage').textContent='Graphic Ladder ACTIVE. Pulsa Simular, acciona los dispositivos y observa los contactos encenderse en tiempo real.';
  auraTailMagic('¡Listo! Tu Ladder gráfico está conectado al PLC virtual. ¡Ahora pruébalo!');
 }
@@ -2739,17 +2849,19 @@ function graphLoad(raw){
  let max=0;
  for(const row of valid){
   if(!Array.isArray(row.branches)||!Number.isFinite(Number(row.output)))continue;
-  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','TOF','CTU','CTD','CMP','BLINK'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null,compareOp:['EQ','NE','GT','GE','LT','LE'].includes(item.compareOp)?item.compareOp:'EQ',compareThreshold:Number.isFinite(Number(item.compareThreshold))?Number(item.compareThreshold):1})):[]);
+  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','TOF','CTU','CTD','CMP','BLINK'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null,compareOp:['EQ','NE','GT','GE','LT','LE'].includes(item.compareOp)?item.compareOp:'EQ',compareThreshold:Number.isFinite(Number(item.compareThreshold))?Number(item.compareThreshold):1,physicalId:Number.isInteger(item.physicalId)?item.physicalId:null})):[]);
   if(!branches.length)continue;
   for(const branch of branches)for(const item of branch)max=Math.max(max,item.id);
   const rid=Number(row.id)||0;max=Math.max(max,rid);
-  graphicLadder.rungs.push({id:rid,output:Number(row.output),branches});
+  graphicLadder.rungs.push({id:rid,output:Number(row.output),branches,physicalId:Number.isInteger(row.physicalId)?row.physicalId:null});
  }
  graphicLadder.nextId=Math.max(max+1,Number(data.nextId)||1);
  graphicSelection=null;graphicRuntime.clear();graphicPrevOutputs.clear();graphicRefresh();
 }
 function graphInit(){
  E('graphicNew').onclick=graphNewRung;
+ E('graphicSyncNow').onclick=()=>{graphSyncElectrical(true);draw();graphicRefresh()};
+ E('graphicAutoWire').onchange=()=>{if(E('graphicAutoWire').checked){graphSyncElectrical(true);draw()}};
  for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicTon','TON'],['graphicTof','TOF'],['graphicCtu','CTU'],['graphicCtd','CTD'],['graphicCmp','CMP'],['graphicBlink','BLINK'],['graphicCoil','COIL']]){
   E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicTon','graphicTof','graphicCtu','graphicCtd','graphicCmp','graphicBlink','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
  }
