@@ -310,8 +310,8 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 .companion-pillow{position:absolute;left:8px;bottom:8px;width:74px;height:31px;border-radius:45%;background:#fff5e7;border:2px solid #e5d5cf;box-shadow:inset -6px -2px 10px #e8d3d0}
 .companion-blanket{position:absolute;left:10px;top:25px;width:73px;height:35px;border-radius:15px 15px 24px 24px;background:repeating-linear-gradient(125deg,#9bd5eb 0px,#9bd5eb 14px,#77b8dc 14px,#77b8dc 17px);border:2px solid #4f90be;box-shadow:0 5px 8px #001f3055}
 .companion-zzz{position:absolute;left:45px;top:-30px;color:#a7eaff;font:bold 20px/1.1 Arial,sans-serif;text-shadow:0 1px 4px #214b6e;animation:companion-zzz-float 2.1s ease-in-out infinite alternate}
-.companion-sleeping .aura-eyes,.companion-sleeping .antonio-eyes,.companion-sleeping .joan-eyes,.companion-sleeping .nagi-eyes{opacity:0}
-.companion-sleeping .aura-eyelids,.companion-sleeping .antonio-eyelids,.companion-sleeping .joan-eyelids,.companion-sleeping .nagi-eyelids{opacity:1}
+.companion-sleeping .aura-eyes,.companion-sleeping .antonio-eyes,.companion-sleeping .joan-eyes,.companion-sleeping .nagi-eyes,.companion-sleeping .tranny-eyes{opacity:0}
+.companion-sleeping .aura-eyelids,.companion-sleeping .antonio-eyelids,.companion-sleeping .joan-eyelids,.companion-sleeping .nagi-eyelids,.companion-sleeping .tranny-eyelids{opacity:1}
 .companion-sleeping .aura-tail,.companion-sleeping .aura-tail-tip,.companion-sleeping .antonio-wing,.companion-sleeping .joan-left-wing,.companion-sleeping .joan-right-wing,.companion-sleeping .nagi-tail{animation:none!important}
 @keyframes companion-zzz-float{from{opacity:.55;transform:translateY(2px) scale(.94)}to{opacity:1;transform:translateY(-12px) scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.companion-sleeping .companion-zzz{animation:none}.joan-penguin.companion-sleeping,.antonio-duck.companion-sleeping,.aura-fox.companion-sleeping{transition:none}}
@@ -460,7 +460,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 <path d="M29 15Q34 9 40 15M77 15Q83 9 89 15" class="tranny-eyelids" fill="none" stroke="#cf785b" stroke-width="4"/>
 <path d="M48 68Q59 80 72 68" fill="none" stroke="#9f574d" stroke-width="3" stroke-linecap="round"/>
 <path d="M28 87L13 99M44 93L35 105M74 93L83 105M90 87L106 99" stroke="#c66c59" stroke-width="4" stroke-linecap="round"/>
-</svg><span>Tranny</span><div id="trannySpeech" class="tranny-speech" hidden role="status"></div></div>
+</svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div><span>Tranny</span><div id="trannySpeech" class="tranny-speech" hidden role="status"></div></div>
 <section id="trannyPanel" class="companion-panel tranny-panel" hidden aria-label="Tranny automatic arrangement">
 <div class="studio-drawer-top"><strong>Tranny · Tidy Workspace</strong><button id="closeTranny" title="Cerrar">×</button></div>
 <p class="studio-lead">Ordeno visualmente tus componentes sin cambiar su lógica. Antes de reorganizar el esquema, guardo una posición anterior para que puedas recuperarla.</p>
@@ -3823,12 +3823,12 @@ function companionSleepNow(){
  if(!companionCanSleep())return;
  const plc=companionPLCSpot();if(!plc)return;
  const details=[
-  ['auraFox','Aura'],['antonioDuck','Antonio'],['joanPenguin','Joan'],['nagiRaccoon','Nagi']
+  ['auraFox','Aura'],['antonioDuck','Antonio'],['joanPenguin','Joan'],['nagiRaccoon','Nagi'],['trannyCrab','Tranny']
  ];
  let count=0;
  for(const [id] of details){
   const el=E(id);if(!el||el.classList.contains('aura-hidden')||el.classList.contains('nagi-hidden')||el.classList.contains('hide-duck'))continue;
-  companionSleep.positions.set(id,{left:el.style.left||'',right:el.style.right||'',top:el.style.top||'',bottom:el.style.bottom||''});
+  companionSleep.positions.set(id,{left:el.style.left||'',right:el.style.right||'',top:el.style.top||'',bottom:el.style.bottom||'',wasTucked:el.classList.contains('companion-working-tucked')});el.classList.remove('companion-working-tucked');
   const x=plc.left.x+(count+.25)*Math.min(130,plc.width/3.8);
   const y=plc.left.y-53;
   el.style.left=Math.max(0,Math.min(window.innerWidth-90,x))+'px';el.style.top=Math.max(2,Math.min(window.innerHeight-110,y))+'px';el.style.right='auto';el.style.bottom='auto';
@@ -3837,14 +3837,14 @@ function companionSleepNow(){
  }
  if(!count)return;
  companionSleep.sleeping=true;
- E('auraSpeech').hidden=true;E('antonioSpeech').hidden=true;E('joanSpeech').hidden=true;E('nagiSpeech').hidden=true;
+ E('auraSpeech').hidden=true;E('antonioSpeech').hidden=true;E('joanSpeech').hidden=true;E('nagiSpeech').hidden=true;E('trannySpeech').hidden=true;
 }
 function companionWake(){
  if(!companionSleep.sleeping)return;
  for(const [id,p] of companionSleep.positions){
   const el=E(id);if(!el)continue;
   el.style.left=p.left;el.style.right=p.right;el.style.top=p.top;el.style.bottom=p.bottom;
-  el.classList.remove('companion-sleeping');
+  el.classList.remove('companion-sleeping');if(p.wasTucked)el.classList.add('companion-working-tucked');
  }
  companionSleep.positions.clear();companionSleep.sleeping=false;
 }
@@ -4034,6 +4034,52 @@ function trannyInit(){
  E('trannyCrab').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();trannyOpen()}};
 }
 
+
+const companionDock={
+ auraFox:['showTutor','tutorPanel'],
+ antonioDuck:['showAntonio','antonioPanel'],
+ joanPenguin:['showJoan','joanPanel'],
+ nagiRaccoon:['showNagi','nagiPanel'],
+ trannyCrab:['showTranny','trannyPanel']
+};
+let companionWorking=false;
+function companionTuckWorking(){
+ companionWorking=true;
+ if(companionSleep.sleeping)companionWake();
+ for(const [id,[button]] of Object.entries(companionDock)){
+  const mascot=E(id);mascot.classList.add('companion-working-tucked');
+  E(button).classList.add('companion-summon','companion-available');
+ }
+}
+function companionSummon(id){
+ const member=E(id);
+ if(!member)return;
+ companionWorking=false;member.classList.remove('companion-working-tucked');
+ if(id==='auraFox')auraVisible(true,'manual');
+ if(id==='nagiRaccoon'){nagiRuntime.hidden=false;member.classList.remove('nagi-hidden')}
+ if(id==='antonioDuck')member.classList.remove('hide-duck');
+ member.classList.remove('companion-sleeping');
+ companionSleep.lastActivity=Date.now();
+}
+function companionDockInitialize(){
+ for(const [id,[button,panel]] of Object.entries(companionDock)){
+  E(button).classList.add('companion-summon','companion-available');
+  E(button).onclick=()=>{
+   companionSummon(id);
+   if(panel==='tutorPanel')openTutor();
+   else if(panel==='antonioPanel')antonioOpen();
+   else if(panel==='joanPanel')joanOpen();
+   else if(panel==='nagiPanel')nagiOpen();
+   else trannyOpen();
+  };
+ }
+ canvas.addEventListener('pointerdown',e=>{if(e.button===0)companionTuckWorking()},{passive:true});
+ const graphic=E('graphicLadderView');
+ graphic.addEventListener('pointerdown',()=>companionTuckWorking(),{passive:true});
+ E('sceneCanvas').addEventListener('pointerdown',()=>companionTuckWorking(),{passive:true});
+ // Initial mascots are visible; they retire only when the user begins hands-on work.
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -4090,7 +4136,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
