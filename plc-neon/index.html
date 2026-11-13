@@ -453,6 +453,22 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
 #fluidStudio .fluid-foot{flex-shrink:0}
 #openFluid[aria-pressed="true"]{border-color:#f4a3ff!important;box-shadow:0 0 15px #bb67f455!important}
 @media(max-width:700px){#fluidStudio:not([hidden]){height:calc(100dvh - 55px);min-height:470px}#fluidStudio .fluid-body{flex-direction:column}#fluidStudio .fluid-palette{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;min-height:65px;max-height:90px;width:100%}#fluidStudio .fluid-palette button{white-space:nowrap}}
+
+/* Bryan is the most playful: extra tail movement, curious tilts and kitten hops. */
+#bryanPet .fluid-pet-tail{animation:fluid-tail-wag .65s ease-in-out infinite alternate}
+#bryanPet:not(.companion-sleeping):not(.companion-working-tucked) .fluid-mascot-art{animation:bryan-curious 4s ease-in-out infinite}
+#bryanPet.mascot-chasing,#nagiRaccoon.mascot-chasing{animation:mascot-play-hop .4s ease-in-out 7 alternate!important}
+@keyframes bryan-curious{0%,65%,100%{transform:rotate(0)}75%{transform:rotate(-10deg)}85%{transform:rotate(7deg)}}
+.mascot-idle-board{position:fixed;z-index:95;width:226px;padding:9px;background:linear-gradient(135deg,#38254c,#193e54);border:2px solid #ff9fe2;border-radius:15px;box-shadow:0 8px 28px #000a,0 0 16px #ff88de45;pointer-events:none}
+.mascot-idle-title{font:700 11px/1.4 Arial;text-align:center;color:#fff5fd;margin-bottom:6px}
+.mascot-idle-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+.mascot-idle-cell{aspect-ratio:1;display:grid;place-items:center;border-radius:5px;background:#31536b;font:700 10px Arial;color:#d7f7ff;border:1px solid #ffffff25}
+.mascot-idle-cell:nth-child(odd){background:#5c3d70}
+.mascot-idle-bryan{background:#ffb467!important;color:#1b2233}.mascot-idle-bryan:after{content:'🐈';font-size:13px}
+.mascot-idle-nagi{background:#91d9e4!important;color:#1b2233}.mascot-idle-nagi:after{content:'🦝';font-size:13px}
+.mascot-idle-turn{text-align:center;font:700 11px Arial;margin-top:7px;color:#ffe9ac}
+@media(max-width:650px){.mascot-idle-board{width:172px;padding:6px}.mascot-idle-cell{font-size:8px}}
+@media(prefers-reduced-motion:reduce){#bryanPet .fluid-pet-tail,#bryanPet .fluid-mascot-art{animation:none!important}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="region" aria-label="Espacio de trabajo neumático e hidráulico">
@@ -3950,19 +3966,21 @@ function companionSleepNow(force=false){
  for(const [id] of details){
   const el=E(id);if(!el||el.classList.contains('aura-hidden')||el.classList.contains('nagi-hidden')||el.classList.contains('hide-duck'))continue;
   companionSleep.positions.set(id,{left:el.style.left||'',right:el.style.right||'',top:el.style.top||'',bottom:el.style.bottom||'',wasTucked:el.classList.contains('companion-working-tucked')});el.classList.remove('companion-working-tucked');
-  const x=plc.left.x+(count%4)*Math.min(115,plc.width/4);
-  const y=plc.left.y-62-Math.floor(count/4)*66;
+  const side=count%2;const slot=Math.floor(count/2);const x=side===0?plc.left.x-32+slot*19:plc.left.x+plc.width-74-slot*19;
+  const y=plc.left.y-76-Math.floor(slot/2)*64;
   el.style.left=Math.max(0,Math.min(window.innerWidth-90,x))+'px';el.style.top=Math.max(2,Math.min(window.innerHeight-110,y))+'px';el.style.right='auto';el.style.bottom='auto';
   el.classList.add('companion-sleeping');
   count++;
  }
  if(!count)return;
  companionSleep.sleeping=true;
+ mascotIdleBoardStart(plc);
  E('auraSpeech').hidden=true;E('antonioSpeech').hidden=true;E('joanSpeech').hidden=true;E('nagiSpeech').hidden=true;E('trannySpeech').hidden=true;
  for(const id of ['leonardoPet','bryanPet','mayPet'])E(id).querySelector('.fluid-mascot-bubble').hidden=true;
 }
 function companionWake(){
  if(!companionSleep.sleeping)return;
+ mascotIdleBoardStop();
  for(const [id,p] of companionSleep.positions){
   const el=E(id);if(!el)continue;
   el.style.left=p.left;el.style.right=p.right;el.style.top=p.top;el.style.bottom=p.bottom;
@@ -4221,6 +4239,27 @@ function fluidMascotInit(){for(const [name,d] of Object.entries(fluidMascotInfo)
  const studio=E('fluidStudio');studio.addEventListener('pointerdown',e=>{if(!e.target.closest('#fluidCanvas')||companionSleep.sleeping)return;const selected=E('fluidMode').value;const name=selected==='hydraulic'?'leonardo':'bryan';if(Math.random()<.12)fluidMascotSay(name,fluidMascotInfo[name].tips[Math.floor(Math.random()*fluidMascotInfo[name].tips.length)])});}
 
 
+
+/* Idle-time tabletop: decorative snakes and ladders with automatic dice turns.
+   This is intentionally separate from the PLC's real input/output state. */
+let mascotIdleBoard=null,mascotIdleTimer=null,mascotIdleStep=0;
+function mascotIdleBoardStop(){if(mascotIdleTimer){clearInterval(mascotIdleTimer);mascotIdleTimer=null}if(mascotIdleBoard){mascotIdleBoard.remove();mascotIdleBoard=null}}
+function mascotIdleBoardStart(plc){
+ mascotIdleBoardStop();
+ if(document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const board=document.createElement('div');board.className='mascot-idle-board';board.setAttribute('aria-label','Mascotas jugando serpientes y escaleras en espera');
+ const title=document.createElement('div');title.className='mascot-idle-title';title.textContent='🐈 Bryan + 🦝 Nagi · Serpientes y escaleras 🎲';board.append(title);
+ const grid=document.createElement('div');grid.className='mascot-idle-grid';
+ for(let i=24;i>=1;i--){const c=document.createElement('span');c.className='mascot-idle-cell';c.textContent=i===24?'🏆':i===7||i===18?'🪜':i===13||i===21?'🐍':String(i);c.dataset.square=String(i);grid.append(c)}
+ board.append(grid);const footer=document.createElement('div');footer.className='mascot-idle-turn';footer.textContent='Bryan lanza el dado…';board.append(footer);
+ document.body.append(board);mascotIdleBoard=board;
+ const x=Math.max(8,Math.min(innerWidth-242,plc.left.x+plc.width/2-110)),y=Math.max(70,Math.min(innerHeight-290,plc.left.y-335));
+ board.style.left=x+'px';board.style.top=y+'px';
+ let a=1,b=1,turn=0;
+ const move=()=>{if(!companionSleep.sleeping||document.hidden){mascotIdleBoardStop();return}const roll=1+Math.floor(Math.random()*6);if(turn%2===0){a=Math.min(24,a+roll);if(a===7)a=15;if(a===21)a=12}else{b=Math.min(24,b+roll);if(b===18)b=23;if(b===13)b=5}for(const c of grid.children){const n=Number(c.dataset.square);c.classList.toggle('mascot-idle-bryan',n===a);c.classList.toggle('mascot-idle-nagi',n===b);c.title=(n===a?'🐈 Bryan ':'')+(n===b?'🦝 Nagi':'')}footer.textContent=(turn%2===0?'🐈 Bryan':'🦝 Nagi')+' sacó '+roll+' 🎲';turn++;if(a===24||b===24){a=1;b=1;footer.textContent+=' · ¡Partida terminada! 💕'}};
+ move();mascotIdleTimer=setInterval(move,2800);
+}
+
 /* Gentle spontaneous mascot play: temporary visual movement only, no position overrides. */
 const mascotPlayIds=['auraFox','antonioDuck','joanPenguin','nagiRaccoon','trannyCrab','leonardoPet','bryanPet','mayPet'];
 let mascotPlayBusy=false;
@@ -4229,14 +4268,15 @@ function mascotPlayMoment(){
  if(!E('petHouse').hidden||auraRuntime.dragging||antonioState.drag||joanRuntime.drag||nagiRuntime.drag||trannyState.drag)return;
  const available=mascotPlayIds.filter(id=>{const e=E(id);return e&&!e.classList.contains('companion-working-tucked')&&!e.classList.contains('aura-hidden')&&!e.classList.contains('nagi-hidden')&&!e.classList.contains('hide-duck')});
  if(available.length<2)return;
- const first=available[Math.floor(Math.random()*available.length)],second=available.filter(id=>id!==first)[Math.floor(Math.random()*(available.length-1))];
+ const pair=available.includes('bryanPet')&&available.includes('nagiRaccoon')&&Math.random()<.8?['bryanPet','nagiRaccoon']:null;
+ const first=pair?pair[0]:available[Math.floor(Math.random()*available.length)],second=pair?pair[1]:available.filter(id=>id!==first)[Math.floor(Math.random()*(available.length-1))];
  const a=E(first),b=E(second);mascotPlayBusy=true;
- a.classList.add('mascot-playing');b.classList.add('mascot-playing');
+ a.classList.add('mascot-playing');b.classList.add('mascot-playing');if(first==='bryanPet'||second==='bryanPet'){a.classList.add('mascot-chasing');b.classList.add('mascot-chasing')}
  const sparkle=document.createElement('div');sparkle.className='mascot-play-sparkle';sparkle.textContent=['💗','✨','🌟','🫧','💕'][Math.floor(Math.random()*5)];sparkle.setAttribute('aria-hidden','true');
  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();sparkle.style.left=Math.max(12,Math.min(innerWidth-70,(ar.left+br.left)/2))+'px';sparkle.style.top=Math.max(15,Math.min(innerHeight-90,Math.min(ar.top,br.top)-28))+'px';document.body.append(sparkle);
- setTimeout(()=>{a.classList.remove('mascot-playing');b.classList.remove('mascot-playing');sparkle.remove();mascotPlayBusy=false},3200);
+ setTimeout(()=>{a.classList.remove('mascot-playing','mascot-chasing');b.classList.remove('mascot-playing','mascot-chasing');sparkle.remove();mascotPlayBusy=false},3200);
 }
-function mascotPlayInit(){window.setInterval(()=>{if(Math.random()<.45)mascotPlayMoment()},22000)}
+function mascotPlayInit(){window.setInterval(()=>{if(Math.random()<.8)mascotPlayMoment()},14000)}
 
 /* Optional private generative model through local Ollama. No cloud token,
    remote prompt injection actions, or background data transmission. */
