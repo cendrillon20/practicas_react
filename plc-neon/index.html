@@ -483,6 +483,15 @@ button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline
 @keyframes mascot-spectator-peek{to{transform:translateY(-5px) rotate(8deg)}}
 .mascot-spectator:not(.companion-sleeping){animation:mascot-play-hop .8s ease-in-out 2 alternate}
 @media(prefers-reduced-motion:reduce){.mascot-idle-spectators span,.mascot-spectator{animation:none!important}}
+
+/* Match the perceived illustration size, not just the outer mascot container. */
+#leonardoPet .fluid-mascot-art,#bryanPet .fluid-mascot-art,#mayPet .fluid-mascot-art{width:58px!important;height:58px!important;display:grid;place-items:center}
+#leonardoPet .fluid-mascot-art svg,#bryanPet .fluid-mascot-art svg,#mayPet .fluid-mascot-art svg{width:58px!important;height:58px!important;max-width:58px!important;max-height:58px!important}
+#leonardoPet,#bryanPet,#mayPet{width:78px!important;min-width:78px!important;max-width:78px!important}
+.companion-sleeping{touch-action:none!important;cursor:grab!important;pointer-events:auto!important}
+.companion-sleep-dragging{cursor:grabbing!important;transition:none!important;animation:none!important}
+.fluid-mascot.companion-sleeping{pointer-events:auto!important}
+@media(max-width:700px){#leonardoPet .fluid-mascot-art,#bryanPet .fluid-mascot-art,#mayPet .fluid-mascot-art,#leonardoPet .fluid-mascot-art svg,#bryanPet .fluid-mascot-art svg,#mayPet .fluid-mascot-art svg{width:49px!important;height:49px!important}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="region" aria-label="Espacio de trabajo neumático e hidráulico">
@@ -4006,6 +4015,34 @@ function companionRegisterActivity(){
  companionSleep.lastActivity=Date.now();
  // Las mascotas solo se despiertan con la campana.
 }
+
+/* Shared sleeping drag behavior: all eight companions remain asleep and movable. */
+function companionSleepingDragInit(){
+ const ids=['auraFox','antonioDuck','joanPenguin','nagiRaccoon','trannyCrab','leonardoPet','bryanPet','mayPet'];
+ let active=null;
+ for(const id of ids){
+  const el=E(id);if(!el)continue;
+  el.addEventListener('pointerdown',ev=>{
+   if(!companionSleep.sleeping||!el.classList.contains('companion-sleeping')||ev.button!==0)return;
+   const r=el.getBoundingClientRect();active={id,pointer:ev.pointerId,dx:ev.clientX-r.left,dy:ev.clientY-r.top};
+   el.setPointerCapture(ev.pointerId);el.classList.add('companion-sleep-dragging');ev.preventDefault();ev.stopImmediatePropagation();
+  },true);
+  el.addEventListener('pointermove',ev=>{
+   if(!active||active.id!==id||active.pointer!==ev.pointerId)return;
+   el.style.left=Math.max(2,Math.min(innerWidth-el.offsetWidth-2,ev.clientX-active.dx))+'px';
+   el.style.top=Math.max(2,Math.min(innerHeight-el.offsetHeight-2,ev.clientY-active.dy))+'px';
+   el.style.right='auto';el.style.bottom='auto';ev.preventDefault();ev.stopImmediatePropagation();
+  },true);
+  const finish=ev=>{
+   if(!active||active.id!==id||active.pointer!==ev.pointerId)return;
+   const saved=companionSleep.positions.get(id);
+   if(saved){saved.left=el.style.left;saved.top=el.style.top;saved.right='auto';saved.bottom='auto'}
+   active=null;el.classList.remove('companion-sleep-dragging');ev.preventDefault();ev.stopImmediatePropagation();
+  };
+  el.addEventListener('pointerup',finish,true);el.addEventListener('pointercancel',finish,true);
+  el.addEventListener('click',ev=>{if(companionSleep.sleeping){ev.preventDefault();ev.stopImmediatePropagation()}},true);
+ }
+}
 function companionSleepInitialize(){
  E('sleepPillow').onclick=()=>{companionSleepNow(true);E('sleepPillow').classList.add('pillow-pulse');setTimeout(()=>E('sleepPillow').classList.remove('pillow-pulse'),650)};
  E('wakeBell').onclick=()=>{companionWake();companionSleep.lastActivity=Date.now();E('wakeBell').classList.add('bell-ringing');setTimeout(()=>E('wakeBell').classList.remove('bell-ringing'),700)};
@@ -4466,7 +4503,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();fluidMascotInit();companionSleepInitialize();mascotPlayInit();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();fluidMascotInit();companionSleepingDragInit();companionSleepInitialize();mascotPlayInit();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
