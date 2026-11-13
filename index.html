@@ -3015,6 +3015,155 @@ function taskInterpretAndApply(){
 E('interpretGoal').onclick=taskInterpretAndApply;
 E('goalCheck').onclick=()=>verifyTask(true);
 
+
+const joanInfo={
+ no:['NO Push Button','Pulsador normalmente abierto','Cierra el contacto mientras se presiona. Úsalo para una señal Start o Marcha; conecta sus dos bornes en serie con la entrada correspondiente del PLC.'],
+ nc:['NC Push Button','Pulsador normalmente cerrado','Conduce en reposo y se abre al presionar. Es habitual para una señal Stop, verificando que el PLC interpreta el nivel lógico correcto.'],
+ emergency:['E-Stop','Parada de emergencia','Elemento didáctico de contacto NC. En maquinaria real debe conectarse a un circuito de seguridad conforme al análisis de riesgos, no solo al PLC estándar.'],
+ selector:['Selector Switch','Selector de posiciones','Mantiene el estado seleccionado. Útil para modos Manual/Auto o Enable, con condiciones de seguridad independientes.'],
+ selectorNC:['NC Selector','Selector normalmente cerrado','Contacto que se abre cuando cambias el selector. Comprueba su posición en el monitor digital.'],
+ selector3:['Three-position Selector','Selector de tres posiciones','Permite practicar tres estados. El comportamiento simplificado no equivale a todos los modelos de conmutadores.'],
+ limit:['Limit Switch','Final de carrera','Detecta una posición mecánica, como una puerta o un cilindro al final del recorrido.'],
+ rollerNC:['NC Roller Limit Switch','Final de carrera de rodillo NC','Sensor mecánico normalmente cerrado; comprueba la continuidad en reposo y actuado.'],
+ rollerLever:['Lever Limit Switch','Final de carrera de palanca','Se acciona cuando una pieza desplaza la palanca. Útil como posición de referencia.'],
+ ind:['PNP Inductive Sensor','Sensor inductivo PNP','Detecta objetos metálicos compatibles. En un sensor típico de 3 hilos: BN a +V, BU a 0 V y BK a entrada digital; comprueba siempre el datasheet.'],
+ opt:['Photoelectric Sensor','Sensor fotoeléctrico','Detecta presencia o paso mediante luz. Adecuado para contar piezas en una cinta.'],
+ cap:['Capacitive Sensor','Sensor capacitivo','Puede detectar sólidos o líquidos según su ajuste; requiere calibración del umbral y entorno.'],
+ pressure:['Pressure Switch','Presostato','Convierte un umbral de presión en una señal discreta; no mide valores analógicos completos.'],
+ level:['Level Switch','Interruptor de nivel','Indica si el nivel alcanza un punto determinado; útil en depósitos y tanques.'],
+ green:['Green Indicator Lamp','Piloto verde','Señal visual para marcha o condición normal. Su circuito requiere alimentación y retorno correctos.'],
+ red:['Red Indicator Lamp','Piloto rojo','Señal visual para alarma, falla o parada; define su significado antes de usarlo.'],
+ amber:['Amber Indicator Lamp','Piloto ámbar','Indicación de advertencia o atención.'],
+ blue:['Blue Indicator Lamp','Piloto azul','Indicador de una condición de proceso definida por el diseñador.'],
+ white:['White Indicator Lamp','Piloto blanco','Indicación general de habilitación o disponibilidad.'],
+ relay:['Relay Coil','Bobina de relé','Permite gobernar contactos de potencia o mando mediante su bobina. Una bobina real puede requerir supresión de transitorios.'],
+ solenoid:['Solenoid Valve Coil','Bobina de electroválvula','Conmuta una válvula neumática/hidráulica. Comprueba tensión, corriente, diodo/varistor de supresión y salida compatible.'],
+ motorLoad:['Motor Contactor Coil','Bobina de contactor','Gobierna un contactor externo; la salida PLC no debe alimentar directamente un motor de potencia.'],
+ buzzer:['Buzzer','Zumbador','Aviso sonoro discreto para estados o alarmas.'],
+ fuse:['Fuse','Fusible','Protección eléctrica contra sobrecorriente. En esta edición se representa simbólicamente: no calcula curva de fusión ni energía de fallo.'],
+ breaker:['Circuit Breaker','Interruptor automático','Dispositivo de maniobra y protección. La simulación no emula disparos térmicos o magnéticos reales.'],
+ junction:['Junction Node','Punto de conexión','Une eléctricamente cables en un mismo nodo. Úsalo para crear ramificaciones sin depender de un único cable.'],
+ timer:['TON Timer','Temporizador interno','No se cablea físicamente; se programa en Ladder para producir una señal después de PT.'],
+ tofBlock:['TOF Timer','Temporizador de desconexión','Instrucción interna que retrasa el apagado. El bloque del esquema es visual; la lógica se coloca en Ladder.'],
+ ctuBlock:['CTU Counter','Contador ascendente','Cuenta flancos de señal. El contador de programa puede reiniciarse mediante una entrada asignada.'],
+ ctdBlock:['CTD Counter','Contador descendente','Disminuye una cuenta hasta el límite predefinido.'],
+ cmpBlock:['Comparator','Comparador','Evalúa EQ, NE, GT, GE, LT o LE sobre valores definidos.'],
+ railplus:['Positive 24 V Rail','Barra positiva','Distribuye +24 V de control. Verifica la corriente requerida y evita cortocircuitos.'],
+ railzero:['0 V Rail','Retorno 0 V','Referencia de la fuente de control, que no sustituye automáticamente PE.'],
+ plc:['PLC Controller','Controlador lógico programable','Lee las entradas, ejecuta un programa y gobierna salidas. Usa Virtual PLC si aún no conoces el modelo físico.']
+};
+const joanRuntime={selected:'no',drag:null,sitting:false,timer:null,quiz:null,score:0};
+function joanSay(text){
+ const bubble=E('joanSpeech');bubble.textContent=String(text).slice(0,320);bubble.hidden=false;
+ clearTimeout(joanRuntime.timer);joanRuntime.timer=setTimeout(()=>bubble.hidden=true,5500);
+}
+function joanOpen(){E('joanPanel').hidden=false;joanSearchItems();joanSay('¡Hola! Soy Joan. Dime qué componente necesitas y te explico cómo utilizarlo.')}
+function joanPlace(type){
+ if(simulation){joanSay('Para colocar componentes necesitas Edit Mode.');return}
+ if(!types[type]||['railplus','railzero','plc'].includes(type)){joanSay('Este elemento de base ya está en el esquema.');return}
+ if(type==='junction'){placingJunction=true;joanSay('Haz clic en el tablero donde quieras colocar el Junction Node.');return}
+ const n=A(type,440+Math.random()*280,220+Math.random()*180);
+ chosen={kind:'node',id:n.id};multi.clear();draw();refreshInspector();
+ joanSay('¡Aquí tienes '+(joanInfo[type]?.[0]||types[type][0])+'! Ahora conecta sus bornes y revisa la alimentación.');
+}
+function joanExplain(type){
+ joanRuntime.selected=type;
+ const info=joanInfo[type]||[types[type]?.[0]||type,'Component',types[type]?.[1]||''];
+ E('joanExplanation').textContent=info[0]+' — '+info[1]+'\n\n'+info[2]+'\n\nConsejo: selecciona el componente en el circuito para conocer dónde colocar sus cables.';
+ joanSay('Te explico '+info[0]+'.');
+}
+function joanSearchItems(){
+ const query=String(E('joanSearch').value||'').toLowerCase().trim(),root=E('joanRecommendations');
+ root.replaceChildren();
+ const keys=Object.keys(joanInfo).filter(k=>types[k]).filter(k=>!query||[k,...joanInfo[k],types[k][0]].join(' ').toLowerCase().includes(query)).slice(0,18);
+ for(const key of keys){
+  const row=document.createElement('div');row.className='joan-recommendation';
+  const name=document.createElement('span');name.className='joan-name';name.textContent=joanInfo[key][0];
+  name.style.cursor='pointer';name.onclick=()=>joanExplain(key);
+  const explain=document.createElement('button');explain.textContent='Info';explain.onclick=()=>joanExplain(key);
+  const offer=document.createElement('button');offer.className='joan-offer';offer.textContent='＋ Give';offer.disabled=simulation;offer.onclick=()=>joanPlace(key);
+  row.append(name,explain,offer);root.appendChild(row);
+ }
+ if(!keys.length)root.textContent='No encontré ese nombre. Prueba: sensor, motor, contact, lamp, relay, timer.';
+}
+function joanRecommendForGoal(){
+ const task=normalizedTask(E('ladderGoal').value);
+ let selection=['no','green'];
+ if(/cinta|banda|caja|pieza|transport/.test(task))selection=['opt','motorLoad','nc','green'];
+ else if(/neumat|cilindro|valvula/.test(task))selection=['solenoid','limit','no','nc'];
+ else if(/temperatur|presion|nivel/.test(task))selection=['pressure','level','green'];
+ else if(/paro|emergenc/.test(task))selection=['emergency','nc','red'];
+ else if(/temporiz|segund|blink|parpad/.test(task))selection=['no','green','timer'];
+ else if(/motor|arranqu|marcha/.test(task))selection=['no','nc','motorLoad','relay'];
+ E('joanSearch').value='';joanSearchItems();
+ joanSay('Para esa tarea te recomiendo: '+selection.map(x=>joanInfo[x]?.[0]).join(', ')+'.');
+ E('joanExplanation').textContent='COMPONENTS FOR YOUR TASK\n'+selection.map(x=>'• '+joanInfo[x][0]+': '+joanInfo[x][2]).join('\n\n');
+}
+function joanQuizStart(){
+ const keys=['no','nc','ind','opt','relay','fuse','solenoid','timer','junction','motorLoad','pressure'];
+ const answer=keys[Math.floor(Math.random()*keys.length)],options=[answer];
+ while(options.length<3){const k=keys[Math.floor(Math.random()*keys.length)];if(!options.includes(k))options.push(k)}
+ options.sort(()=>Math.random()-.5);
+ joanRuntime.quiz=answer;
+ const area=E('joanQuizArea');area.hidden=false;area.replaceChildren();
+ const text=document.createElement('p');text.textContent='¿Qué componente corresponde a esta explicación?\n'+joanInfo[answer][2];
+ area.appendChild(text);
+ for(const key of options){
+  const button=document.createElement('button');button.textContent=joanInfo[key][0];
+  button.onclick=()=>{
+   if(key===answer){joanRuntime.score++;area.textContent='¡Correcto! '+joanInfo[answer][0]+'. Puntos: '+joanRuntime.score;joanSay('¡Bravo! Acertaste.')}
+   else{area.textContent='Casi. La respuesta era '+joanInfo[answer][0]+'. '+joanInfo[answer][2];joanSay('¡Cuac! Intenta otra vez con calma.')}
+   const repeat=document.createElement('button');repeat.textContent='Next Question · Otra pregunta';repeat.onclick=joanQuizStart;area.appendChild(repeat);
+  };
+  area.appendChild(button);
+ }
+}
+function joanPosition(x,y){
+ const el=E('joanPenguin');el.classList.add('joan-placed');
+ el.style.left=Math.round(Math.max(4,Math.min(window.innerWidth-85,x)))+'px';
+ el.style.top=Math.round(Math.max(4,Math.min(window.innerHeight-100,y)))+'px';
+ el.style.right='auto';el.style.bottom='auto';
+}
+function joanSeatSave(){
+ try{const b=E('joanPenguin').getBoundingClientRect();localStorage.setItem('plc-joan-seat-v1',JSON.stringify({x:b.left/Math.max(1,window.innerWidth),y:b.top/Math.max(1,window.innerHeight)}))}catch{}
+}
+function joanDragStart(e){
+ if(e.button!==0)return;
+ const b=E('joanPenguin').getBoundingClientRect();joanRuntime.drag={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-b.left,dy:e.clientY-b.top,moved:false};
+ E('joanPenguin').setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();
+}
+function joanDragMove(e){
+ const d=joanRuntime.drag;if(!d||d.id!==e.pointerId)return;
+ if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>7)d.moved=true;
+ if(!d.moved)return;
+ E('joanPenguin').classList.add('joan-dragging');joanPosition(e.clientX-d.dx,e.clientY-d.dy);
+}
+function joanDragEnd(e){
+ const d=joanRuntime.drag;if(!d||d.id!==e.pointerId)return;
+ joanRuntime.drag=null;E('joanPenguin').classList.remove('joan-dragging');
+ if(d.moved){E('joanPenguin').classList.add('joan-sitting');joanSeatSave();joanSay('Me quedaré aquí. ¡Puedes pedirme componentes cuando quieras!')}
+ else joanOpen();
+}
+function joanInitialize(){
+ E('showJoan').onclick=joanOpen;E('closeJoan').onclick=()=>E('joanPanel').hidden=true;
+ E('joanPenguin').onpointerdown=joanDragStart;E('joanPenguin').onpointermove=joanDragMove;E('joanPenguin').onpointerup=joanDragEnd;
+ E('joanPenguin').onpointercancel=()=>{joanRuntime.drag=null;E('joanPenguin').classList.remove('joan-dragging')};
+ E('joanPenguin').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();joanOpen()}};
+ E('joanSearch').addEventListener('input',joanSearchItems);
+ E('joanExplainSelected').onclick=()=>{
+  const current=chosen?.kind==='node'?find(chosen.id):null;
+  if(current)joanExplain(current.type);else joanRecommendForGoal();
+ };
+ E('joanQuiz').onclick=joanQuizStart;
+ try{const p=JSON.parse(localStorage.getItem('plc-joan-seat-v1')||'null');if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){joanPosition(p.x*window.innerWidth,p.y*window.innerHeight);E('joanPenguin').classList.add('joan-sitting')}}catch{}
+ joanSearchItems();
+ window.setInterval(()=>{
+  const penguin=E('joanPenguin');
+  if(Math.random()<.5){penguin.classList.add('joan-blink');setTimeout(()=>penguin.classList.remove('joan-blink'),160)}
+  if(Math.random()<.3)joanSay('¿Buscas un componente? Puedes pedírmelo por nombre.');
+ },34000);
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -3071,7 +3220,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();joanInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
