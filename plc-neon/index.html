@@ -381,8 +381,39 @@ header{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 13px}h
 .fluid-companions{display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px;background:#102a40}.fluid-companions button{border:1px solid #6b9eb7;border-radius:10px;background:#234960;color:#e5f8ff;padding:9px 13px;cursor:pointer}.fluid-learning{background:#193b4c;color:#f2fbff;border:1px solid #78adbd;border-radius:12px;padding:12px 18px;max-height:190px;overflow:auto}.fluid-learning[hidden]{display:none}.fluid-learning p{margin:7px 0}.fluid-learning li{margin:3px 0}
 
 .fluid-mascot{position:fixed;z-index:82;bottom:12px;width:83px;display:flex;flex-direction:column;align-items:center;cursor:grab;touch-action:none;user-select:none;filter:drop-shadow(0 5px 9px #0008);animation:fluid-pet-bob 3s ease-in-out infinite alternate}.fluid-mascot strong{background:#1a354a;border:1px solid #9dd3de;border-radius:9px;color:#fff;font:700 11px Arial;padding:3px 7px}.fluid-mascot-art{font-size:59px;line-height:1.2;transition:transform .2s}.fluid-mascot:hover .fluid-mascot-art{transform:rotate(-8deg) scale(1.08)}.fluid-mascot-dragging{animation:none;cursor:grabbing}.fluid-dog{left:280px}.fluid-cat{left:370px}.fluid-lion{left:460px}.fluid-mascot-bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:200px;background:#f3fbff;color:#18344a;border:2px solid #71b7c7;border-radius:13px;padding:10px;font:12px/1.4 Arial;box-shadow:0 7px 22px #0008}.fluid-mascot-bubble[hidden]{display:none}.fluid-mascot.companion-working-tucked{display:none!important}.fluid-mascot.companion-sleeping{animation:none;filter:grayscale(.3) brightness(.8);pointer-events:none}.fluid-mascot.companion-sleeping:after{content:'💤';position:absolute;top:-17px;right:-3px;font-size:24px}@keyframes fluid-pet-bob{to{transform:translateY(-7px)}}@media(max-width:700px){.fluid-mascot{width:60px}.fluid-mascot-art{font-size:43px}.fluid-dog{left:15vw}.fluid-cat{left:29vw}.fluid-lion{left:43vw}}
+
+/* Neon Spectrum 2026 — vibrant premium multi-accent UI */
+:root{--neon-pink:#ff5cbd;--neon-purple:#b889ff;--neon-lime:#b7ff72;--neon-orange:#ffb15d;--neon-cyan:#63efff;--neon-sky:#68a9ff}
+body{background:radial-gradient(ellipse at 10% 0%,#40205b 0%,transparent 36%),radial-gradient(ellipse at 90% 10%,#123b59 0%,transparent 40%),radial-gradient(ellipse at 50% 95%,#31234f 0%,transparent 46%),#0c0e20;color:#f4f4ff}
+header{background:linear-gradient(105deg,#1c1433 0%,#172b48 42%,#2c1741 100%);border-bottom:1px solid #9a73ff80;box-shadow:0 3px 25px #ae55ff26,0 1px 0 #ff79cf4d;gap:8px}
+header .logo{filter:drop-shadow(0 0 9px #bf72ff)}header strong{color:#fff;text-shadow:0 0 16px #ad7bff77}
+header .push,header button.push{border:1px solid #7b82b78a;background:linear-gradient(135deg,#30234c,#19364c);color:#f6f1ff;box-shadow:inset 0 1px 0 #ffffff12;transition:transform .16s,border-color .16s,box-shadow .16s}
+header .push:hover,header button.push:hover{transform:translateY(-2px);border-color:#ff82d4;box-shadow:0 0 13px #ff6fca55}
+header #simulate{background:linear-gradient(125deg,#136854,#255e43)!important;border-color:#7bffc0!important;color:#eafff1!important}
+header #openFluid{background:linear-gradient(125deg,#5d2c84,#7a3275)!important;border-color:#e990ff!important}
+header #wakeBell{background:linear-gradient(135deg,#6c4722,#9b6230)!important;border-color:#ffda77!important}
+header #sleepPillow{background:linear-gradient(135deg,#453075,#573b91)!important;border-color:#c5a0ff!important}
+.header-more>summary{background:linear-gradient(130deg,#32244e,#21374e);border-color:#8f70c5;color:#f4eaff}
+.header-more-items{background:linear-gradient(145deg,#201b39,#122a3c);border-color:#bd7bf4;box-shadow:0 15px 45px #000c,0 0 22px #9e63ff33}
+.layout aside{background:linear-gradient(175deg,#211b3b,#10253b);border-right:1px solid #bb79ff55}
+.layout aside .side-title{color:#e7c6ff;letter-spacing:.06em}
+.layout aside h4{color:#bdf9d0;border-bottom:1px solid #b5ff7738}
+.layout main,.layout .workspace{background:radial-gradient(ellipse at 75% 10%,#31224c33,transparent 55%),#101628}
+button:focus-visible,summary:focus-visible,[role="button"]:focus-visible{outline:2px solid #ffd17b!important;outline-offset:3px}
+#fluidStudio{background:linear-gradient(135deg,#171a34,#122d38);border:2px solid #b982ff;box-shadow:0 0 0 1px #ff77b640,0 24px 80px #000e,0 0 35px #bd69ff38}
+.fluid-head{background:linear-gradient(90deg,#4d276d,#244c69);border-bottom:1px solid #ff79ca88}
+.fluid-tools{background:linear-gradient(90deg,#2c244c,#1a3e45)}
+.fluid-companions{background:linear-gradient(100deg,#36224e,#193c4a)}
+.fluid-companions button:nth-child(1){border-color:#8fbeff;background:#233c68}.fluid-companions button:nth-child(2){border-color:#ffbb78;background:#5c392d}.fluid-companions button:nth-child(3){border-color:#e7a1ff;background:#51315d}
+.fluid-learning{background:linear-gradient(125deg,#35254e,#1b4650);border-color:#e293ff}
+.fluid-palette{background:linear-gradient(#211a3a,#162b3a)}
+.pet-house{background:linear-gradient(160deg,#512a66,#213d65 53%,#2d3c4e);border-color:#ffbaea;box-shadow:0 0 24px #ff7bc744,0 24px 70px #000c}
+.pet-house .studio-drawer-top{color:#fff1b6}
+.companion-panel{background:linear-gradient(140deg,#211a39,#17384b);border-color:#b788ff}
+.pillow-pulse{animation:pillow-pulse .65s ease}@keyframes pillow-pulse{50%{transform:scale(1.2);box-shadow:0 0 24px #ce8dff}}
+@media(prefers-reduced-motion:reduce){header .push,.fluid-mascot,.pillow-pulse{animation:none!important;transition:none!important}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMayboca" title="Mayboca · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMayboca" title="Mayboca · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="dialog" aria-modal="true" aria-label="Editor neumático e hidráulico">
 <div class="fluid-head"><strong>💨 Fluid Studio · Neumática e hidráulica</strong><button id="fluidSave" title="Exportar diagrama JSON">↓ JSON</button><button id="fluidLoad" title="Importar diagrama JSON">↑ JSON</button><input type="file" id="fluidFile" accept=".json" hidden><button id="fluidClose" aria-label="Cerrar editor">✕</button></div>
 <div class="fluid-companions"><button id="fluidLeonardo">🐕 Leonardo · Hidráulica</button><button id="fluidBryan">🐈 Bryan · Neumática</button><button id="fluidMayboca">🦁 Mayboca · Autoaprendizaje</button></div><div id="fluidLearning" class="fluid-learning" hidden aria-live="polite"></div><div class="fluid-tools"><label>Tipo de circuito <select id="fluidMode"><option value="pneumatic">💨 Neumático</option><option value="hydraulic">💧 Hidráulico</option></select></label><button id="fluidConnect">🔗 Conectar puntos</button><button id="fluidDelete">⌫ Eliminar seleccionado</button><button id="fluidClear">Vaciar</button><button id="fluidArrange">✨ Acomodar</button></div>
@@ -3867,9 +3898,10 @@ function companionPLCSpot(){
  if(left.x>window.innerWidth||right.x<0||left.y<0||left.y>window.innerHeight)return null;
  return {left,right,width:Math.max(160,right.x-left.x)};
 }
-function companionSleepNow(){
- if(!companionCanSleep())return;
- const plc=companionPLCSpot();if(!plc)return;
+function companionSleepNow(force=false){
+ if(companionSleep.sleeping)return;
+ if(!force&&!companionCanSleep())return;
+ const plc=companionPLCSpot()||{left:{x:Math.max(80,window.innerWidth*.35),y:Math.max(150,window.innerHeight*.58)},width:Math.min(550,window.innerWidth*.65)};
  const details=[
   ['auraFox','Aura'],['antonioDuck','Antonio'],['joanPenguin','Joan'],['nagiRaccoon','Nagi'],['trannyCrab','Tranny'],['leonardoPet','Leonardo'],['bryanPet','Bryan'],['maybocaPet','Mayboca']
  ];
@@ -3877,8 +3909,8 @@ function companionSleepNow(){
  for(const [id] of details){
   const el=E(id);if(!el||el.classList.contains('aura-hidden')||el.classList.contains('nagi-hidden')||el.classList.contains('hide-duck'))continue;
   companionSleep.positions.set(id,{left:el.style.left||'',right:el.style.right||'',top:el.style.top||'',bottom:el.style.bottom||'',wasTucked:el.classList.contains('companion-working-tucked')});el.classList.remove('companion-working-tucked');
-  const x=plc.left.x+(count+.25)*Math.min(130,plc.width/3.8);
-  const y=plc.left.y-53;
+  const x=plc.left.x+(count%4)*Math.min(115,plc.width/4);
+  const y=plc.left.y-62-Math.floor(count/4)*66;
   el.style.left=Math.max(0,Math.min(window.innerWidth-90,x))+'px';el.style.top=Math.max(2,Math.min(window.innerHeight-110,y))+'px';el.style.right='auto';el.style.bottom='auto';
   el.classList.add('companion-sleeping');
   count++;
@@ -3902,6 +3934,7 @@ function companionRegisterActivity(){
  // Las mascotas solo se despiertan con la campana.
 }
 function companionSleepInitialize(){
+ E('sleepPillow').onclick=()=>{companionSleepNow(true);E('sleepPillow').classList.add('pillow-pulse');setTimeout(()=>E('sleepPillow').classList.remove('pillow-pulse'),650)};
  E('wakeBell').onclick=()=>{companionWake();companionSleep.lastActivity=Date.now();E('wakeBell').classList.add('bell-ringing');setTimeout(()=>E('wakeBell').classList.remove('bell-ringing'),700)};
  for(const event of ['pointerdown','keydown','wheel','touchstart'])window.addEventListener(event,companionRegisterActivity,{passive:true});
  let lastMove=0;
@@ -4110,7 +4143,7 @@ function companionTuckWorking(){
 }
 function companionSummon(id){
  const member=E(id);
- if(!member)return;
+ if(!member||companionSleep.sleeping)return;
  companionWorking=false;member.classList.remove('companion-working-tucked');
  if(id==='auraFox')auraVisible(true,'manual');
  if(id==='nagiRaccoon'){nagiRuntime.hidden=false;member.classList.remove('nagi-hidden')}
@@ -4124,6 +4157,7 @@ function companionDockInitialize(){
   if(['leonardoPet','bryanPet','maybocaPet'].includes(id))continue;
   E(button).classList.add('companion-summon','companion-available');
   E(button).onclick=()=>{
+   if(companionSleep.sleeping)return;
    companionSummon(id);
    // Summoning a mascot must never open its help window automatically.
    const help=E(panel);if(help)help.hidden=true;
