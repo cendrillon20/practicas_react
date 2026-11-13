@@ -2552,7 +2552,7 @@ function graphNewRung(){
  if(graphicLadder.rungs.length>=16){E('graphicMessage').textContent='Máximo 16 redes en este laboratorio.';return}
  const initialContact=graphItem('NO');initialContact.pin=graphNextPin('input')??initialContact.pin;
  const rung={id:graphId(),branches:[[initialContact]],output:graphNextPin('output')??18};
- graphicLadder.rungs.push(rung);graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:0,index:0};
+ graphicLadder.rungs.push(rung);graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:0,index:0};graphicLatestId=initialContact.id;
  graphAutoSyncAndRedraw();
 }
 function graphFindRung(id){return graphicLadder.rungs.find(r=>r.id===Number(id))}
@@ -2655,7 +2655,7 @@ function graphLine(parent,x1,y1,x2,y2,key){
 function graphSetSelected(rid,branch,index){graphicSelection={rungId:Number(rid),branch:Number(branch),index:Number(index)};graphicRefreshInspector();renderGraphicLadder()}
 function graphSelectCoil(rid){graphicSelection={rungId:Number(rid),branch:-1,index:-1};graphicRefreshInspector();renderGraphicLadder()}
 
-let graphicGesture=null,graphicSuppressClick=false;
+let graphicGesture=null,graphicSuppressClick=false,graphicLatestId=null;
 function graphPetHit(e){
  for(const [id,name] of [['auraFox','Aura'],['antonioDuck','Antonio'],['joanPenguin','Joan']]){
   const el=E(id);if(!el)return null;
@@ -2750,7 +2750,7 @@ function graphAttachGesture(g,rid,bi,ci){
 }
 
 function graphMakeContact(svg,item,x,y,rid,bi,ci){
- const g=graphSvg(svg,'g',{'data-symbol-id':item.id,class:'graphic-symbol'+(graphicSelection?.rungId===rid&&graphicSelection?.branch===bi&&graphicSelection?.index===ci?' selected':'')});
+ const g=graphSvg(svg,'g',{'data-symbol-id':item.id,class:'graphic-symbol'+(graphicSelection?.rungId===rid&&graphicSelection?.branch===bi&&graphicSelection?.index===ci?' selected':'')+(graphicLatestId===item.id?' graphic-new':'')});
  graphSvg(g,'rect',{x:x-31,y:y-34,width:62,height:65,rx:5,fill:'#102840',stroke:'transparent',class:'graphic-hit'});
  graphLine(g,x-42,y,x-14,y,'c:'+item.id);graphLine(g,x+14,y,x+42,y,'c:'+item.id);
  if(item.type==='WIRE')graphLine(g,x-14,y,x+14,y,'c:'+item.id);
@@ -2846,7 +2846,7 @@ function graphInsert(type){
  const row=rung.branches[bi];
  if(row.length>=5){E('graphicMessage').textContent='Máximo 5 símbolos por rama para conservar la lectura visual.';return}
  const item=graphItem(type);if(['NO','NC'].includes(type))item.pin=graphNextPin('input')??item.pin;
- row.splice(sel.index>=0?sel.index+1:row.length,0,item);
+ row.splice(sel.index>=0?sel.index+1:row.length,0,item);graphicLatestId=item.id;
  graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:bi,index:row.indexOf(item)};
  graphAutoSyncAndRedraw();
 }
@@ -2854,7 +2854,7 @@ function graphAddBranch(id){
  if(simulation)return;
  const rung=graphFindRung(id);if(!rung)return;
  if(rung.branches.length>=4){E('graphicMessage').textContent='Máximo 4 ramas en paralelo por rung.';return}
- const item=graphItem('NO');item.pin=graphNextPin('input')??item.pin;rung.branches.push([item]);
+ const item=graphItem('NO');item.pin=graphNextPin('input')??item.pin;rung.branches.push([item]);graphicLatestId=item.id;
  graphicSelection={rungId:rung.id,branch:rung.branches.length-1,index:0};
  graphicLadder.enabled=true;graphAutoSyncAndRedraw();
 }
@@ -2972,7 +2972,7 @@ function graphLoad(raw){
   graphicLadder.rungs.push({id:rid,output:Number(row.output),branches,physicalId:Number.isInteger(row.physicalId)?row.physicalId:null});
  }
  graphicLadder.nextId=Math.max(max+1,Number(data.nextId)||1);
- graphicSelection=null;graphicRuntime.clear();graphicPrevOutputs.clear();graphicRefresh();
+ graphicSelection=null;graphicLatestId=null;graphicRuntime.clear();graphicPrevOutputs.clear();graphicRefresh();
 }
 function graphInit(){
  E('graphicNew').onclick=graphNewRung;
