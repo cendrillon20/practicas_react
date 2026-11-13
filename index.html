@@ -344,7 +344,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
   <p class="studio-lead">Construye la lógica haciendo clic en los símbolos. Cada rung puede tener contactos en serie y ramas en paralelo. Al simular, los conductores y contactos activos se iluminan.</p>
   <label class="graphic-sync-line"><input id="graphicAutoWire" type="checkbox" checked> Auto Sync Electrical · Crear y conectar componentes físicos al colocar símbolos Ladder</label>
   <div id="graphicSyncFeedback" class="ladder-message">Contactos NO/NC y bobinas se vinculan al esquema. TON, CTU y otros bloques son internos al PLC y no necesitan cableado físico.</div>
-  <div class="graphic-toolbar"><button id="graphicNew" data-i18n="addRung">＋ Rung</button><button id="graphicNo">—| |— NO</button><button id="graphicNc">—|/|— NC</button><button id="graphicWire">──── Wire</button><button id="graphicTon">TON · Timer</button><button id="graphicTof">TOF · Timer</button><button id="graphicCtu">CTU · Counter</button><button id="graphicCtd">CTD · Counter</button><button id="graphicCmp">CMP · Compare</button><button id="graphicBlink">BLINK · 4×</button><button id="graphicBranch" data-i18n="parallel">＋ Parallel</button><button id="graphicCoil">—( )— Coil</button><button id="graphicDelete" data-i18n="remove">⌫ Remove</button><button id="graphicFeed">Feed Pet · Dar a mascota</button><button id="graphicSyncNow">Sync Electrical · Sincronizar</button></div>
+  <div class="graphic-toolbar"><button id="graphicNew" data-i18n="addRung">＋ Rung</button><button id="graphicNo">—| |— NO</button><button id="graphicNc">—|/|— NC</button><button id="graphicWire">──── Wire</button><button id="graphicTon">TON · Timer</button><button id="graphicTof">TOF · Timer</button><button id="graphicCtu">CTU · Counter</button><button id="graphicCtd">CTD · Counter</button><button id="graphicCmp">CMP · Compare</button><button id="graphicBlink">BLINK · 4×</button><button id="graphicFlash">FLASH · Continuous</button><button id="graphicBranch" data-i18n="parallel">＋ Parallel</button><button id="graphicCoil">—( )— Coil</button><button id="graphicDelete" data-i18n="remove">⌫ Remove</button><button id="graphicFeed">Feed Pet · Dar a mascota</button><button id="graphicSyncNow">Sync Electrical · Sincronizar</button></div>
   <div class="graphic-actions"><button id="graphicBlinkRecipe">Example · 4 Blinks, Then ON</button><button id="graphicMoveUp">↑ Rung</button><button id="graphicMoveDown">↓ Rung</button><button id="graphicRemoveRung" data-i18n="deleteRung">Delete Rung</button><button id="graphicClear" data-i18n="clearLadder">Clear Ladder</button></div>
   <div id="graphicLadderView" class="graphic-view" aria-label="Editable graphical ladder networks"></div>
   <div id="graphicElementEditor" class="graphic-element-editor">Selecciona un contacto o bobina para configurar su entrada o salida.</div>
@@ -2589,6 +2589,13 @@ function graphFunctionBlock(item,incoming,plc,now){
   const a=Number(incoming),b=Number(item.compareThreshold??1),op=item.compareOp||'EQ';
   output=!!({EQ:()=>a===b,NE:()=>a!==b,GT:()=>a>b,GE:()=>a>=b,LT:()=>a<b,LE:()=>a<=b}[op]?.());
   state.done=output;
+ }else if(type==='FLASH'){
+  if(!incoming){state.started=0;output=false;state.done=false}
+  else{
+   if(!state.started)state.started=now;
+   const onMs=Math.max(100,Number(item.onSeconds||.4)*1000),offMs=Math.max(100,Number(item.offSeconds||.4)*1000);
+   output=((now-state.started)%(onMs+offMs))<onMs;state.done=false;
+  }
  }else if(type==='BLINK'){
   if(item.resetPin!==null&&ins.has(plcInputPins(plc).indexOf(Number(item.resetPin)))){state.started=0;state.done=false}
   else if(incoming&&!state.last&&!state.started){state.started=now;state.done=false}
@@ -2612,7 +2619,7 @@ function evaluateGraphicLadder(plc,ready){
    for(let ci=0;ci<branch.length;ci++){
     const item=branch[ci];let pass=false;
     if(item.type==='WIRE')pass=true;
-    else if(['TON','TOF','CTU','CTD','CMP','BLINK'].includes(item.type)){
+    else if(['TON','TOF','CTU','CTD','CMP','BLINK','FLASH'].includes(item.type)){
      const blockOut=graphFunctionBlock(item,path,plc,now);
      pass=!!blockOut;path=!!ready&&pass;
     }else{
@@ -2696,7 +2703,6 @@ function graphMoveSymbol(source,target){
  const [item]=src.splice(source.ci,1);
  if(!src.length)src.push(graphItem('WIRE'));
  let destinationIndex=target.ci;
- if(src===dst&&source.ci<target.ci)destinationIndex-=1;
  destinationIndex=Math.max(0,Math.min(dst.length,destinationIndex));
  dst.splice(destinationIndex,0,item);
  graphicSelection={rungId:dest.id,branch:target.bi,index:destinationIndex};
@@ -2748,7 +2754,7 @@ function graphMakeContact(svg,item,x,y,rid,bi,ci){
  graphSvg(g,'rect',{x:x-31,y:y-34,width:62,height:65,rx:5,fill:'#102840',stroke:'transparent',class:'graphic-hit'});
  graphLine(g,x-42,y,x-14,y,'c:'+item.id);graphLine(g,x+14,y,x+42,y,'c:'+item.id);
  if(item.type==='WIRE')graphLine(g,x-14,y,x+14,y,'c:'+item.id);
- else if(['TON','TOF','CTU','CTD','CMP','BLINK'].includes(item.type)){
+ else if(['TON','TOF','CTU','CTD','CMP','BLINK','FLASH'].includes(item.type)){
   graphSvg(g,'rect',{x:x-23,y:y-19,width:46,height:38,rx:5,fill:'#173c55',stroke:'#92bddc','stroke-width':1.8,'data-graph-powered':'c:'+item.id});
   graphSvgText(g,x,y+6,item.type,{'font-size':13,fill:'#f1fdff','font-weight':'bold'});
  }else{
@@ -2762,6 +2768,7 @@ function graphMakeContact(svg,item,x,y,rid,bi,ci){
  else if(['CTU','CTD'].includes(item.type))label='PV '+Number(item.preset||4);
  else if(item.type==='CMP')label=(item.compareOp||'EQ')+' '+Number(item.compareThreshold??1);
  else if(item.type==='BLINK')label=Number(item.preset||4)+'× flash';
+ else if(item.type==='FLASH')label=Number(item.onSeconds||.4)+' / '+Number(item.offSeconds||.4)+'s';
  graphSvgText(g,x,y-22,label,{'font-size':11,class:'graphic-label'});
  graphAttachGesture(g,rid,bi,ci);
  g.addEventListener('click',e=>{e.stopPropagation();if(graphicSuppressClick){graphicSuppressClick=false;return}graphSetSelected(rid,bi,ci)});
@@ -2883,7 +2890,7 @@ function graphicRefreshInspector(){
   mkSelect('Output Coil · Bobina',graphPinChoices('output').map(pin=>({value:pin,text:ladderTag(pin,'output',E('ladderPlatform').value)+' · '+portName(plc,pin)})),rung.output,v=>{rung.output=Number(v);graphAutoSyncAndRedraw()});
  }else{
   const item=rung.branches[s.branch]?.[s.index];if(!item){panel.textContent='Contacto no encontrado';return}
-  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'},{value:'TON',text:'TON · Timer On Delay'},{value:'TOF',text:'TOF · Timer Off Delay'},{value:'CTU',text:'CTU · Counter Up'},{value:'CTD',text:'CTD · Counter Down'},{value:'CMP',text:'CMP · Compare'},{value:'BLINK',text:'BLINK · Flash and latch'}],item.type,v=>{item.type=v;graphAutoSyncAndRedraw()});
+  mkSelect('Symbol Type · Tipo',[{value:'NO',text:'NO · Normally Open'},{value:'NC',text:'NC · Normally Closed'},{value:'WIRE',text:'Wire · Direct conductor'},{value:'TON',text:'TON · Timer On Delay'},{value:'TOF',text:'TOF · Timer Off Delay'},{value:'CTU',text:'CTU · Counter Up'},{value:'CTD',text:'CTD · Counter Down'},{value:'CMP',text:'CMP · Compare'},{value:'BLINK',text:'BLINK · Flash and latch'},{value:'FLASH',text:'FLASH · Continuous pulse'}],item.type,v=>{item.type=v;graphAutoSyncAndRedraw()});
   if(['NO','NC'].includes(item.type)){
    mkSelect('Signal Source · Origen',[{value:'input',text:'Digital Input · Entrada'},{value:'output',text:'Output Feedback · Realimentación'}],item.source,v=>{item.source=v;item.pin=graphPinChoices(v)[0]??0;graphAutoSyncAndRedraw()});
    const pins=graphPinChoices(item.source);
@@ -2903,7 +2910,7 @@ function graphicRefreshInspector(){
    };
    if(['TON','TOF'].includes(item.type))field('PT · Preset Time (segundos)','seconds',.1,120,.1);
    if(['CTU','CTD','BLINK'].includes(item.type))field('PV · Preset Count','preset',1,100,1);
-   if(item.type==='BLINK'){
+   if(['BLINK','FLASH'].includes(item.type)){
     field('On Time · Duración encendida (s)','onSeconds',.1,20,.1);
     field('Off Time · Duración apagada (s)','offSeconds',.1,20,.1);
    }
@@ -2958,7 +2965,7 @@ function graphLoad(raw){
  let max=0;
  for(const row of valid){
   if(!Array.isArray(row.branches)||!Number.isFinite(Number(row.output)))continue;
-  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','TOF','CTU','CTD','CMP','BLINK'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null,compareOp:['EQ','NE','GT','GE','LT','LE'].includes(item.compareOp)?item.compareOp:'EQ',compareThreshold:Number.isFinite(Number(item.compareThreshold))?Number(item.compareThreshold):1,physicalId:Number.isInteger(item.physicalId)?item.physicalId:null})):[]);
+  const branches=row.branches.slice(0,4).map(branch=>Array.isArray(branch)?branch.slice(0,5).filter(item=>['NO','NC','WIRE','TON','TOF','CTU','CTD','CMP','BLINK','FLASH'].includes(item?.type)).map(item=>({id:Number(item.id)||0,type:item.type,pin:Number(item.pin)||0,source:item.source==='output'?'output':'input',preset:Math.max(1,Math.min(100,Number(item.preset)||4)),seconds:Math.max(.1,Math.min(120,Number(item.seconds)||1)),onSeconds:Math.max(.1,Math.min(20,Number(item.onSeconds)||.4)),offSeconds:Math.max(.1,Math.min(20,Number(item.offSeconds)||.4)),resetPin:Number.isInteger(item.resetPin)?item.resetPin:null,compareOp:['EQ','NE','GT','GE','LT','LE'].includes(item.compareOp)?item.compareOp:'EQ',compareThreshold:Number.isFinite(Number(item.compareThreshold))?Number(item.compareThreshold):1,physicalId:Number.isInteger(item.physicalId)?item.physicalId:null})):[]);
   if(!branches.length)continue;
   for(const branch of branches)for(const item of branch)max=Math.max(max,item.id);
   const rid=Number(row.id)||0;max=Math.max(max,rid);
@@ -2971,8 +2978,8 @@ function graphInit(){
  E('graphicNew').onclick=graphNewRung;
  E('graphicSyncNow').onclick=()=>{graphSyncElectrical(true);draw();graphicRefresh()};
  E('graphicAutoWire').onchange=()=>{if(E('graphicAutoWire').checked){graphSyncElectrical(true);draw()}};
- for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicTon','TON'],['graphicTof','TOF'],['graphicCtu','CTU'],['graphicCtd','CTD'],['graphicCmp','CMP'],['graphicBlink','BLINK'],['graphicCoil','COIL']]){
-  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicTon','graphicTof','graphicCtu','graphicCtd','graphicCmp','graphicBlink','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
+ for(const [id,type] of [['graphicNo','NO'],['graphicNc','NC'],['graphicWire','WIRE'],['graphicTon','TON'],['graphicTof','TOF'],['graphicCtu','CTU'],['graphicCtd','CTD'],['graphicCmp','CMP'],['graphicBlink','BLINK'],['graphicFlash','FLASH'],['graphicCoil','COIL']]){
+  E(id).onclick=()=>{graphicTool=type;for(const t of ['graphicNo','graphicNc','graphicWire','graphicTon','graphicTof','graphicCtu','graphicCtd','graphicCmp','graphicBlink','graphicFlash','graphicCoil'])E(t).classList.remove('selected');E(id).classList.add('selected');graphInsert(type)};
  }
  E('graphicBranch').onclick=()=>{if(!graphicLadder.rungs.length)graphNewRung();graphAddBranch(graphicSelection?.rungId||graphicLadder.rungs.at(-1).id)};
  E('graphicDelete').onclick=graphRemoveSelected;
@@ -3061,6 +3068,7 @@ const plcInstructionLibrary=[
  ['Counters','CTD','Count Down · Conteo descendente','CTD',true],
  ['Counters','RES / RESET','Reset Counter / Timer · Reiniciar acumulados',null,false],
  ['Logic','BLINK','Flash and Latch · Parpadeo y enclavamiento','BLINK',true],
+ ['Logic','FLASH','Continuous Pulse · Parpadeo continuo','FLASH',true],
  ['Comparison','CMP / EQ / NE','Compare · Igual / Diferente','CMP',true],
  ['Comparison','GT / GE / LT / LE','Compare · Mayor / Menor','CMP',true],
  ['Bit Logic','AND / OR','Series / Parallel Contacts · Serie / Paralelo','NO',true],
@@ -3108,7 +3116,7 @@ function graphicBlinkRecipe(){
  const plc=graphPLC();
  graphicLadder={enabled:true,rungs:[{id:graphId(),branches:[[a,blink]],output:plcOutputPins(plc)[0]??18}],nextId:graphicLadder.nextId};
  graphicSelection={rungId:graphicLadder.rungs[0].id,branch:0,index:1};
- graphicRuntime.clear();graphicPrevOutputs.clear();graphicRefresh();draw();
+ graphicRuntime.clear();graphicPrevOutputs.clear();graphAutoSyncAndRedraw();
  E('graphicMessage').textContent='BLINK 4×: pulsa una vez la entrada '+portName(plc,a.pin)+'. La lámpara conectada a '+portName(plc,graphicLadder.rungs[0].output)+' parpadea 4 veces y permanece encendida hasta reiniciar el PLC virtual. Puedes modificar el tiempo ON/OFF.';
 }
 E('graphicCatalogSearch').addEventListener('input',renderInstructionCatalog);
@@ -3237,7 +3245,7 @@ function taskInterpretAndApply(){
   const plc=nodes.find(n=>n.type==='plc');
   const rung={id:graphId(),branches:[[input,block]],output:Number(E('ladderOutput').value)||plcOutputPins(plc)[0]};
   graphicLadder.rungs=[rung];graphicLadder.enabled=true;
-  graphicSelection={rungId:rung.id,branch:0,index:1};graphicRuntime.clear();graphicRefresh();draw();
+  graphicSelection={rungId:rung.id,branch:0,index:1};graphicRuntime.clear();graphAutoSyncAndRedraw();
   ladderTab('editor');E('goalInterpretFeedback').textContent+=' Se creó un ejemplo gráfico; verifica entrada, salida y los tiempos antes de usarlo.';
  }else if(interpreted.kind==='timer'&&interpreted.clear){
   E('ladderMode').value='timer';E('ladderDelay').value=String(interpreted.seconds);updatePlatformControls();
@@ -3621,7 +3629,7 @@ initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();conf
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
- if(simulation&&graphicLadder.enabled&&graphicLadder.rungs.some(r=>r.branches.some(b=>b.some(i=>['TON','TOF','CTU','CTD','CMP','BLINK'].includes(i.type)))))draw();
+ if(simulation&&graphicLadder.enabled&&graphicLadder.rungs.some(r=>r.branches.some(b=>b.some(i=>['TON','TOF','CTU','CTD','CMP','BLINK','FLASH'].includes(i.type)))))draw();
 },150);
 new ResizeObserver(entries=>{
  const rect=entries[0]?.contentRect;if(!rect)return;
