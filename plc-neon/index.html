@@ -524,8 +524,37 @@ header{position:relative;overflow:visible!important}
 .mascot-idle-stage{max-height:142px;overflow:hidden}
 @media(max-width:700px){.main-overflow-panel{right:-4px;max-height:72dvh}.mascot-activity{width:170px}.mascot-mini-prop{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.mascot-mini-prop{animation:none}}
+
+/* Three-dot command center: polished floating palette rather than wrapped header row. */
+header{height:auto!important;min-height:58px!important;flex-wrap:nowrap!important;padding:7px 12px!important;gap:9px!important}
+header>.spacer{flex:1!important}
+.main-overflow{margin-left:auto;z-index:1000!important}
+.main-overflow>summary{width:auto!important;min-width:85px!important;height:39px!important;display:flex!important;gap:8px;align-items:center;justify-content:center;background:linear-gradient(145deg,#6243a7,#315a8e)!important;border:1px solid #ad93ff!important;border-radius:12px!important;box-shadow:inset 0 1px #ffffff33,0 5px 20px #9657e34d!important;font-size:24px!important}
+.main-overflow>summary:hover{filter:brightness(1.18)}
+.menu-summary-text{font:700 12px Arial;letter-spacing:.3px}
+.main-overflow-panel{position:fixed!important;top:65px!important;right:12px!important;left:auto!important;z-index:1001!important;width:min(570px,calc(100vw - 24px))!important;max-height:calc(100dvh - 80px)!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start!important;align-items:stretch!important;gap:12px!important;padding:16px!important;overflow-y:auto!important;background:linear-gradient(155deg,#1e2042 0%,#142e4c 55%,#241a3e 100%)!important;border:1px solid #9474d5!important;border-radius:19px!important;box-shadow:0 26px 75px #000c,0 0 35px #a76dff25!important}
+.menu-panel-head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding:4px 5px 13px;border-bottom:1px solid #ffffff22}
+.menu-panel-head b{font:800 18px Arial;color:#fff}.menu-panel-head small{display:block;margin-top:5px;color:#a9c4e6;font:11px Arial}.menu-panel-head>span{font:700 11px Arial;color:#d8b8ff}
+.menu-section{min-width:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:7px;padding:12px;border-radius:14px;background:#ffffff08;border:1px solid #ffffff1c}
+.menu-section>h3{flex-basis:100%;margin:0 0 5px;font:700 12px Arial;color:#d6bcff;letter-spacing:.3px}
+.menu-section>.header-more{width:100%}
+.menu-section>.header-more>summary{background:#273b60;border:1px solid #6474aa}
+.menu-section>.header-more-items{position:static!important;max-width:100%!important;width:100%!important;box-shadow:none!important;background:#15243d!important;margin-top:5px}
+.menu-section .project-controls{width:100%;gap:6px!important}
+.menu-section #projectName{min-width:0;width:100%}
+.menu-section button,.menu-section select{border-radius:9px!important;font-size:12px!important}
+.menu-section>label{max-width:100%;font-size:12px}
+.menu-section>label select{max-width:100%}
+@media(max-width:680px){header .language-picker,header .v{display:none!important}.main-overflow-panel{top:59px!important;grid-template-columns:1fr!important}.menu-panel-head{grid-column:1}.menu-section{padding:10px}.menu-summary-text{display:none}.main-overflow>summary{min-width:42px!important}}
+
+.mascot-prank-overlay{position:fixed;z-index:120;pointer-events:none;font-size:22px;white-space:nowrap;background:#1d2d4ce8;border:1px solid #c89dff;border-radius:15px;padding:5px;animation:mascot-soft-breathe .5s infinite alternate}
+.mascot-temporary-disconnect{opacity:.23!important;filter:grayscale(1)!important}
+.mascot-temporary-repair{filter:drop-shadow(0 0 8px #6effc5)!important}
+.mascot-chase-running{animation:mascot-chase-dash 1.1s ease-in-out 3 alternate!important;pointer-events:none}
+@keyframes mascot-chase-dash{0%{transform:translate(0,0) rotate(-5deg)}100%{transform:translate(var(--chase-x,45px),var(--chase-y,-20px)) rotate(12deg)}}
+@media(prefers-reduced-motion:reduce){.mascot-prank-overlay,.mascot-chase-running{animation:none!important}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><details id="mainOverflow" class="main-overflow"><summary aria-label="Abrir menú de herramientas" title="Herramientas y apartados">⋮</summary><div class="main-overflow-panel"><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details></div></details><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><details id="mainOverflow" class="main-overflow"><summary aria-label="Abrir menú de herramientas" title="Herramientas y apartados"><span aria-hidden="true">⋮</span><span class="menu-summary-text">Menú</span></summary><div class="main-overflow-panel"><div class="menu-panel-head"><div><b>Centro de herramientas</b><small>Organiza tu proyecto y el espacio de trabajo</small></div><span>✦ PLC Studio</span></div><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="region" aria-label="Espacio de trabajo neumático e hidráulico">
 <div class="fluid-head"><strong>💨 Fluid Studio · Neumática e hidráulica</strong><button id="fluidSave" title="Exportar diagrama JSON">↓ JSON</button><button id="fluidLoad" title="Importar diagrama JSON">↑ JSON</button><input type="file" id="fluidFile" accept=".json" hidden><button id="fluidClose" aria-label="Volver al esquema eléctrico" title="Volver al esquema eléctrico">↩ Esquema</button></div>
 <div class="fluid-companions"><button id="fluidLeonardo" title="Leonardo · Hidráulica" aria-label="Leonardo · Hidráulica">🐕</button><button id="fluidBryan" title="Bryan · Neumática" aria-label="Bryan · Neumática">🐈</button><button id="fluidMay" title="May · Autoaprendizaje" aria-label="May · Autoaprendizaje">🦁</button></div><div id="fluidLearning" class="fluid-learning" hidden aria-live="polite"></div><div class="fluid-tools"><label>Tipo de circuito <select id="fluidMode"><option value="pneumatic">💨 Neumático</option><option value="hydraulic">💧 Hidráulico</option></select></label><button id="fluidConnect" aria-pressed="true" title="Conectar puertos: clic-clic o arrastrar de un puerto a otro">🔗 Cablear: ON</button><button id="fluidCancel" title="Cancelar conexión (Esc)">✕ Cancelar</button><button id="fluidDelete">⌫ Eliminar seleccionado</button><button id="fluidClear">Vaciar</button><button id="fluidArrange">✨ Acomodar</button></div>
@@ -778,7 +807,7 @@ const NS='http://www.w3.org/2000/svg',E=id=>document.getElementById(id),canvas=E
 const types={
 no:['Pulsador NA','NO (3-4)',2],nc:['Pulsador NC','NC (1-2)',2],selector:['Selector NA','Enclavado',2],
 ind:['Inductivo PNP','3 hilos',3],opt:['Sensor Óptico','Fotoeléctrico',3],cap:['Capacitivo','Nivel / Objeto',3],limit:['Final Carrera','Rodillo NA',2],rollerNC:['Final carrera NC','Rodillo NC',2],rollerLever:['Final carrera palanca','Rodillo con palanca',2],selectorNC:['Selector NC','Contacto NC',2],selector3:['Selector 3 posiciones','Tres posiciones',2],
-green:['Piloto Verde','H1 (X1-X2)',2],red:['Piloto Rojo','H2 (X1-X2)',2],amber:['Piloto Ámbar','H3 (X1-X2)',2],blue:['Piloto Azul','H4 (X1-X2)',2],white:['Piloto Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2],timer:['TON · On Delay','Bloque lógico interno',0],
+green:['LED Verde','H1 (X1-X2)',2],red:['LED Rojo','H2 (X1-X2)',2],amber:['LED Ámbar','H3 (X1-X2)',2],blue:['LED Azul','H4 (X1-X2)',2],white:['LED Blanco','H5 (X1-X2)',2],relay:['Bobina Relé','K1 (A1-A2)',2],buzzer:['Zumbador','Avisador acústico',2],timer:['TON · On Delay','Bloque lógico interno',0],
 tofBlock:['TOF · Off Delay','Bloque lógico interno',0],ctuBlock:['CTU · Count Up','Bloque lógico interno',0],ctdBlock:['CTD · Count Down','Bloque lógico interno',0],cmpBlock:['CMP · Comparator','Bloque lógico interno',0],
 emergency:['E-Stop · NC','Pulsador de emergencia didáctico',2],pressure:['Pressure Switch · NO','Presostato',2],level:['Level Switch · NO','Interruptor de nivel',2],fuse:['Fuse · F1','Fusible conductor ideal',2],breaker:['Circuit Breaker · QF','Interruptor automático',2],solenoid:['Solenoid Coil · Y1','Bobina electroválvula',2],motorLoad:['Motor Starter · KM','Bobina de contactor de motor',2],
 junction:['Punto de unión','Nodo libre para ramificaciones',1]
@@ -1909,7 +1938,7 @@ function configureSceneTemplate(which){
  const ip=plcInputPins(plc),op=plcOutputPins(plc);
  const labels=[
  ['conveyor',[['belt',165,270,{label:'Transportador M1',pin:op[0]}],['box',210,238,{label:'Pieza A'}],['sensor',490,238,{label:'Fotocelda S1',pin:ip[0]}],['motor',78,315,{label:'Motor M1',pin:op[0]}]]],
- ['traffic',[['traffic',345,90,{label:'Semáforo 1',pin:op[0],pin2:op[1],pin3:op[2]}],['switch',195,318,{label:'Solicitud peatón',pin:ip[0]}],['lamp',550,318,{label:'Piloto auxiliar',pin:op[3]}]]],
+ ['traffic',[['traffic',345,90,{label:'Semáforo 1',pin:op[0],pin2:op[1],pin3:op[2]}],['switch',195,318,{label:'Solicitud peatón',pin:ip[0]}],['lamp',550,318,{label:'LED auxiliar',pin:op[3]}]]],
  ['robot',[['arm',180,125,{label:'Brazo A1',pin:op[0]}],['box',520,305,{label:'Pieza B'}],['sensor',560,250,{label:'Presencia S1',pin:ip[0]}],['lamp',620,100,{label:'Pinza / estado',pin:op[1]}]]],
  ['lights',[['lamp',170,175,{label:'Lámpara H1',pin:op[0]}],['lamp',355,175,{label:'Lámpara H2',pin:op[1]}],['lamp',540,175,{label:'Lámpara H3',pin:op[2]}],['switch',355,330,{label:'Interruptor S1',pin:ip[0]}]]],
  ['pneumatic',[['cylinder',440,215,{label:'Cylinder A',pin:op[0]}],['valve',240,240,{label:'Valve Y1',pin:op[0]}],['air',100,250,{label:'Air Supply'}],['switch',370,375,{label:'Start S1',pin:ip[0]}]]]
@@ -2199,7 +2228,7 @@ const tutorLibrary=[
 {id:'commissioning',title:'Puesta en marcha y documentación',terms:'comisionamiento puesta en marcha pruebas fat sat documentación',lesson:'Una entrega profesional requiere lista de E/S, matriz causa-efecto, planos actualizados, versiones del programa, prueba de sensores, verificación de alarmas, FAT/SAT y evidencia de resultados. Documenta límites de simulación y establece aprobaciones para cambios.',practice:'Crea una tabla de cuatro pruebas: estado inicial, acción, salida esperada y resultado observado.'},
 {id:'pneumatics',title:'Neumática e hidráulica',terms:'pneumatica valvula cilindro solenoide hidraulica 5/2',lesson:'Los actuadores neumáticos suelen comandarse por electroválvulas, con sensores de fin de carrera e interbloqueos. Distingue estabilidad de presión, retorno, señal de posición y tiempo de actuación. Un PLC de 24 V suele controlar la bobina a través del módulo adecuado, no mediante un pin sin verificación eléctrica.',practice:'Programa extender cilindro si existe pieza y retraer al alcanzar el final de carrera.'},
 {id:'servo',title:'Servos y control de movimiento',terms:'servo motion posicion velocidad referencia encoder servo drive',lesson:'La lógica booleana simple no sustituye control de movimiento. Los servos requieren drive, referencia, límites, realimentación y rutinas de homing, además de coordinación temporal. Los perfiles específicos de movimiento dependen del fabricante, no se ejecutan en este simulador.',practice:'Define las señales que deben estar correctas antes de habilitar un eje servo.'},
-{id:'lighting',title:'Iluminación y señalización',terms:'lampara piloto iluminacion luz señalizacion baliza',lesson:'Una lámpara piloto muestra un estado del proceso: marcha, falla, espera o alarma. Define significados coherentes para cada color y salida. En una instalación física respeta tensión de alimentación, corriente y protección. El escenario de luces permite representar el estado de salidas digitales.',practice:'Asigna verde a marcha, rojo a falla y amarillo a espera; define su tabla de estados.'}
+{id:'lighting',title:'Iluminación y señalización',terms:'lampara LED iluminacion luz señalizacion baliza',lesson:'Una lámpara LED muestra un estado del proceso: marcha, falla, espera o alarma. Define significados coherentes para cada color y salida. En una instalación física respeta tensión de alimentación, corriente y protección. El escenario de luces permite representar el estado de salidas digitales.',practice:'Asigna verde a marcha, rojo a falla y amarillo a espera; define su tabla de estados.'}
 ];
 const tutorExercises=[
 ['conveyor','Diseña una cinta que solo funcione mientras Marcha está pulsado. ¿Cuál es la entrada, salida y condición? Prueba el control directo y el sensor.'],
@@ -3570,11 +3599,11 @@ const joanInfo={
  cap:['Capacitive Sensor','Sensor capacitivo','Puede detectar sólidos o líquidos según su ajuste; requiere calibración del umbral y entorno.'],
  pressure:['Pressure Switch','Presostato','Convierte un umbral de presión en una señal discreta; no mide valores analógicos completos.'],
  level:['Level Switch','Interruptor de nivel','Indica si el nivel alcanza un punto determinado; útil en depósitos y tanques.'],
- green:['Green Indicator Lamp','Piloto verde','Señal visual para marcha o condición normal. Su circuito requiere alimentación y retorno correctos.'],
- red:['Red Indicator Lamp','Piloto rojo','Señal visual para alarma, falla o parada; define su significado antes de usarlo.'],
- amber:['Amber Indicator Lamp','Piloto ámbar','Indicación de advertencia o atención.'],
- blue:['Blue Indicator Lamp','Piloto azul','Indicador de una condición de proceso definida por el diseñador.'],
- white:['White Indicator Lamp','Piloto blanco','Indicación general de habilitación o disponibilidad.'],
+ green:['Green Indicator Lamp','LED verde','Señal visual para marcha o condición normal. Su circuito requiere alimentación y retorno correctos.'],
+ red:['Red Indicator Lamp','LED rojo','Señal visual para alarma, falla o parada; define su significado antes de usarlo.'],
+ amber:['Amber Indicator Lamp','LED ámbar','Indicación de advertencia o atención.'],
+ blue:['Blue Indicator Lamp','LED azul','Indicador de una condición de proceso definida por el diseñador.'],
+ white:['White Indicator Lamp','LED blanco','Indicación general de habilitación o disponibilidad.'],
  relay:['Relay Coil','Bobina de relé','Permite gobernar contactos de potencia o mando mediante su bobina. Una bobina real puede requerir supresión de transitorios.'],
  solenoid:['Solenoid Valve Coil','Bobina de electroválvula','Conmuta una válvula neumática/hidráulica. Comprueba tensión, corriente, diodo/varistor de supresión y salida compatible.'],
  motorLoad:['Motor Contactor Coil','Bobina de contactor','Gobierna un contactor externo; la salida PLC no debe alimentar directamente un motor de potencia.'],
@@ -4382,6 +4411,38 @@ function mascotIdleBoardStart(plc){
  nextRound();tick();mascotIdleTimer=setInterval(tick,2600);
 }
 
+
+/* Safe, reversible visual prank on real schematic shapes; never mutates nodes/wires. */
+let mascotPrankBusy=false;
+function mascotCircuitPrank(){
+ if(mascotPrankBusy||companionSleep.sleeping||document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const svg=document.getElementById('canvas');if(!svg||svg.getBoundingClientRect().width<100)return;
+ const shapes=[...svg.querySelectorAll('g[data-id],g[data-node-id],g.component')].filter(el=>el.getBoundingClientRect().width>10);
+ const wires=[...svg.querySelectorAll('path,line,polyline')].filter(el=>el.getBoundingClientRect().width>25);
+ const target=shapes.length?shapes[Math.floor(Math.random()*shapes.length)]:wires[Math.floor(Math.random()*wires.length)];
+ if(!target)return;
+ const r=target.getBoundingClientRect(),area=svg.getBoundingClientRect();if(r.left<area.left||r.top<area.top||r.right>area.right||r.bottom>area.bottom)return;
+ mascotPrankBusy=true;
+ const item=document.createElement('div');item.className='mascot-prank-overlay';item.style.left=Math.min(innerWidth-140,Math.max(4,r.left+r.width/2-45))+'px';item.style.top=Math.min(innerHeight-85,Math.max(65,r.top-45))+'px';
+ item.textContent='🐈 🔌 🦝';item.title='Bryan y Nagi juegan a desconectar y reparar';document.body.append(item);
+ target.classList.add('mascot-temporary-disconnect');
+ setTimeout(()=>{item.textContent='🦝 🔧 🐈';target.classList.remove('mascot-temporary-disconnect');target.classList.add('mascot-temporary-repair')},1300);
+ setTimeout(()=>{item.textContent='✨ ¡Reparado!';target.classList.remove('mascot-temporary-repair')},2600);
+ setTimeout(()=>{item.remove();target.classList.remove('mascot-temporary-disconnect','mascot-temporary-repair');mascotPrankBusy=false},3700);
+}
+function mascotChaseMoment(){
+ if(mascotPlayBusy||companionSleep.sleeping||document.hidden)return;
+ const a=E('bryanPet'),b=E('nagiRaccoon');if(!a||!b||a.classList.contains('companion-working-tucked')||b.classList.contains('companion-working-tucked'))return;
+ mascotPlayBusy=true;
+ const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+ const original=[a.style.transform,b.style.transform];
+ a.classList.add('mascot-chase-running');b.classList.add('mascot-chase-running');
+ a.style.setProperty('--chase-x',Math.max(-90,Math.min(90,br.left-ar.left))+'px');a.style.setProperty('--chase-y',Math.max(-45,Math.min(45,br.top-ar.top))+'px');
+ b.style.setProperty('--chase-x',Math.random()>.5?'65px':'-65px');b.style.setProperty('--chase-y','-24px');
+ setTimeout(()=>{a.classList.remove('mascot-chase-running');b.classList.remove('mascot-chase-running');a.style.transform=original[0];b.style.transform=original[1];mascotPlayBusy=false},3500);
+}
+setInterval(()=>{if(Math.random()<.5)mascotCircuitPrank();else mascotChaseMoment()},24000);
+
 /* Gentle spontaneous mascot play: temporary visual movement only, no position overrides. */
 const mascotPlayIds=['auraFox','antonioDuck','joanPenguin','nagiRaccoon','trannyCrab','leonardoPet','bryanPet','mayPet'];
 let mascotPlayBusy=false;
@@ -4638,5 +4699,31 @@ $('fluidLoad').onclick=()=>$('fluidFile').click();
 $('fluidFile').onchange=async ev=>{const file=ev.target.files[0];if(!file)return;try{const d=JSON.parse(await file.text());if(d.format!=='plc-fluid-v1'||!['pneumatic','hydraulic'].includes(d.mode)||!Array.isArray(d.nodes)||!Array.isArray(d.edges)||d.nodes.length>500||d.edges.length>2000)throw Error('Formato no válido');if(!d.nodes.every(n=>Number.isInteger(n.id)&&typeof n.type==='string'&&typeof n.label==='string'&&Number.isFinite(n.x)&&Number.isFinite(n.y)))throw Error('Componentes inválidos');$('fluidMode').value=d.mode;nodes=d.nodes;edges=d.edges.filter(e=>e&&e.a&&e.b&&Number.isInteger(e.a.id)&&Number.isInteger(e.b.id));nextId=Math.max(1,...nodes.map(n=>n.id+1));selected=null;pending=null;palette();render();persist();status('Diagrama importado.')}catch(e){status('Error al importar: '+e.message)}ev.target.value=''};
 try{const d=JSON.parse(localStorage.getItem(key)||'null');if(d&&['pneumatic','hydraulic'].includes(d.mode)&&Array.isArray(d.nodes)&&Array.isArray(d.edges)){nodes=d.nodes;edges=d.edges;nextId=Math.max(1,...nodes.map(n=>n.id+1));$('fluidMode').value=d.mode}}catch(e){}
 palette();render();
+})();
+
+/* Group existing menu controls without replacing IDs or breaking event handlers. */
+(function(){
+ const menu=document.getElementById('mainOverflow'),panel=menu&&menu.querySelector('.main-overflow-panel');
+ if(!panel)return;
+ const head=panel.querySelector('.menu-panel-head');
+ const groups=[
+  ['📁 Proyecto',['examples','projectName','newProject','saveLocal','savedProjects','deleteLocal','save','load']],
+  ['🎨 Vista y herramientas',['phoneMode','zoomOut','zoomValue','zoomIn','showScenarios']],
+  ['🐾 Compañeros',['showTutor','showAntonio','showJoan','sleepPillow','wakeBell','showPetHouse','showNagi','showTranny','showLeonardo','showBryan','showMay']],
+  ['🧩 Editores y diagnóstico',['openFluid','showLadder','ladderFocusTop','diagnose','rotL','rotR','del']]
+ ];
+ for(const [name,ids] of groups){
+  const section=document.createElement('section');section.className='menu-section';const title=document.createElement('h3');title.textContent=name;section.append(title);
+  const moved=new Set();
+  for(const id of ids){
+   const el=document.getElementById(id);if(!el)continue;
+   let wrapper=el.closest('.project-controls,.header-more');if(wrapper&&panel.contains(wrapper)&&wrapper!==panel){}else wrapper=null;
+   const target=wrapper||((el.closest('label')&&panel.contains(el.closest('label')))?el.closest('label'):el);
+   if(moved.has(target))continue;moved.add(target);section.append(target);
+  }
+  panel.append(section);
+ }
+ document.addEventListener('pointerdown',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open)menu.open=false});
 })();
 </script></html>
