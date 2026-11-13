@@ -3634,6 +3634,122 @@ function petInitialize(){
  petRender();
 }
 
+
+const nagiGuides={
+ first:['Abre el proyecto inicial en Edit Mode. Los botones Edit y Simulate están en la barra superior.','Elige un componente de la paleta izquierda. Joan puede explicártelo y añadirlo.','Haz clic en un borne y luego en otro para cablear; no unas directamente +24V y 0V.','Escribe la tarea en Ladder → Program o construye un programa gráfico.','Pulsa Verify Task y después Simulate; observa las entradas, salidas y Signal Timing.'],
+ wiring:['Trabaja en Edit Mode. Busca sensores, switches, relays, lámparas y junctions en la paleta.','Arrastra un componente a su posición. Para crear un cable, pulsa el primer borne y después el segundo.','Haz clic en un cable para cambiar su color, añadir quiebres o insertar una unión.','Usa Revisar para detectar bornes sin conexión o posibles errores. Aura aporta la retroalimentación técnica.'],
+ ladder:['Pulsa Ladder Full View. El Ladder será grande y el esquema eléctrico una miniatura a la izquierda.','Abre Ladder Editor y pulsa ＋ Rung para crear una red.','Selecciona NO, NC, Wire, Parallel, TON, TOF, CTU, CTD, CMP, BLINK o FLASH para construir la lógica.','Haz clic en cada contacto para configurar su señal; selecciona la bobina para elegir el borne de salida.','Usa Auto Sync Electrical o Sync Electrical y revisa los cables propuestos.','Pulsa Use This Ladder y Verify Task. Después entra en Simulate para ver contactos energizados en verde.'],
+ simulation:['Describe un comportamiento verificable en Program: entrada, salida y tiempos.','Ejecuta Verify Task; un resultado no reconocido bloquea la ejecución en lugar de inventar una lógica.','Pulsa Simulate. Activa el pulsador o sensor, observa las bobinas y el PLC.','Abre Monitor y Signal Timing para visualizar las señales digitales a lo largo del tiempo.','Vuelve a Edit Mode antes de modificar cables, bloques o componentes.'],
+ scenes:['Selecciona Scenes. Puedes partir de Conveyor, Traffic, Robot, Lights, Pneumatics o Custom.','Arrastra objetos a la escena; selecciona el objeto para configurar su señal PLC.','Agrega un sensor virtual y un actuador; vincula las mismas entradas/salidas al Ladder.','Activa Simulate y verifica cómo cambia la escena según la salida.','Pulsa Evaluate Practice y revisa las sugerencias del tutor.'],
+ projects:['En la barra superior puedes usar New para crear un proyecto y Save para guardarlo en este navegador.','Export Project guarda el estado del circuito, las redes Ladder y los escenarios en un archivo JSON.','Import Project restaura archivos de proyectos compatibles con el simulador.','Project Reader intenta detectar formatos de texto de otros fabricantes; los formatos binarios no se ejecutan automáticamente.','Para conservar copias independientes, exporta tu proyecto como archivo y guárdalo fuera del navegador.'],
+ companions:['Aura revisa Ladder y esquemas, señala errores y puede jugar Fox Chase.','Antonio acompaña paso a paso desde el objetivo, con Game Mode opcional y travesuras visuales reversibles.','Joan explica componentes, recomienda cuáles utilizar y puede añadirlos al esquema.','Nagi explica cómo navegar por las ventanas y herramientas de la aplicación.','Pet House permite alimentar, descansar, jugar y resolver retos de aprendizaje con los personajes.'],
+ languages:['En la barra superior localiza Idioma / Language.','Selecciona Español, English, Português, 中文, 日本語 o Deutsch.','Los menús principales se traducen y los términos técnicos se mantienen en inglés para familiarizarte con el entorno.','Algunas explicaciones extensas siguen en español; la traducción total está en desarrollo.']
+};
+const nagiInfo={
+ rung:['ladder',2],contact:['ladder',3],contacto:['ladder',3],ladder:['ladder',0],escalera:['ladder',0],
+ cable:['wiring',1],wire:['wiring',1],conex:['wiring',1],borne:['wiring',1],sensor:['wiring',0],
+ simular:['simulation',2],simulate:['simulation',2],onda:['simulation',3],wave:['simulation',3],
+ escenario:['scenes',0],scene:['scenes',0],neumat:['scenes',0],robot:['scenes',0],
+ guardar:['projects',0],save:['projects',0],import:['projects',2],export:['projects',2],archivo:['projects',2],
+ idioma:['languages',0],language:['languages',0],portugues:['languages',1],japones:['languages',1],
+ aura:['companions',0],antonio:['companions',1],joan:['companions',2],mascota:['companions',4]
+};
+const nagiRuntime={steps:[],index:0,topic:'first',drag:null,sitting:false,hidden:false,nearCursor:false,cursorTips:true,lastCursor:null,lastHint:0,tipTimer:null,speechTimer:null,savedPos:null};
+function nagiSay(message,ms=5500){
+ const bubble=E('nagiSpeech');bubble.textContent=String(message).slice(0,360);bubble.hidden=false;
+ clearTimeout(nagiRuntime.speechTimer);nagiRuntime.speechTimer=setTimeout(()=>bubble.hidden=true,ms);
+}
+function nagiPosition(x,y){
+ const el=E('nagiRaccoon');el.style.left=Math.max(5,Math.min(window.innerWidth-92,x))+'px';el.style.top=Math.max(5,Math.min(window.innerHeight-110,y))+'px';el.style.right='auto';el.style.bottom='auto';
+}
+function nagiRestorePlace(){
+ const el=E('nagiRaccoon');el.classList.remove('nagi-near-cursor');
+ if(nagiRuntime.savedPos){el.style.left=nagiRuntime.savedPos.left;el.style.top=nagiRuntime.savedPos.top;el.style.right=nagiRuntime.savedPos.right;el.style.bottom=nagiRuntime.savedPos.bottom;nagiRuntime.savedPos=null}
+}
+function nagiGuideStart(topic){
+ const selected=nagiGuides[topic]?topic:'first';
+ nagiRuntime.topic=selected;nagiRuntime.steps=nagiGuides[selected];nagiRuntime.index=0;
+ E('nagiTopic').value=selected;nagiShowStep();
+}
+function nagiShowStep(){
+ const steps=nagiRuntime.steps,index=nagiRuntime.index;
+ E('nagiGuide').textContent=steps.length?'STEP '+(index+1)+' / '+steps.length+'\n\n'+steps[index]+'\n\nUsa Next para avanzar.':'Selecciona un recorrido para comenzar.';
+ E('nagiBack').disabled=index<=0;E('nagiNext').disabled=index>=steps.length-1;
+}
+function nagiNext(delta){
+ if(!nagiRuntime.steps.length)nagiGuideStart('first');
+ else nagiRuntime.index=Math.max(0,Math.min(nagiRuntime.steps.length-1,nagiRuntime.index+delta));
+ nagiShowStep();nagiSay('Paso '+(nagiRuntime.index+1)+': '+nagiRuntime.steps[nagiRuntime.index]);
+}
+function nagiAsk(){
+ const q=E('nagiQuestion').value.trim().toLowerCase();
+ if(!q)return;
+ let best=null;
+ for(const [word,reference] of Object.entries(nagiInfo))if(q.includes(word)){best=reference;break}
+ if(!best){
+  E('nagiAnswer').textContent='Puedo ayudarte con Ladder, componentes, cableado, Simulate, Scenes, archivos, mascotas e idiomas. Prueba «¿Cómo agrego un rung?» o «¿Dónde guardo el proyecto?»';
+  return;
+ }
+ nagiGuideStart(best[0]);nagiRuntime.index=Math.min(best[1],nagiRuntime.steps.length-1);nagiShowStep();
+ E('nagiAnswer').textContent='Nagi recomienda:\n'+nagiRuntime.steps[nagiRuntime.index]+'\n\nSi necesitas verificar la lógica o seguridad, abre Aura Tutor.';
+ nagiSay('¡Encontré la herramienta! '+nagiRuntime.steps[nagiRuntime.index]);
+}
+function nagiOpen(){E('nagiPanel').hidden=false;nagiRuntime.hidden=false;E('nagiRaccoon').classList.remove('nagi-hidden');if(!nagiRuntime.steps.length)nagiGuideStart('first')}
+function nagiDragStart(e){
+ if(e.button!==0)return;
+ const b=E('nagiRaccoon').getBoundingClientRect();nagiRuntime.drag={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,offsetX:e.clientX-b.left,offsetY:e.clientY-b.top,moved:false};
+ E('nagiRaccoon').setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();
+}
+function nagiDragMove(e){
+ const d=nagiRuntime.drag;if(!d||d.pointerId!==e.pointerId)return;
+ if(Math.hypot(d.startX-e.clientX,d.startY-e.clientY)>7)d.moved=true;
+ if(!d.moved)return;
+ E('nagiRaccoon').classList.add('nagi-dragging');nagiPosition(e.clientX-d.offsetX,e.clientY-d.offsetY);
+}
+function nagiDragEnd(e){
+ const d=nagiRuntime.drag;if(!d||d.pointerId!==e.pointerId)return;
+ nagiRuntime.drag=null;E('nagiRaccoon').classList.remove('nagi-dragging');
+ if(d.moved){nagiRuntime.sitting=true;E('nagiRaccoon').classList.add('nagi-sitting');nagiSay('Me quedaré aquí. Puedes pedirme pasos de cualquier herramienta.');nagiSaveSeat()}
+ else nagiOpen();
+}
+function nagiSaveSeat(){
+ try{const b=E('nagiRaccoon').getBoundingClientRect();localStorage.setItem('plc-nagi-seat-v1',JSON.stringify({x:b.left/window.innerWidth,y:b.top/window.innerHeight,sitting:nagiRuntime.sitting}))}catch{}
+}
+function nagiNearCursor(){
+ if(!nagiRuntime.cursorTips||nagiRuntime.sitting||nagiRuntime.hidden||nagiRuntime.drag||nagiRuntime.nearCursor||companionSleep.sleeping||document.hidden)return;
+ if(!nagiRuntime.lastCursor)return;
+ const q=nagiRuntime.lastCursor;
+ if(q.x>window.innerWidth-125||q.y>window.innerHeight-150)return;
+ const el=E('nagiRaccoon');
+ nagiRuntime.savedPos={left:el.style.left||'',top:el.style.top||'',right:el.style.right||'',bottom:el.style.bottom||''};
+ nagiRuntime.nearCursor=true;
+ el.classList.add('nagi-near-cursor');
+ nagiPosition(q.x+27,q.y+24);
+ const tips=['Abre Ladder Full View para editar el programa con símbolos.','¿Quieres agregar un componente? Joan puede entregártelo.','Usa Verify Task antes de Simulate.','Puedes guardar tu proyecto o exportarlo a JSON.','Si ves un error eléctrico, Aura puede señalarlo.'];
+ nagiSay(tips[Math.floor(Math.random()*tips.length)],3200);
+ clearTimeout(nagiRuntime.tipTimer);nagiRuntime.tipTimer=setTimeout(()=>{nagiRuntime.nearCursor=false;nagiRestorePlace()},3550);
+}
+function nagiInitialize(){
+ E('showNagi').onclick=nagiOpen;E('closeNagi').onclick=()=>E('nagiPanel').hidden=true;
+ E('nagiStart').onclick=()=>nagiGuideStart(E('nagiTopic').value);
+ E('nagiBack').onclick=()=>nagiNext(-1);E('nagiNext').onclick=()=>nagiNext(1);
+ E('nagiAsk').onclick=nagiAsk;
+ E('nagiQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();nagiAsk()}});
+ E('nagiSit').onclick=()=>{
+  nagiRuntime.sitting=!nagiRuntime.sitting;E('nagiRaccoon').classList.toggle('nagi-sitting',nagiRuntime.sitting);
+  if(!nagiRuntime.sitting)nagiRestorePlace();nagiSaveSeat();
+ };
+ E('nagiHide').onclick=()=>{nagiRuntime.hidden=true;E('nagiRaccoon').classList.add('nagi-hidden');E('nagiPanel').hidden=true};
+ E('nagiCursorTips').onchange=e=>{nagiRuntime.cursorTips=e.target.checked;if(!nagiRuntime.cursorTips){nagiRuntime.nearCursor=false;clearTimeout(nagiRuntime.tipTimer);nagiRestorePlace()}};
+ E('nagiRaccoon').onpointerdown=nagiDragStart;E('nagiRaccoon').onpointermove=nagiDragMove;E('nagiRaccoon').onpointerup=nagiDragEnd;
+ E('nagiRaccoon').onpointercancel=()=>{nagiRuntime.drag=null;E('nagiRaccoon').classList.remove('nagi-dragging')};
+ E('nagiRaccoon').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();nagiOpen()}};
+ try{const seat=JSON.parse(localStorage.getItem('plc-nagi-seat-v1')||'null');if(seat&&Number.isFinite(seat.x)&&Number.isFinite(seat.y)){nagiPosition(seat.x*window.innerWidth,seat.y*window.innerHeight);nagiRuntime.sitting=!!seat.sitting;E('nagiRaccoon').classList.toggle('nagi-sitting',nagiRuntime.sitting)}}catch{}
+ nagiGuideStart('first');
+ window.addEventListener('pointermove',e=>{if(!nagiRuntime.drag)nagiRuntime.lastCursor={x:e.clientX,y:e.clientY}},{passive:true});
+ window.setInterval(()=>{if(Math.random()<.22)nagiNearCursor();if(Math.random()<.25){E('nagiRaccoon').classList.add('nagi-blink');setTimeout(()=>E('nagiRaccoon').classList.remove('nagi-blink'),200)}},17500);
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -3690,7 +3806,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
