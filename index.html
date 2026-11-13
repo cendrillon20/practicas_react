@@ -571,6 +571,7 @@ function evaluateLadder(plc,ready){
  return {output:Number(plan.output),active:!!isOn};
 }
 function solve(){live=new Set();zero=new Set();ins=new Set();outs=new Set();activeLoads=new Set();if(!simulation)return;
+if(!taskMayRun())return;
 const plus=nodes.find(n=>n.type==='railplus'),minus=nodes.find(n=>n.type==='railzero'),plc=nodes.find(n=>n.type==='plc');if(!plus||!minus||!plc)return;
 const map=new Map(),link=(a,b)=>{if(!map.has(a))map.set(a,[]);map.get(a).push(b)},reach=(seeds)=>{const seen=new Set(seeds),q=[...seeds];for(let i=0;i<q.length;i++)for(const x of map.get(q[i])||[])if(!seen.has(x)){seen.add(x);q.push(x)}return seen};
 for(const bus of [plus,minus])for(let i=0;i<localPorts(bus).length;i++)for(let j=0;j<localPorts(bus).length;j++)link(K(bus,i),K(bus,j));
@@ -2549,7 +2550,8 @@ function graphRemovePhysicalFor(item,pet){
 function graphNewRung(){
  if(simulation){E('graphicMessage').textContent='Cambia a Edit Mode para agregar redes.';return}
  if(graphicLadder.rungs.length>=16){E('graphicMessage').textContent='Máximo 16 redes en este laboratorio.';return}
- const rung={id:graphId(),branches:[[graphItem('NO')]],output:graphNextPin('output')??18};
+ const initialContact=graphItem('NO');initialContact.pin=graphNextPin('input')??initialContact.pin;
+ const rung={id:graphId(),branches:[[initialContact]],output:graphNextPin('output')??18};
  graphicLadder.rungs.push(rung);graphicLadder.enabled=true;graphicSelection={rungId:rung.id,branch:0,index:0};
  graphAutoSyncAndRedraw();
 }
