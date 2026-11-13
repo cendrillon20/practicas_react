@@ -3498,6 +3498,69 @@ function antonioInitialize(){
  },30000);
 }
 
+
+const petHouseState={aura:{happiness:70,energy:82,knowledge:65},antonio:{happiness:75,energy:80,knowledge:50},joan:{happiness:76,energy:77,knowledge:68},stars:0};
+function petBound(x){return Math.round(Math.max(0,Math.min(100,Number(x)||0)))}
+function petLoad(){
+ try{
+  const saved=JSON.parse(localStorage.getItem('plc-companion-house-v1')||'null');
+  if(!saved)return;
+  for(const name of ['aura','antonio','joan'])for(const stat of ['happiness','energy','knowledge'])
+   if(Number.isFinite(saved?.[name]?.[stat]))petHouseState[name][stat]=petBound(saved[name][stat]);
+  petHouseState.stars=Math.max(0,Math.min(100000,Number(saved.stars)||0));
+ }catch{}
+}
+function petSave(){try{localStorage.setItem('plc-companion-house-v1',JSON.stringify(petHouseState))}catch{}}
+function petMood(name){const state=petHouseState[name],mean=(state.happiness+state.energy+state.knowledge)/3;return mean>=75?'Joyful · Alegre':mean>=55?'Happy · Contento':'Learning · Aprendiendo'}
+function petRender(){
+ const name=E('petSelected').value||'aura',state=petHouseState[name];if(!state)return;
+ E('petAuraMood').textContent=petMood('aura');E('petAntonioMood').textContent=petMood('antonio');E('petJoanMood').textContent=petMood('joan');
+ E('petStatus').textContent='Companion: '+name+'\nHappiness · Alegría: '+state.happiness+'/100\nEnergy · Energía: '+state.energy+'/100\nKnowledge · Conocimiento: '+state.knowledge+'/100\nLearning Stars: '+petHouseState.stars;
+}
+function petActivity(kind){
+ const name=E('petSelected').value||'aura',p=petHouseState[name];if(!p)return;
+ const values={feed:[7,4,0],play:[12,-5,2],rest:[3,15,0],study:[3,-4,12]}[kind];if(!values)return;
+ p.happiness=petBound(p.happiness+values[0]);p.energy=petBound(p.energy+values[1]);p.knowledge=petBound(p.knowledge+values[2]);
+ if(kind==='study')petHouseState.stars+=1;
+ const messages={feed:'¡Qué rico! Gracias por cuidar a '+name+'.',play:'¡Hora de jugar! '+name+' está más feliz.',rest:name+' descansó y recuperó energía.',study:name+' aprendió un nuevo concepto de automatización. +1 Learning Star.'};
+ E('petFeedback').textContent=messages[kind]+' Recuerda que un PLC se programa para actuar solamente cuando las entradas y condiciones cumplen la tarea.';
+ if(name==='aura')auraTailMagic('¡Gracias por cuidarme!');
+ else if(name==='antonio')antonioSay('¡Cuac! ¡Estoy muy contento!');
+ else joanSay('¡Piu! ¡Gracias por ayudarme!');
+ petSave();petRender();
+}
+const petQuestions=[
+ {q:'¿Para qué sirve TON?',a:['Retrasar la activación','Enviar una señal analógica','Cambiar el color del cable'],c:0,why:'TON activa la salida después de mantener IN=1 durante PT.'},
+ {q:'¿Qué hace un contacto NC físico?',a:['Se abre al pulsarlo','Siempre produce un valor cero','Cuenta piezas'],c:0,why:'Normalmente cerrado significa continuidad en reposo. El estado de bit del PLC depende de su cableado.'},
+ {q:'¿Qué hace CTU?',a:['Cuenta flancos positivos','Controla tensión alterna','Mide presión'],c:0,why:'Count Up incrementa el contador cuando detecta un flanco válido.'},
+ {q:'¿Qué significa Rung?',a:['Una red Ladder','Una salida analógica','Un robot industrial'],c:0,why:'Rung es el término inglés para red o peldaño de Ladder.'},
+ {q:'¿Qué equipo protege ante sobrecorriente?',a:['Fuse','TON','Photoeye'],c:0,why:'Fuse significa fusible. Debe dimensionarse según especificaciones eléctricas reales.'}
+];
+function petChallenge(){
+ const q=petQuestions[Math.floor(Math.random()*petQuestions.length)],box=E('petFeedback');box.replaceChildren();
+ const text=document.createElement('strong');text.textContent='Learning Challenge · '+q.q;box.appendChild(text);
+ for(let i=0;i<q.a.length;i++){
+  const answer=document.createElement('button');answer.textContent=q.a[i];answer.style.margin='5px';
+  answer.onclick=()=>{
+   const good=i===q.c;if(good)petHouseState.stars+=2;
+   box.textContent=(good?'✓ Correcto. +2 estrellas. ':'Inténtalo nuevamente. ')+q.why;
+   const next=document.createElement('button');next.textContent='Next Challenge';next.onclick=petChallenge;box.appendChild(next);
+   petSave();petRender();
+  };
+  box.appendChild(answer);
+ }
+}
+function petInitialize(){
+ petLoad();
+ E('showPetHouse').onclick=()=>{E('petHouse').hidden=false;petRender()};
+ E('closePetHouse').onclick=()=>E('petHouse').hidden=true;
+ E('petSelected').onchange=petRender;
+ for(const [id,kind] of [['petFeed','feed'],['petPlay','play'],['petRest','rest'],['petStudy','study']])E(id).onclick=()=>petActivity(kind);
+ E('petLearnGame').onclick=petChallenge;
+ E('petVisitTutor').onclick=()=>{E('petHouse').hidden=true;openTutor()};
+ petRender();
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -3554,7 +3617,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
