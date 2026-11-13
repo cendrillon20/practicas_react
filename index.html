@@ -318,7 +318,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
 
 .nagi-raccoon{position:fixed;right:112px;bottom:12px;z-index:82;width:79px;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;filter:drop-shadow(0 5px 7px #0009);animation:nagi-scamper 11s ease-in-out infinite alternate;touch-action:none}
 .nagi-raccoon svg{height:74px;width:78px;overflow:visible}.nagi-raccoon span{background:#1c354b;color:#f1f9ff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:9px}
-.nagi-raccoon.nagi-sitting,.nagi-raccoon.nagi-dragging,.nagi-raccoon.nagi-near-cursor,.nagi-raccoon.nagi-sleeping{animation:none!important}
+.nagi-raccoon.nagi-sitting,.nagi-raccoon.nagi-dragging,.nagi-raccoon.nagi-near-cursor,.nagi-raccoon.nagi-sleeping,.nagi-raccoon.companion-sleeping{animation:none!important}
 .nagi-raccoon.nagi-dragging{z-index:155;cursor:grabbing}
 .nagi-raccoon.nagi-hidden{opacity:0;pointer-events:none;visibility:hidden}
 .nagi-raccoon.nagi-near-cursor{pointer-events:none;transition:left .35s,top .35s}
@@ -436,7 +436,7 @@ body.phone-mode main{flex:1 1 0;min-height:0}
   <path d="M57 93Q60 96 63 93" fill="none" stroke="#6f7d7f" stroke-width="2"/>
   <path class="nagi-tail" d="M92 97Q127 100 112 58Q124 80 111 106Q105 120 85 108Z" fill="#60717e" stroke="#364555" stroke-width="3"/>
   <path d="M100 103L113 102M104 88L117 87M110 73L117 71" stroke="#b2bac2" stroke-width="5"/>
- </svg>
+ </svg><div class="companion-bedding" aria-hidden="true"><div class="companion-pillow"></div><div class="companion-blanket"></div><span class="companion-zzz">Zzz</span></div>
  <span>Nagi</span><div id="nagiSpeech" class="nagi-speech" hidden role="status"></div>
 </div>
 <section id="nagiPanel" class="companion-panel nagi-panel" hidden aria-label="Nagi platform walkthrough">
