@@ -816,7 +816,7 @@ const routed=routeWire(w);w.unroutable=!routed;
  // Mantener la última ruta válida visible si el usuario pasa por una posición
  // temporalmente imposible (por ejemplo, dos piezas superpuestas).
  if(routed)w.lastRoute=routed.d;
- const p=S('path',{d:routed?.d||w.lastRoute||'',style:'--wire-color:'+(w.color||'#ffc844'),class:(chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':'')+(w.unroutable?' wire-blocked':'')},wl);
+ const p=S('path',{d:routed?.d||w.lastRoute||'',style:'--wire-color:'+(w.color||'#ffc844'),class:(chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':'')+(w.unroutable?' wire-blocked':'')+(typeof antonioState!=='undefined'&&antonioState.prankedWire===w.id?' antonio-prank-wire':'')},wl);p.setAttribute('data-wire-id',w.id);
 const hit=S('path',{d:routed?.d||w.lastRoute||'',style:'stroke:transparent;stroke-width:18px;fill:none;pointer-events:stroke;cursor:pointer'},wl);
  const selectWire=e=>{e.stopPropagation();e.preventDefault();if(simulation)return;w.lastClickPos=pointer(e);multi.clear();chosen={kind:'wire',id:w.id};E('wireColor').value=w.color||'#ffc844';refreshInspector();draw();showMenu(e,w,'wire')};
  p.onpointerdown=selectWire;hit.onpointerdown=selectWire;
@@ -3398,6 +3398,106 @@ function joanInitialize(){
  },34000);
 }
 
+
+const antonioState={mode:'guide',step:0,steps:[],drag:null,sitting:false,prankedWire:null,prankTimer:null,speechTimer:null};
+function antonioSay(message){
+ const bubble=E('antonioSpeech');bubble.textContent=String(message).slice(0,420);bubble.hidden=false;
+ clearTimeout(antonioState.speechTimer);antonioState.speechTimer=setTimeout(()=>bubble.hidden=true,5000);
+}
+function antonioOpen(){E('antonioPanel').hidden=false;antonioSay('¡Cuac! Soy Antonio, tu compañero de prácticas. Te guío paso a paso.')}
+function antonioPosition(x,y){
+ const duck=E('antonioDuck');duck.classList.add('antonio-placed');
+ duck.style.left=Math.round(Math.max(5,Math.min(window.innerWidth-92,x)))+'px';
+ duck.style.top=Math.round(Math.max(5,Math.min(window.innerHeight-102,y)))+'px';
+ duck.style.right='auto';duck.style.bottom='auto';
+}
+function antonioDragStart(e){
+ if(e.button!==0)return;
+ const b=E('antonioDuck').getBoundingClientRect();antonioState.drag={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-b.left,dy:e.clientY-b.top,moved:false};
+ E('antonioDuck').setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();
+}
+function antonioDragMove(e){
+ const d=antonioState.drag;if(!d||d.id!==e.pointerId)return;
+ if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>6)d.moved=true;
+ if(!d.moved)return;
+ E('antonioDuck').classList.add('antonio-dragging');antonioPosition(e.clientX-d.dx,e.clientY-d.dy);
+}
+function antonioDragEnd(e){
+ const d=antonioState.drag;if(!d||d.id!==e.pointerId)return;
+ antonioState.drag=null;E('antonioDuck').classList.remove('antonio-dragging');
+ if(d.moved){
+  antonioState.sitting=true;E('antonioDuck').classList.add('antonio-sitting');
+  const b=E('antonioDuck').getBoundingClientRect();
+  try{localStorage.setItem('plc-antonio-seat-v1',JSON.stringify({x:b.left/window.innerWidth,y:b.top/window.innerHeight}))}catch{}
+  antonioSay('¡Me quedo sentado aquí! ¿Seguimos construyendo la lógica?');
+ }else antonioOpen();
+}
+function antonioPrepare(){
+ const goal=E('ladderGoal').value.trim(),task=taskInterpret(goal),plc=nodes.find(n=>n.type==='plc');
+ const inPin=plc?plcInputPins(plc)[0]:3,outPin=plc?plcOutputPins(plc)[0]:18;
+ const steps=[
+ '1. Task · Tarea: '+(goal||'Escribe primero qué debe hacer el PLC en Program.'),
+ '2. Inputs · Entradas: selecciona el sensor o pulsador y conéctalo al borne '+portName(plc,inPin)+' con su alimentación adecuada.',
+ '3. Output · Salida: conecta una lámpara o actuador a '+portName(plc,outPin)+' y su retorno de 0V.',
+ '4. Ladder · Abre Ladder Full View, selecciona ＋ Rung y asigna un contacto NO o NC a la señal de entrada.',
+ '5. Coil · Asigna una bobina OTE a '+portName(plc,outPin)+'. Revisa que el símbolo y el borne físico correspondan.',
+ '6. Sync Electrical · Usa la sincronización para crear los componentes físicos faltantes; revisa todos los cables creados.',
+ '7. Verify Task · Comprueba que la lógica coincide con la solicitud. Después inicia Simular y observa las ondas.'
+ ];
+ if(task.kind==='timer')steps.splice(5,0,'TON · Añade un temporizador con PT '+task.seconds+' segundos.');
+ if(task.kind==='blink-count')steps.splice(5,0,'BLINK · Configura '+task.flashes+' destellos con tiempos ON/OFF '+task.seconds+' segundos.');
+ if(task.kind==='flash')steps.splice(5,0,'FLASH · Para parpadeo continuo se necesita un bloque FLASH compatible. No se ejecutará si falta.');
+ if(task.kind==='complex')steps.splice(5,0,'Limitación · La secuencia es compleja: divide la tarea en estados, entradas, salidas y redes verificables.');
+ antonioState.steps=steps;antonioState.step=0;antonioRenderStep();
+}
+function antonioRenderStep(){
+ const el=E('antonioSteps'),steps=antonioState.steps;
+ if(!steps.length){el.textContent='Describe la tarea del PLC y pulsa Read My Task.';return}
+ el.textContent='STEP '+(antonioState.step+1)+' / '+steps.length+'\n\n'+steps[antonioState.step]+'\n\nConsejo: cuando termines este paso, pulsa Next Step.';
+ E('antonioPrevious').disabled=antonioState.step<=0;
+ E('antonioNext').disabled=antonioState.step>=steps.length-1;
+}
+function antonioStep(delta){
+ if(!antonioState.steps.length){antonioPrepare();return}
+ antonioState.step=Math.max(0,Math.min(antonioState.steps.length-1,antonioState.step+delta));
+ antonioRenderStep();antonioSay('¡Muy bien! Paso '+(antonioState.step+1)+' de '+antonioState.steps.length+'.');
+}
+function antonioRepair(){
+ clearTimeout(antonioState.prankTimer);
+ antonioState.prankedWire=null;
+ E('antonioFeedback').textContent='Aura reparó la desconexión visual. Los cables reales del proyecto nunca fueron modificados.';
+ draw();auraTailMagic('¡Listo, Antonio! No toques las conexiones sin permiso.');
+}
+function antonioPrank(){
+ if(antonioState.mode!=='game'||!E('antonioAllowPranks').checked){E('antonioFeedback').textContent='Activa Game Mode y autoriza las travesuras visuales. No se alterará tu circuito.';return}
+ if(!wires.length){E('antonioFeedback').textContent='No hay cables para jugar. Crea un circuito primero.';return}
+ clearTimeout(antonioState.prankTimer);
+ const sample=wires[Math.floor(Math.random()*wires.length)];
+ antonioState.prankedWire=sample.id;
+ E('antonioFeedback').textContent='¡Cuac! Antonio hizo parpadear el cable #'+sample.id+'. Es solo una simulación visual.';
+ draw();antonioSay('¡Cuac! ¡Una travesura inofensiva!');
+ antonioState.prankTimer=setTimeout(antonioRepair,2400);
+}
+function antonioInitialize(){
+ E('showAntonio').onclick=antonioOpen;E('closeAntonio').onclick=()=>E('antonioPanel').hidden=true;
+ E('antonioDuck').onpointerdown=antonioDragStart;E('antonioDuck').onpointermove=antonioDragMove;E('antonioDuck').onpointerup=antonioDragEnd;
+ E('antonioDuck').onpointercancel=()=>{antonioState.drag=null;E('antonioDuck').classList.remove('antonio-dragging')};
+ E('antonioDuck').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();antonioOpen()}};
+ E('antonioPrepare').onclick=antonioPrepare;E('antonioPrevious').onclick=()=>antonioStep(-1);E('antonioNext').onclick=()=>antonioStep(1);
+ E('antonioPrank').onclick=antonioPrank;E('antonioRepair').onclick=antonioRepair;
+ E('antonioMode').onchange=e=>{antonioState.mode=e.target.value;E('antonioDuck').classList.toggle('hide-duck',antonioState.mode==='off');E('antonioFeedback').textContent=antonioState.mode==='game'?'Game Mode: puedes autorizar travesuras visuales.':'Antonio te acompañará paso a paso.'};
+ try{
+  const raw=localStorage.getItem('plc-antonio-seat-v1'),seat=raw&&JSON.parse(raw);
+  if(seat&&Number.isFinite(seat.x)&&Number.isFinite(seat.y)){antonioPosition(seat.x*window.innerWidth,seat.y*window.innerHeight);E('antonioDuck').classList.add('antonio-sitting')}
+ }catch{}
+ window.setInterval(()=>{
+  if(antonioState.mode==='off')return;
+  const duck=E('antonioDuck');duck.classList.add('antonio-flapping');setTimeout(()=>duck.classList.remove('antonio-flapping'),1350);
+  if(Math.random()<.45){duck.classList.add('antonio-blink');setTimeout(()=>duck.classList.remove('antonio-blink'),180)}
+  if(antonioState.mode==='game'&&E('antonioAllowPranks').checked&&Math.random()<.24)antonioPrank();
+ },30000);
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -3454,7 +3554,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();joanInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
