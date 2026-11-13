@@ -379,6 +379,8 @@ header button.companion-summon:focus-visible,#fluidStudio button:focus-visible{o
 /* Compact professional workspace navigation */
 header{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 13px}header .push{white-space:nowrap}.header-more{position:relative;z-index:160}.header-more>summary{cursor:pointer;list-style:none;border:1px solid #446a87;background:#18334b;border-radius:9px;padding:9px 12px;color:#dff6ff;font:600 12px Arial}.header-more[open]>summary{background:#2a5a70}.header-more-items{position:absolute;right:0;top:calc(100% + 5px);display:flex;flex-wrap:wrap;gap:7px;width:max-content;max-width:min(470px,94vw);padding:12px;background:#10283f;border:1px solid #5686a6;border-radius:13px;box-shadow:0 12px 35px #000b}.companion-menu .header-more-items{width:270px}.bell-ringing{animation:bell-ring .15s linear 4}@keyframes bell-ring{25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}}
 .fluid-companions{display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px;background:#102a40}.fluid-companions button{border:1px solid #6b9eb7;border-radius:10px;background:#234960;color:#e5f8ff;padding:9px 13px;cursor:pointer}.fluid-learning{background:#193b4c;color:#f2fbff;border:1px solid #78adbd;border-radius:12px;padding:12px 18px;max-height:190px;overflow:auto}.fluid-learning[hidden]{display:none}.fluid-learning p{margin:7px 0}.fluid-learning li{margin:3px 0}
+
+.fluid-mascot{position:fixed;z-index:82;bottom:12px;width:83px;display:flex;flex-direction:column;align-items:center;cursor:grab;touch-action:none;user-select:none;filter:drop-shadow(0 5px 9px #0008);animation:fluid-pet-bob 3s ease-in-out infinite alternate}.fluid-mascot strong{background:#1a354a;border:1px solid #9dd3de;border-radius:9px;color:#fff;font:700 11px Arial;padding:3px 7px}.fluid-mascot-art{font-size:59px;line-height:1.2;transition:transform .2s}.fluid-mascot:hover .fluid-mascot-art{transform:rotate(-8deg) scale(1.08)}.fluid-mascot-dragging{animation:none;cursor:grabbing}.fluid-dog{left:280px}.fluid-cat{left:370px}.fluid-lion{left:460px}.fluid-mascot-bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:200px;background:#f3fbff;color:#18344a;border:2px solid #71b7c7;border-radius:13px;padding:10px;font:12px/1.4 Arial;box-shadow:0 7px 22px #0008}.fluid-mascot-bubble[hidden]{display:none}.fluid-mascot.companion-working-tucked{display:none!important}.fluid-mascot.companion-sleeping{animation:none;filter:grayscale(.3) brightness(.8);pointer-events:none}.fluid-mascot.companion-sleeping:after{content:'💤';position:absolute;top:-17px;right:-3px;font-size:24px}@keyframes fluid-pet-bob{to{transform:translateY(-7px)}}@media(max-width:700px){.fluid-mascot{width:60px}.fluid-mascot-art{font-size:43px}.fluid-dog{left:15vw}.fluid-cat{left:29vw}.fluid-lion{left:43vw}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMayboca" title="Mayboca · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="dialog" aria-modal="true" aria-label="Editor neumático e hidráulico">
@@ -483,6 +485,9 @@ header{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 13px}h
  <div class="tutor-references"><strong>Documentación de fabricantes</strong><a href="https://www.rockwellautomation.com/es-es/docs/studio-5000-logix-designer/38-00/contents-ditamap/studio-5000-logix-designer.html" target="_blank" rel="noopener noreferrer">Rockwell Studio 5000 · ayuda oficial</a><a href="https://literature.rockwellautomation.com/idc/groups/literature/documents/rm/1762-rm001_-en-p.pdf" target="_blank" rel="noopener noreferrer">Rockwell MicroLogix · instrucciones</a><a href="https://www.deltaww.com/en-US/service-support/faq/326" target="_blank" rel="noopener noreferrer">Delta · WPLSoft / ISPSoft</a><a href="https://content.helpme-codesys.com/es/CODESYS%20LD%20FBD/_cds_programming_in_ld.html" target="_blank" rel="noopener noreferrer">CODESYS · programación LD</a></div>
 </section>
 </div>
+<div id="leonardoPet" class="fluid-mascot fluid-dog" role="button" tabindex="0" aria-label="Leonardo, dálmata de hidráulica" title="Leonardo · hidráulica"><div class="fluid-mascot-art">🐕</div><strong>Leonardo</strong><div class="fluid-mascot-bubble" hidden role="status"></div></div>
+<div id="bryanPet" class="fluid-mascot fluid-cat" role="button" tabindex="0" aria-label="Bryan, gatito naranja de neumática" title="Bryan · neumática"><div class="fluid-mascot-art">🐈</div><strong>Bryan</strong><div class="fluid-mascot-bubble" hidden role="status"></div></div>
+<div id="maybocaPet" class="fluid-mascot fluid-lion" role="button" tabindex="0" aria-label="Mayboca, león tutor de fluidos" title="Mayboca · tutor de fluidos"><div class="fluid-mascot-art">🦁</div><strong>Mayboca</strong><div class="fluid-mascot-bubble" hidden role="status"></div></div>
 <div id="trannyCrab" class="tranny-crab" role="button" tabindex="0" title="Tranny · ordenar diagrama y Ladder" aria-label="Tranny, cangrejo organizador">
 <svg viewBox="0 0 118 107" aria-hidden="true">
 <ellipse cx="58" cy="97" rx="36" ry="8" fill="#162538" opacity=".3"/>
@@ -570,10 +575,10 @@ header{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px 13px}h
   <div class="pet-house-roof"></div><div class="pet-house-room">
    <div class="pet-house-character" data-pet="aura" role="button" tabindex="0" aria-label="Seleccionar Aura">🦊<strong>Aura</strong><small id="petAuraMood">Happy</small></div>
    <div class="pet-house-character" data-pet="antonio" role="button" tabindex="0" aria-label="Seleccionar Antonio">🦆<strong>Antonio</strong><small id="petAntonioMood">Happy</small></div>
-   <div class="pet-house-character" data-pet="joan" role="button" tabindex="0" aria-label="Seleccionar Joan">🐧<strong>Joan</strong><small id="petJoanMood">Happy</small></div><div class="pet-house-character" data-pet="nagi" role="button" tabindex="0" aria-label="Seleccionar Nagi">🦝<strong>Nagi</strong><small id="petNagiMood">Happy</small></div><div class="pet-house-character" data-pet="tranny" role="button" tabindex="0" aria-label="Seleccionar Tranny">🦀<strong>Tranny</strong><small id="petTrannyMood">Happy</small></div>
+   <div class="pet-house-character" data-pet="joan" role="button" tabindex="0" aria-label="Seleccionar Joan">🐧<strong>Joan</strong><small id="petJoanMood">Happy</small></div><div class="pet-house-character" data-pet="nagi" role="button" tabindex="0" aria-label="Seleccionar Nagi">🦝<strong>Nagi</strong><small id="petNagiMood">Happy</small></div><div class="pet-house-character" data-pet="leonardo" role="button" tabindex="0" aria-label="Seleccionar Leonardo">🐕<strong>Leonardo</strong><small id="petLeonardoMood">Happy</small></div><div class="pet-house-character" data-pet="bryan" role="button" tabindex="0" aria-label="Seleccionar Bryan">🐈<strong>Bryan</strong><small id="petBryanMood">Happy</small></div><div class="pet-house-character" data-pet="mayboca" role="button" tabindex="0" aria-label="Seleccionar Mayboca">🦁<strong>Mayboca</strong><small id="petMaybocaMood">Happy</small></div><div class="pet-house-character" data-pet="tranny" role="button" tabindex="0" aria-label="Seleccionar Tranny">🦀<strong>Tranny</strong><small id="petTrannyMood">Happy</small></div>
   </div>
  </div>
- <label>Take care of · Cuida a<select id="petSelected"><option value="aura">Aura</option><option value="antonio">Antonio</option><option value="joan">Joan</option><option value="nagi">Nagi</option><option value="tranny">Tranny</option></select></label>
+ <label>Take care of · Cuida a<select id="petSelected"><option value="aura">Aura</option><option value="antonio">Antonio</option><option value="joan">Joan</option><option value="nagi">Nagi</option><option value="tranny">Tranny</option><option value="leonardo">Leonardo</option><option value="bryan">Bryan</option><option value="mayboca">Mayboca</option></select></label>
  <div class="pet-house-bars"><label>❤️ Alegría <progress id="petHappyBar" max="100" value="70"></progress></label><label>⚡ Energía <progress id="petEnergyBar" max="100" value="80"></progress></label><label>🧠 Aprendizaje <progress id="petKnowledgeBar" max="100" value="60"></progress></label></div><div id="petStatus" class="pet-status" aria-live="polite"></div>
  <div class="studio-actions"><button id="petFeed">Feed · Alimentar</button><button id="petPlay">Play · Jugar</button><button id="petRest">Rest · Descansar</button><button id="petStudy">Study · Estudiar</button></div>
  <div id="petFeedback" class="antonio-steps">Elige un personaje y realiza una actividad.</div>
@@ -3656,13 +3661,13 @@ function antonioInitialize(){
 }
 
 
-const petHouseState={aura:{happiness:70,energy:82,knowledge:65},antonio:{happiness:75,energy:80,knowledge:50},joan:{happiness:76,energy:77,knowledge:68},nagi:{happiness:77,energy:81,knowledge:72},tranny:{happiness:74,energy:79,knowledge:67},stars:0};
+const petHouseState={aura:{happiness:70,energy:82,knowledge:65},antonio:{happiness:75,energy:80,knowledge:50},joan:{happiness:76,energy:77,knowledge:68},nagi:{happiness:77,energy:81,knowledge:72},tranny:{happiness:74,energy:79,knowledge:67},leonardo:{happiness:76,energy:82,knowledge:71},bryan:{happiness:83,energy:77,knowledge:69},mayboca:{happiness:78,energy:83,knowledge:75},stars:0};
 function petBound(x){return Math.round(Math.max(0,Math.min(100,Number(x)||0)))}
 function petLoad(){
  try{
   const saved=JSON.parse(localStorage.getItem('plc-companion-house-v1')||'null');
   if(!saved)return;
-  for(const name of ['aura','antonio','joan','nagi','tranny'])for(const stat of ['happiness','energy','knowledge'])
+  for(const name of ['aura','antonio','joan','nagi','tranny','leonardo','bryan','mayboca'])for(const stat of ['happiness','energy','knowledge'])
    if(Number.isFinite(saved?.[name]?.[stat]))petHouseState[name][stat]=petBound(saved[name][stat]);
   petHouseState.stars=Math.max(0,Math.min(100000,Number(saved.stars)||0));
  }catch{}
@@ -3671,7 +3676,7 @@ function petSave(){try{localStorage.setItem('plc-companion-house-v1',JSON.string
 function petMood(name){const state=petHouseState[name],mean=(state.happiness+state.energy+state.knowledge)/3;return mean>=75?'Joyful · Alegre':mean>=55?'Happy · Contento':'Learning · Aprendiendo'}
 function petRender(){
  const name=E('petSelected').value||'aura',state=petHouseState[name];if(!state)return;
- E('petAuraMood').textContent=petMood('aura');E('petAntonioMood').textContent=petMood('antonio');E('petJoanMood').textContent=petMood('joan');E('petNagiMood').textContent=petMood('nagi');E('petTrannyMood').textContent=petMood('tranny');
+ E('petAuraMood').textContent=petMood('aura');E('petAntonioMood').textContent=petMood('antonio');E('petJoanMood').textContent=petMood('joan');E('petNagiMood').textContent=petMood('nagi');E('petTrannyMood').textContent=petMood('tranny');E('petLeonardoMood').textContent=petMood('leonardo');E('petBryanMood').textContent=petMood('bryan');E('petMaybocaMood').textContent=petMood('mayboca');
  E('petHappyBar').value=state.happiness;E('petEnergyBar').value=state.energy;E('petKnowledgeBar').value=state.knowledge;
  document.querySelectorAll('#petHouse .pet-house-character').forEach(el=>el.classList.toggle('pet-active',el.dataset.pet===name));
  E('petStatus').textContent='Companion: '+name+'\nHappiness · Alegría: '+state.happiness+'/100\nEnergy · Energía: '+state.energy+'/100\nKnowledge · Conocimiento: '+state.knowledge+'/100\nLearning Stars: '+petHouseState.stars;
@@ -3685,7 +3690,7 @@ function petActivity(kind){
  E('petFeedback').textContent=messages[kind]+' Recuerda que un PLC se programa para actuar solamente cuando las entradas y condiciones cumplen la tarea.';
  if(name==='aura')auraTailMagic('¡Gracias por cuidarme!');
  else if(name==='antonio')antonioSay('¡Cuac! ¡Estoy muy contento!');
- else if(name==='joan')joanSay('¡Piu! ¡Gracias por ayudarme!');else if(name==='nagi')nagiSay('¡Gracias! ¡Ahora exploramos una herramienta nueva!');else trannySay('¡Gracias! Voy a acomodar mis pinzas.');
+ else if(name==='joan')joanSay('¡Piu! ¡Gracias por ayudarme!');else if(name==='nagi')nagiSay('¡Gracias! ¡Ahora exploramos una herramienta nueva!');else if(name==='tranny')trannySay('¡Gracias! Voy a acomodar mis pinzas.');else fluidMascotSay(name,'¡Gracias por cuidarme!');
  petSave();petRender();
 }
 const petQuestions=[
@@ -3866,7 +3871,7 @@ function companionSleepNow(){
  if(!companionCanSleep())return;
  const plc=companionPLCSpot();if(!plc)return;
  const details=[
-  ['auraFox','Aura'],['antonioDuck','Antonio'],['joanPenguin','Joan'],['nagiRaccoon','Nagi'],['trannyCrab','Tranny']
+  ['auraFox','Aura'],['antonioDuck','Antonio'],['joanPenguin','Joan'],['nagiRaccoon','Nagi'],['trannyCrab','Tranny'],['leonardoPet','Leonardo'],['bryanPet','Bryan'],['maybocaPet','Mayboca']
  ];
  let count=0;
  for(const [id] of details){
@@ -3881,6 +3886,7 @@ function companionSleepNow(){
  if(!count)return;
  companionSleep.sleeping=true;
  E('auraSpeech').hidden=true;E('antonioSpeech').hidden=true;E('joanSpeech').hidden=true;E('nagiSpeech').hidden=true;E('trannySpeech').hidden=true;
+ for(const id of ['leonardoPet','bryanPet','maybocaPet'])E(id).querySelector('.fluid-mascot-bubble').hidden=true;
 }
 function companionWake(){
  if(!companionSleep.sleeping)return;
@@ -4088,12 +4094,15 @@ const companionDock={
  antonioDuck:['showAntonio','antonioPanel'],
  joanPenguin:['showJoan','joanPanel'],
  nagiRaccoon:['showNagi','nagiPanel'],
- trannyCrab:['showTranny','trannyPanel']
+ trannyCrab:['showTranny','trannyPanel'],
+ leonardoPet:['showLeonardo','fluidLearning'],
+ bryanPet:['showBryan','fluidLearning'],
+ maybocaPet:['showMayboca','fluidLearning']
 };
 let companionWorking=false;
 function companionTuckWorking(){
  companionWorking=true;
- if(companionSleep.sleeping)companionWake();
+ if(companionSleep.sleeping)return;
  for(const [id,[button]] of Object.entries(companionDock)){
   const mascot=E(id);mascot.classList.add('companion-working-tucked');
   E(button).classList.add('companion-summon','companion-available');
@@ -4106,11 +4115,13 @@ function companionSummon(id){
  if(id==='auraFox')auraVisible(true,'manual');
  if(id==='nagiRaccoon'){nagiRuntime.hidden=false;member.classList.remove('nagi-hidden')}
  if(id==='antonioDuck')member.classList.remove('hide-duck');
+ if(companionSleep.sleeping)return;
  member.classList.remove('companion-sleeping');
  companionSleep.lastActivity=Date.now();
 }
 function companionDockInitialize(){
  for(const [id,[button,panel]] of Object.entries(companionDock)){
+  if(['leonardoPet','bryanPet','maybocaPet'].includes(id))continue;
   E(button).classList.add('companion-summon','companion-available');
   E(button).onclick=()=>{
    companionSummon(id);
@@ -4125,6 +4136,14 @@ function companionDockInitialize(){
  // Initial mascots are visible; they retire only when the user begins hands-on work.
 }
 
+
+
+/* Interactive fluid companions, with saved positions and contextual lessons. */
+const fluidMascotInfo={leonardo:{id:'leonardoPet',button:'showLeonardo',mode:'hydraulic',tips:['La válvula de alivio protege contra presión excesiva.','Identifica el retorno al depósito antes de conectar actuadores.','Una válvula 4/3 tiene cuatro vías y tres posiciones.']},bryan:{id:'bryanPet',button:'showBryan',mode:'pneumatic',tips:['La unidad FRL prepara el aire comprimido.','Una válvula 5/2 suele gobernar un cilindro de doble efecto.','Distingue alimentación, salidas y escapes.']},mayboca:{id:'maybocaPet',button:'showMayboca',mode:null,tips:['Compara símbolos antes de conectar sus puertos.','Usa el autoaprendizaje para practicar.','Los esquemas son didácticos; comprueba la seguridad de instalaciones reales.']}};
+function fluidMascotSay(name,message){const d=fluidMascotInfo[name];if(!d)return;const el=E(d.id),bubble=el.querySelector('.fluid-mascot-bubble');bubble.textContent=message;bubble.hidden=false;clearTimeout(el._bubbleTimer);el._bubbleTimer=setTimeout(()=>bubble.hidden=true,4800)}
+function fluidMascotInit(){for(const [name,d] of Object.entries(fluidMascotInfo)){const el=E(d.id),key='plc-fluid-mascot-'+name+'-v1';try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)){el.style.left=Math.max(0,Math.min(innerWidth-90,saved.x*innerWidth))+'px';el.style.top=Math.max(0,Math.min(innerHeight-100,saved.y*innerHeight))+'px';el.style.bottom='auto'}}catch{}
+ let drag=null;el.addEventListener('pointerdown',e=>{if(e.button!==0||companionSleep.sleeping)return;const b=el.getBoundingClientRect();drag={pointer:e.pointerId,startX:e.clientX,startY:e.clientY,dx:e.clientX-b.left,dy:e.clientY-b.top,moved:false};el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation()});el.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.pointer)return;if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>6)drag.moved=true;if(drag.moved){el.classList.add('fluid-mascot-dragging');el.style.left=Math.max(4,Math.min(innerWidth-90,e.clientX-drag.dx))+'px';el.style.top=Math.max(4,Math.min(innerHeight-100,e.clientY-drag.dy))+'px';el.style.bottom='auto'}});el.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.pointer)return;const moved=drag.moved;drag=null;el.classList.remove('fluid-mascot-dragging');if(moved){const b=el.getBoundingClientRect();try{localStorage.setItem(key,JSON.stringify({x:b.left/innerWidth,y:b.top/innerHeight}))}catch{}fluidMascotSay(name,'¡Aquí me quedo!')}else{fluidMascotSay(name,d.tips[Math.floor(Math.random()*d.tips.length)]);E(d.button).click()}});el.addEventListener('pointercancel',()=>{drag=null;el.classList.remove('fluid-mascot-dragging')});el.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!companionSleep.sleeping){e.preventDefault();E(d.button).click()}})}
+ const studio=E('fluidStudio');studio.addEventListener('pointerdown',e=>{if(!e.target.closest('#fluidCanvas')||companionSleep.sleeping)return;const selected=E('fluidMode').value;const name=selected==='hydraulic'?'leonardo':'bryan';if(Math.random()<.12)fluidMascotSay(name,fluidMascotInfo[name].tips[Math.floor(Math.random()*fluidMascotInfo[name].tips.length)])});}
 
 /* Optional private generative model through local Ollama. No cloud token,
    remote prompt injection actions, or background data transmission. */
@@ -4278,7 +4297,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionDockInitialize();fluidMascotInit();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
