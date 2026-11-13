@@ -3954,6 +3954,86 @@ E('routeAll').onclick=()=>{
  draw();E('junctionInstructions').textContent='Rutas recalculadas. Los puntos eléctricos y el circuito permanecen conectados.';
 };
 
+
+const trannyState={previous:null,drag:null,sitting:false,timer:null};
+function trannySay(text){
+ const bubble=E('trannySpeech');bubble.textContent=String(text).slice(0,250);bubble.hidden=false;
+ clearTimeout(trannyState.timer);trannyState.timer=setTimeout(()=>bubble.hidden=true,4800);
+}
+function trannyOpen(){E('trannyPanel').hidden=false;companionSummon('trannyCrab');trannySay('¡Clac clac! Puedo organizar el esquema y Ladder sin cambiar su lógica.')}
+function trannyCapture(){
+ return {positions:nodes.map(n=>({id:n.id,x:n.x,y:n.y})),bend:wires.map(w=>({id:w.id,waypoints:w.waypoints?JSON.parse(JSON.stringify(w.waypoints)):null,bendX:w.bendX,bendY:w.bendY}))};
+}
+function trannyTidyCircuit(){
+ if(simulation){E('trannyFeedback').textContent='Entra a Edit Mode antes de ordenar componentes.';return false}
+ trannyState.previous=trannyCapture();
+ const plc=nodes.find(n=>n.type==='plc'),plus=nodes.find(n=>n.type==='railplus'),zeroRail=nodes.find(n=>n.type==='railzero');
+ if(!plc){E('trannyFeedback').textContent='No se encontró un PLC.';return false}
+ const inputs=[],loads=[],joins=[],logic=[];
+ const loaded=new Set(['green','red','amber','blue','white','relay','buzzer','solenoid','motorLoad']);
+ const internal=new Set(['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock']);
+ for(const n of nodes){
+  if([plc.id,plus?.id,zeroRail?.id].includes(n.id))continue;
+  if(n.type==='junction')joins.push(n);
+  else if(loaded.has(n.type))loads.push(n);
+  else if(internal.has(n.type))logic.push(n);
+  else inputs.push(n);
+ }
+ // Keep the controller and both busbars separated; distribute circuit parts
+ // in a readable grid. All wire endpoints remain unchanged.
+ plc.x=410;plc.y=385;plc.angle=0;
+ if(plus){plus.x=330;plus.y=112;plus.angle=0}
+ if(zeroRail){zeroRail.x=330;zeroRail.y=855;zeroRail.angle=0}
+ const lane=(group,originX,originY,cols,dx,dy)=>{
+  group.sort((a,b)=>(a.y-b.y)||(a.x-b.x)||(a.id-b.id));
+  group.forEach((n,i)=>{n.x=originX+(i%cols)*dx;n.y=originY+Math.floor(i/cols)*dy;n.angle=n.angle||0});
+ };
+ lane(inputs,30,210,2,164,145);
+ lane(loads,1070,190,2,165,145);
+ lane(logic,410,1050,4,165,145);
+ lane(joins,290,225,2,770,155);
+ // Preserve user waypoint choices; recalculation is a separate explicit action.
+ manualZoom=false;draw();scheduleFit();
+ E('trannyFeedback').textContent='Electrical Layout listo: '+inputs.length+' sensores/mandos, '+loads.length+' cargas, '+logic.length+' bloques y '+joins.length+' uniones. La conectividad y los pines no han cambiado. Undo Layout recupera la posición anterior.';
+ trannySay('¡Clac! Separé mandos, PLC y salidas. Revisa los cruces de cables antes de simular.');
+ return true;
+}
+function trannyTidyLadder(){
+ const style=E('tidyLadderSpacing').value;
+ const view=E('graphicLadderView');
+ view.classList.remove('tidy-compact','tidy-comfortable');view.classList.add('tidy-'+(style==='compact'?'compact':'comfortable'));
+ renderGraphicLadder();
+ view.classList.add('tidy-'+(style==='compact'?'compact':'comfortable'));
+ E('trannyFeedback').textContent='Ladder Layout: '+(style==='compact'?'compacto':'espacioso')+'. Se han alineado visualmente las redes; no se ha alterado el orden de scan ni los contactos.';
+ trannySay('¡Pinzas arriba! El Ladder está presentable, sin cambiar su comportamiento.');
+ return true;
+}
+function trannyUndo(){
+ if(!trannyState.previous){E('trannyFeedback').textContent='No hay una distribución anterior que recuperar.';return}
+ if(simulation){E('trannyFeedback').textContent='Vuelve a Edit Mode para recuperar posiciones.';return}
+ const snapshot=trannyState.previous;
+ for(const p of snapshot.positions){const n=find(p.id);if(n){n.x=p.x;n.y=p.y}}
+ for(const p of snapshot.bend){const w=wires.find(w=>w.id===p.id);if(!w)continue;
+  if(p.waypoints)w.waypoints=p.waypoints;else delete w.waypoints;
+  if(p.bendX!==undefined)w.bendX=p.bendX;else delete w.bendX;
+  if(p.bendY!==undefined)w.bendY=p.bendY;else delete w.bendY;
+ }
+ trannyState.previous=null;manualZoom=false;draw();scheduleFit();
+ E('trannyFeedback').textContent='Posiciones anteriores restauradas. Los cables siguen conectados a los mismos bornes.';
+}
+function trannyPosition(x,y){const el=E('trannyCrab');el.style.left=Math.max(5,Math.min(window.innerWidth-82,x))+'px';el.style.top=Math.max(5,Math.min(window.innerHeight-90,y))+'px';el.style.bottom='auto'}
+function trannyInit(){
+ E('showTranny').onclick=trannyOpen;E('closeTranny').onclick=()=>E('trannyPanel').hidden=true;
+ E('tidyCircuit').onclick=trannyTidyCircuit;
+ E('tidyLadder').onclick=trannyTidyLadder;
+ E('tidyBoth').onclick=()=>{if(trannyTidyCircuit())trannyTidyLadder()};
+ E('undoTidy').onclick=trannyUndo;
+ E('trannyCrab').onpointerdown=e=>{if(e.button!==0)return;const b=E('trannyCrab').getBoundingClientRect();trannyState.drag={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-b.left,dy:e.clientY-b.top,moved:false};E('trannyCrab').setPointerCapture(e.pointerId);e.stopPropagation();e.preventDefault()};
+ E('trannyCrab').onpointermove=e=>{const d=trannyState.drag;if(!d||d.id!==e.pointerId)return;if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>7)d.moved=true;if(d.moved){E('trannyCrab').classList.add('tranny-dragging');trannyPosition(e.clientX-d.dx,e.clientY-d.dy)}};
+ E('trannyCrab').onpointerup=e=>{const d=trannyState.drag;if(!d||d.id!==e.pointerId)return;trannyState.drag=null;E('trannyCrab').classList.remove('tranny-dragging');if(d.moved){E('trannyCrab').classList.add('tranny-sitting');trannyState.sitting=true}else trannyOpen()};
+ E('trannyCrab').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();trannyOpen()}};
+}
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
@@ -4010,7 +4090,7 @@ if(e.key==='F2')renameChosen();if(e.key.toLowerCase()==='j'&&!simulation){placin
 if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();remove()}
 };
 reset('start');simulation=false;refreshInspector();expansionStatus();updateView();refreshProjects();graphInit();
-initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
+initTutor();initAura();antonioInitialize();joanInitialize();petInitialize();nagiInitialize();trannyInit();companionSleepInitialize();configureSceneTemplate('conveyor');initLanguage();refreshScenarioEditControls();refreshSceneProperties();refreshSceneInputs();
 window.setInterval(()=>{if(simulation&&ladderPlan&&(['timer','tof'].includes(ladderPlan.mode))&&(ladderRuntime.started||ladderRuntime.tofRunning)&&!ladderRuntime.done)draw()},180);
 window.setInterval(sceneTick,140);
 window.setInterval(()=>{
