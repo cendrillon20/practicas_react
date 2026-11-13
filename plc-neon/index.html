@@ -553,6 +553,22 @@ header>.spacer{flex:1!important}
 .mascot-chase-running{animation:mascot-chase-dash 1.1s ease-in-out 3 alternate!important;pointer-events:none}
 @keyframes mascot-chase-dash{0%{transform:translate(0,0) rotate(-5deg)}100%{transform:translate(var(--chase-x,45px),var(--chase-y,-20px)) rotate(12deg)}}
 @media(prefers-reduced-motion:reduce){.mascot-prank-overlay,.mascot-chase-running{animation:none!important}}
+
+/* Games use cloned SVG artwork from the real mascots, never mascot emojis. */
+.mascot-idle-spectators{min-height:43px;gap:4px!important;align-items:end}
+.mascot-game-actor{display:inline-flex;align-items:center;justify-content:center;width:32px;height:40px;overflow:visible;animation:mascot-soft-breathe 2s ease-in-out infinite alternate}
+.mascot-game-actor svg{width:38px!important;height:38px!important;max-width:38px;max-height:38px;overflow:visible}
+.mascot-game-active{transform:translateY(-6px);filter:drop-shadow(0 0 5px #ffe899)}
+.mascot-mini-scene{gap:4px;overflow:hidden;position:relative}
+.mascot-scene-actor{width:33px;height:46px;display:inline-flex;align-items:center;animation:mascot-actor-run 1.25s ease-in-out infinite alternate;animation-delay:var(--actor-delay,0s)}
+.mascot-scene-actor svg{width:40px!important;height:40px!important;flex-shrink:0}
+.mascot-prop-nibble{animation:mascot-nibble 1.3s ease-in-out infinite!important}
+.mascot-prop-wire{font-size:37px!important;animation:mascot-curious-tilt .7s infinite alternate!important}
+.mascot-prop-ball{animation:mascot-actor-run 1.1s infinite alternate!important}
+.mascot-prank-actor{z-index:130!important;animation:mascot-soft-breathe .42s ease-in-out infinite alternate!important;transition:left .8s ease,top .8s ease!important;pointer-events:none!important}
+@keyframes mascot-actor-run{to{transform:translateY(-13px) rotate(12deg)}}
+@keyframes mascot-nibble{0%,100%{transform:scale(1)}45%{transform:scale(.15)}75%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.mascot-game-actor,.mascot-scene-actor,.mascot-prop-nibble,.mascot-prop-wire,.mascot-prop-ball,.mascot-prank-actor{animation:none!important}}
 </style>
 <header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><details id="mainOverflow" class="main-overflow"><summary aria-label="Abrir menú de herramientas" title="Herramientas y apartados"><span aria-hidden="true">⋮</span><span class="menu-summary-text">Menú</span></summary><div class="main-overflow-panel"><div class="menu-panel-head"><div><b>Centro de herramientas</b><small>Organiza tu proyecto y el espacio de trabajo</small></div><span>✦ PLC Studio</span></div><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="region" aria-label="Espacio de trabajo neumático e hidráulico">
@@ -4383,11 +4399,11 @@ function mascotIdleBoardStart(plc){
   if(!players.length)return;
   positions=players.map(()=>1);turn=0;throws=0;
   title.textContent=({board:'🎲 Serpientes y escaleras',snack:'🍪 Merienda de componentes',wires:'🧶 Jugando con cables',ball:'⚽ Pelota entre mascotas'})[mode];
-  spectators.replaceChildren();for(const [id,emoji,name] of players){const el=document.createElement('span');el.textContent=emoji;el.title=name;spectators.append(el)}
+  spectators.replaceChildren();for(const [id,emoji,name] of players){const source=E(id),art=source&&source.querySelector('svg');if(!art)continue;const actor=document.createElement('span');actor.className='mascot-game-actor';actor.title=name;actor.dataset.actor=id;actor.append(art.cloneNode(true));spectators.append(actor)}
   stage.replaceChildren();
   if(mode==='board'){const grid=document.createElement('div');grid.className='mascot-idle-grid';for(let i=24;i>=1;i--){const cell=document.createElement('span');cell.className='mascot-idle-cell';cell.dataset.square=String(i);cell.textContent=i===24?'🏆':i===7||i===18?'🪜':i===13||i===21?'🐍':i;grid.append(cell)}stage.append(grid)}
   else{const scene=document.createElement('div');scene.className='mascot-mini-scene';stage.append(scene)}
-  footer.textContent='Ronda '+round+' · '+players.map(p=>p[1]).join(' ');
+  footer.textContent='Ronda '+round+' · '+players.length+' participantes';
  }
  function tick(){
   if(!companionSleep.sleeping||document.hidden){mascotIdleBoardStop();return}
@@ -4397,14 +4413,16 @@ function mascotIdleBoardStart(plc){
   if(mode==='board'){
    let p=Math.min(24,positions[index]+roll);if(p===7)p=15;if(p===18)p=23;if(p===13)p=5;if(p===21)p=12;positions[index]=p;
    for(const cell of stage.querySelectorAll('.mascot-idle-cell')){const n=Number(cell.dataset.square),here=players.filter((p,i)=>positions[i]===n);cell.classList.toggle('mascot-idle-occupied',here.length>0);cell.textContent=here.length?here.map(p=>p[1]).join(''):n===24?'🏆':n===7||n===18?'🪜':n===13||n===21?'🐍':n}
-   footer.textContent=who[1]+' 🎲 '+roll;
+   footer.textContent='Dado: '+roll+' · turno '+(index+1);
   }else{
    const scene=stage.firstElementChild;scene.replaceChildren();
    const prop=document.createElement('span');prop.className='mascot-mini-prop';
-   if(mode==='snack'){prop.textContent=throws%2?'🔌 ➜ 😋 ➜ 🔌':'🔋 ➜ 😋 ➜ 🔋';footer.textContent=who[1]+' juega a comer y devolver componentes'}
-   if(mode==='wires'){prop.textContent=throws%2?'〰️ 🧶 ⚡ 〰️':'🔌 🧵 ➰ 🔌';footer.textContent=who[1]+' juega con líneas de colores'}
-   if(mode==='ball'){prop.textContent=players.map(p=>p[1]).join(' ⚽ ');footer.textContent='¡Pásala! '+who[1]}
+   if(mode==='snack'){prop.textContent=throws%2?'🔋':'🔌';prop.classList.add('mascot-prop-nibble');footer.textContent=throws%2?'Componente devuelto a su lugar':'¡Ñam! Lo devuelve enseguida'}
+   if(mode==='wires'){prop.textContent='〰️';prop.classList.add('mascot-prop-wire');footer.textContent='Enredan y desenredan el cable'}
+   if(mode==='ball'){prop.textContent='⚽';prop.classList.add('mascot-prop-ball');footer.textContent='¡Atrapadas con la pelota!'}
    scene.append(prop);
+   for(const [i,p] of players.entries()){const art=E(p[0])?.querySelector('svg');if(!art)continue;const actor=document.createElement('span');actor.className='mascot-scene-actor';actor.style.setProperty('--actor-delay',i*.22+'s');actor.append(art.cloneNode(true));scene.append(actor)}
+   for(const actor of spectators.children)actor.classList.toggle('mascot-game-active',actor.dataset.actor===who[0]);
   }
   turn++;throws++;
  }
@@ -4416,19 +4434,21 @@ function mascotIdleBoardStart(plc){
 let mascotPrankBusy=false;
 function mascotCircuitPrank(){
  if(mascotPrankBusy||companionSleep.sleeping||document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- const svg=document.getElementById('canvas');if(!svg||svg.getBoundingClientRect().width<100)return;
- const shapes=[...svg.querySelectorAll('g[data-id],g[data-node-id],g.component')].filter(el=>el.getBoundingClientRect().width>10);
- const wires=[...svg.querySelectorAll('path,line,polyline')].filter(el=>el.getBoundingClientRect().width>25);
- const target=shapes.length?shapes[Math.floor(Math.random()*shapes.length)]:wires[Math.floor(Math.random()*wires.length)];
- if(!target)return;
- const r=target.getBoundingClientRect(),area=svg.getBoundingClientRect();if(r.left<area.left||r.top<area.top||r.right>area.right||r.bottom>area.bottom)return;
+ const svg=E('canvas');if(!svg||svg.getBoundingClientRect().width<100)return;
+ const candidates=[...svg.querySelectorAll('g[data-id],g[data-node-id],g.component')].filter(el=>{const r=el.getBoundingClientRect();return r.width>15&&r.height>10});
+ const target=candidates[Math.floor(Math.random()*candidates.length)];if(!target)return;
+ const r=target.getBoundingClientRect(),area=svg.getBoundingClientRect();
+ if(r.left<area.left||r.top<area.top||r.right>area.right||r.bottom>area.bottom)return;
+ const ids=['bryanPet','nagiRaccoon','trannyCrab'];
+ const actors=ids.map(id=>E(id)).filter(el=>el&&!el.classList.contains('companion-working-tucked'));
+ if(!actors.length)return;
  mascotPrankBusy=true;
- const item=document.createElement('div');item.className='mascot-prank-overlay';item.style.left=Math.min(innerWidth-140,Math.max(4,r.left+r.width/2-45))+'px';item.style.top=Math.min(innerHeight-85,Math.max(65,r.top-45))+'px';
- item.textContent='🐈 🔌 🦝';item.title='Bryan y Nagi juegan a desconectar y reparar';document.body.append(item);
+ const point={x:Math.max(5,Math.min(innerWidth-85,r.left+r.width/2-35)),y:Math.max(65,Math.min(innerHeight-110,r.top-62))};
+ const saved=actors.map(el=>({el,left:el.style.left,right:el.style.right,top:el.style.top,bottom:el.style.bottom}));
+ for(const [i,el] of actors.entries()){el.classList.add('mascot-prank-actor');el.style.left=Math.max(5,Math.min(innerWidth-80,point.x+(i-1)*56))+'px';el.style.top=Math.max(65,Math.min(innerHeight-100,point.y+(i%2)*24))+'px';el.style.right='auto';el.style.bottom='auto'}
  target.classList.add('mascot-temporary-disconnect');
- setTimeout(()=>{item.textContent='🦝 🔧 🐈';target.classList.remove('mascot-temporary-disconnect');target.classList.add('mascot-temporary-repair')},1300);
- setTimeout(()=>{item.textContent='✨ ¡Reparado!';target.classList.remove('mascot-temporary-repair')},2600);
- setTimeout(()=>{item.remove();target.classList.remove('mascot-temporary-disconnect','mascot-temporary-repair');mascotPrankBusy=false},3700);
+ setTimeout(()=>{target.classList.remove('mascot-temporary-disconnect');target.classList.add('mascot-temporary-repair')},1400);
+ setTimeout(()=>{target.classList.remove('mascot-temporary-repair');for(const p of saved){p.el.style.left=p.left;p.el.style.top=p.top;p.el.style.right=p.right;p.el.style.bottom=p.bottom;p.el.classList.remove('mascot-prank-actor')}mascotPrankBusy=false},3300);
 }
 function mascotChaseMoment(){
  if(mascotPlayBusy||companionSleep.sleeping||document.hidden)return;
