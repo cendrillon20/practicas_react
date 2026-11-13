@@ -2801,6 +2801,141 @@ function graphicBlinkRecipe(){
 E('graphicCatalogSearch').addEventListener('input',renderInstructionCatalog);
 E('graphicBlinkRecipe').onclick=graphicBlinkRecipe;
 
+
+const taskVocabulary={
+ seconds:/(\d+(?:[.,]\d+)?)\s*(?:segundos?|seconds?|sec|secs|s)\b/i,
+ cycle:/parpad|destell|intermiten|titil|blink|flash|prenda\s+y\s+apag|enciend[ae]\s+y\s+apag|on\s+and\s+off|altern[ae]\s+encen|apague\s+y\s+prenda/i,
+ repeat:/continu|repet|c[ií]clic|constant|forever|siempre|indefinid|sin\s+parar/i,
+ count:/(\d+|un[ao]|dos|tres|cuatro|cinco)\s*(?:veces|times|destellos?|parpadeos?)/i,
+ delay:/despu[eé]s\s+de|esper[ae]|retard|retras|delay|tras\s+\d/i,
+ latch:/permanec|se\s+quede|manteng|enclav|memoriz|reten|hasta\s+(?:que|pulsar)|latch/i,
+ stop:/\b(paro|stop|detener|parada|apagar\s+con|desactivar\s+con)\b/i,
+ comparative:/mayor\s+que|menor\s+que|igual\s+a|compare|compar/i,
+ sequential:/secuencia|secuencial|varios\s+pasos|varias\s+salidas|pid|analog|modbus|red\s+industrial|motor\s+trif[aá]sico/i
+};
+function normalizedTask(raw){return String(raw||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function taskInterpret(raw){
+ const text=normalizedTask(raw),result={kind:'unknown',seconds:null,offSeconds:null,flashes:null,clear:false,ambiguous:[],explanation:''};
+ if(text.trim().length<6){result.ambiguous.push('Describe qué señal inicia la operación y cuál es el resultado esperado.');return result}
+ const allSeconds=[...text.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:segundos?|seconds?|sec|secs|s)\b/gi)].map(m=>Number(m[1].replace(',','.')));
+ const valid=allSeconds.filter(x=>x>=.1&&x<=3600);
+ result.seconds=valid[0]??null;result.offSeconds=valid[1]??valid[0]??null;
+ const words={uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6};
+ const count=text.match(/(\d+|uno|una|dos|tres|cuatro|cinco|seis)\s*(?:veces|times|destellos?|parpadeos?)/);
+ result.flashes=count?Number(words[count[1]]??count[1]):null;
+ const cyc=taskVocabulary.cycle.test(text),repeats=taskVocabulary.repeat.test(text),stays=taskVocabulary.latch.test(text);
+ if(taskVocabulary.sequential.test(text)){result.kind='complex';result.ambiguous.push('La tarea contiene un control de varias etapas o funciones que requieren más redes o instrucciones de las que ejecuta esta versión.')}
+ else if(cyc&&result.flashes){result.kind='blink-count';result.seconds=result.seconds||.5;result.offSeconds=result.offSeconds||result.seconds;result.clear=true}
+ else if(cyc){result.kind='flash';result.seconds=result.seconds||null;result.clear=!!result.seconds;if(!result.seconds)result.ambiguous.push('Especifica los segundos que la salida permanece ON y OFF.')}
+ else if(taskVocabulary.delay.test(text)&&result.seconds){result.kind='timer';result.clear=true}
+ else if(taskVocabulary.stop.test(text)&&stays){result.kind='latch';result.clear=true}
+ else if(taskVocabulary.comparative.test(text)){result.kind='compare';result.ambiguous.push('Indica qué valor se compara, la operación y el límite numérico.')}
+ else if(stays){result.kind='latch';result.ambiguous.push('Indica qué botón detiene o reinicia la salida.')}
+ else if(/enciend|prend|activ|lamp|luz|motor|on\b|apaga|off\b|pulsa|bot[oó]n|pulsador/.test(text)){result.kind='direct';result.clear=true}
+ else{result.kind='unknown';result.ambiguous.push('No pude reconocer con certeza el comportamiento; describe entrada, condición, tiempos y salida.')}
+ if(result.seconds!==null&&!Number.isFinite(result.seconds)){result.clear=false;result.ambiguous.push('Tiempo inválido.')}
+ if(result.kind==='flash'&&taskVocabulary.repeat.test(text))result.repeats=true;
+ result.explanation=({
+  'flash':'Parpadeo continuo con tiempos ON/OFF: '+result.seconds+' s / '+result.offSeconds+' s.',
+  'blink-count':'Parpadear '+result.flashes+' veces y después permanecer encendido: '+result.seconds+' s ON / '+result.offSeconds+' s OFF.',
+  timer:'TON: activar la salida después de '+result.seconds+' segundos.',
+  latch:'Marcha/Paro con enclavamiento.',
+  direct:'Salida digital controlada por una entrada.',
+  compare:'Comparación de señales.',
+  complex:'Secuencia compleja: requiere descomponer la tarea.',
+  unknown:'Tarea todavía no identificada.'
+ })[result.kind];
+ return result;
+}
+function taskMatchesProgram(requirement){
+ const reasons=[],plc=nodes.find(n=>n.type==='plc');
+ if(!plc){reasons.push('Falta el PLC.');return reasons}
+ const graphic=graphicLadder.enabled&&graphicLadder.rungs.length;
+ const plan=!graphic?ladderPlan:null;
+ const flat=graphic?graphicLadder.rungs.flatMap(r=>r.branches.flatMap(b=>b)):[];
+ const has=t=>flat.some(item=>item.type===t);
+ if(!graphic&&!plan){reasons.push('No hay Ladder activo. Debes generar, importar o aplicar un programa válido.');return reasons}
+ if(graphic)reasons.push(...graphicValidationReasons());
+ if(requirement.kind==='unknown'||requirement.kind==='complex'){
+  reasons.push('La tarea no se puede verificar automáticamente. Especifica el comportamiento en redes reconocidas o usa modo didáctico manual; no se garantizará ejecución exacta.');
+ }else if(requirement.kind==='flash'){
+  if(!graphic||!has('FLASH'))reasons.push('La tarea solicita parpadeo continuo ON/OFF: necesitas un bloque FLASH configurado.');
+  else if(!flat.some(i=>i.type==='FLASH'&&Math.abs(Number(i.onSeconds)-requirement.seconds)<.001&&Math.abs(Number(i.offSeconds)-requirement.offSeconds)<.001))reasons.push('Los tiempos del FLASH no coinciden con la solicitud ('+requirement.seconds+' s ON / '+requirement.offSeconds+' s OFF).');
+ }else if(requirement.kind==='blink-count'){
+  if(!graphic||!has('BLINK'))reasons.push('Se necesitan '+requirement.flashes+' destellos y enclavamiento posterior; coloca BLINK en el Ladder gráfico.');
+  else if(!flat.some(i=>i.type==='BLINK'&&Number(i.preset)===requirement.flashes))reasons.push('El número de destellos del bloque BLINK no coincide con la tarea.');
+ }else if(requirement.kind==='timer'){
+  const valid=graphic?flat.some(i=>i.type==='TON'&&Math.abs(Number(i.seconds)-requirement.seconds)<.001):plan?.mode==='timer'&&Math.abs(Number(plan.delaySeconds)-requirement.seconds)<.001;
+  if(!valid)reasons.push('La tarea exige un TON de '+requirement.seconds+' segundos; comprueba PT.');
+ }else if(requirement.kind==='latch'){
+  if(graphic){if(!flat.some(i=>i.type==='NO'||i.type==='NC')||!graphicLadder.rungs.some(r=>r.branches.length>=2))reasons.push('Para retener Marcha/Paro construye una rama de realimentación y un contacto de Paro.')}
+  else if(plan?.mode!=='latch')reasons.push('El modo seleccionado no es enclavamiento de Marcha/Paro.');
+ }else if(requirement.kind==='compare'){
+  if(graphic?!has('CMP'):plan?.mode!=='compare')reasons.push('El programa necesita un comparador CMP.');
+ }
+ return reasons;
+}
+function graphicValidationReasons(){
+ const problems=[],plc=nodes.find(n=>n.type==='plc');
+ if(!plc)return ['Falta el PLC'];
+ const outputs=new Map();
+ for(const [ri,r] of graphicLadder.rungs.entries()){
+  if(!plcOutputPins(plc).includes(Number(r.output)))problems.push('Rung '+(ri+1)+': salida inválida.');
+  outputs.set(r.output,(outputs.get(r.output)||0)+1);
+  for(const b of r.branches)for(const i of b){
+   if(['NO','NC'].includes(i.type)&&!(i.source==='output'?plcOutputPins(plc):plcInputPins(plc)).includes(Number(i.pin)))problems.push('Rung '+(ri+1)+': contacto sin borne válido.');
+  }
+ }
+ for(const [pin,n]of outputs)if(n>1)problems.push('Multiple output coils '+portName(plc,Number(pin))+' (duplicadas).');
+ return problems;
+}
+let taskGate={allowed:false,reasons:['Generate and verify Ladder · Genera y verifica el programa'],fingerprint:'',requirement:null};
+function taskFingerprint(){
+ return JSON.stringify({goal:E('ladderGoal')?.value||'',plan:ladderPlan,graphic:graphicLadder.enabled?graphicLadder:null});
+}
+function verifyTask(show=true){
+ const goal=E('ladderGoal').value.trim();
+ const hasGoal=goal.length>=6;
+ const requirement=taskInterpret(goal);
+ const reasons=hasGoal?taskMatchesProgram(requirement):['Escribe la tarea antes de ejecutar el programa.'];
+ if(requirement.ambiguous.length)reasons.push(...requirement.ambiguous);
+ const allowed=hasGoal&&reasons.length===0;
+ taskGate={allowed,reasons,requirement,fingerprint:taskFingerprint()};
+ const status=E('taskGateStatus');
+ if(status){status.textContent=(allowed?'✓ VERIFIED · Tarea verificable y Ladder compatible.':'⛔ BLOCKED · No se energizarán salidas hasta cumplir los requisitos detectables.')+' '+(reasons.join(' | ')||requirement.explanation);}
+ if(show&&E('goalInterpretFeedback'))E('goalInterpretFeedback').textContent=requirement.explanation+(requirement.ambiguous.length?' Atención: '+requirement.ambiguous.join(' '):'');
+ return allowed;
+}
+function taskMayRun(){
+ if(!simulation)return false;
+ if(taskGate.fingerprint!==taskFingerprint())verifyTask(false);
+ return taskGate.allowed;
+}
+function taskInterpretAndApply(){
+ const interpreted=taskInterpret(E('ladderGoal').value);
+ E('goalInterpretFeedback').textContent=interpreted.explanation+(interpreted.ambiguous.length?' '+interpreted.ambiguous.join(' '):'');
+ if(['flash','blink-count'].includes(interpreted.kind)&&interpreted.clear) {
+  if(simulation){E('goalInterpretFeedback').textContent+=' Cambia a Editar para crear un programa.';return}
+  if(graphicLadder.rungs.length&&!confirm('¿Sustituir el Ladder gráfico actual por un ejemplo ajustado a esta tarea?'))return;
+  const kind=interpreted.kind==='flash'?'FLASH':'BLINK';
+  const input=graphItem('NO'),block=graphItem(kind);
+  block.onSeconds=interpreted.seconds;block.offSeconds=interpreted.offSeconds;
+  if(kind==='BLINK')block.preset=interpreted.flashes;
+  const plc=nodes.find(n=>n.type==='plc');
+  const rung={id:graphId(),branches:[[input,block]],output:Number(E('ladderOutput').value)||plcOutputPins(plc)[0]};
+  graphicLadder.rungs=[rung];graphicLadder.enabled=true;
+  graphicSelection={rungId:rung.id,branch:0,index:1};graphicRuntime.clear();graphicRefresh();draw();
+  ladderTab('editor');E('goalInterpretFeedback').textContent+=' Se creó un ejemplo gráfico; verifica entrada, salida y los tiempos antes de usarlo.';
+ }else if(interpreted.kind==='timer'&&interpreted.clear){
+  E('ladderMode').value='timer';E('ladderDelay').value=String(interpreted.seconds);updatePlatformControls();
+  E('goalInterpretFeedback').textContent+=' Seleccioné TON y ajusté el tiempo. Genera o construye el Ladder y comprueba los pines.';
+ }else if(interpreted.kind==='latch'){E('ladderMode').value='latch';updatePlatformControls()}
+ else if(interpreted.kind==='direct'){E('ladderMode').value='direct';updatePlatformControls()}
+ verifyTask(false);
+}
+E('interpretGoal').onclick=taskInterpretAndApply;
+E('goalCheck').onclick=()=>verifyTask(true);
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
