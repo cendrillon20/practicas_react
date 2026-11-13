@@ -3815,6 +3815,84 @@ function companionSleepInitialize(){
  window.setInterval(()=>{if(companionCanSleep())companionSleepNow()},1000);
 }
 
+
+/* Project Reader: preview, identify and explain formats without claiming native compatibility.
+   Only this application's JSON projects can be restored in full. */
+const projectReaderExtensions=new Set(['json','txt','st','il','lad','xml','l5x','project','exp','csv','scl','awl','asc','pou','plcopen','acd','rss','dvp','zip','ap14','ap15','ap16','ap17','ap18','tsproj','projectarchive']);
+const projectReaderBinary=new Set(['acd','rss','dvp','zip','ap14','ap15','ap16','ap17','ap18','tsproj','projectarchive']);
+function projectReaderIdentify(file,textSample){
+ const ext=String(file.name||'').split('.').pop().toLowerCase();
+ if(ext==='json')return 'PLC-Sim Studio JSON or generic JSON';
+ if(ext==='l5x')return 'Rockwell Logix Designer / Studio 5000 L5X (XML exchange)';
+ if(ext==='project'||ext==='projectarchive')return 'CODESYS project or project archive';
+ if(ext==='scl'||ext==='awl')return 'Siemens text source (SCL/AWL)';
+ if(ext==='exp')return 'PLC export text (vendor-specific)';
+ if(ext==='pou')return 'IEC POU source file';
+ if(['xml','plcopen'].includes(ext))return /<project|<pou|<body|<rung/i.test(textSample)?'IEC 61131-3 / PLCopen / XML':'XML source, vendor unknown';
+ if(['txt','st','il','lad','csv','asc'].includes(ext))return 'Editable text / Ladder / ST / instruction list';
+ if(projectReaderBinary.has(ext))return 'Native / archive format, not executable in browser';
+ return 'Unknown project format';
+}
+async function projectReaderOpen(file){
+ const area=E('projectPreview');
+ const name=String(file.name||'project'),ext=name.split('.').pop().toLowerCase();
+ if(!projectReaderExtensions.has(ext)){area.textContent='Formato no identificado: '+name+'. No se abrirá como programa ejecutable.';return}
+ if(file.size>4*1024*1024){area.textContent='Archivo de '+file.size+' bytes. Esta versión lee fuentes de hasta 4 MB. No se procesó el contenido.';return}
+ const bytes=new Uint8Array(await file.slice(0,1024).arrayBuffer());
+ const hasNul=bytes.includes(0),archive=bytes[0]===0x50&&bytes[1]===0x4b;
+ const isBinary=projectReaderBinary.has(ext)||hasNul||archive;
+ const format=projectReaderIdentify(file,'');
+ if(isBinary){
+  area.textContent='FILE: '+name+'\nTYPE: '+format+'\nSIZE: '+file.size+' bytes\nSTATUS: Identificado, pero NO decodificado ni simulado.\n\nEl formato contiene datos binarios, comprimidos o propietarios. Exporta un archivo L5X, XML/PLCopen o texto ST/IL desde el programa de origen. No es posible garantizar lectura ni emulación exacta de un archivo nativo.';
+  return;
+ }
+ const textData=await file.text(),identity=projectReaderIdentify(file,textData),first=textData.slice(0,2500),lines=textData.split(/\r?\n/).length;
+ area.replaceChildren();
+ const report=document.createElement('div');
+ report.style.whiteSpace='pre-wrap';
+ report.textContent='FILE: '+name+'\nTYPE: '+identity+'\nLINES: '+lines+'\nSIZE: '+file.size+' bytes\n\nPREVIEW:\n'+first+(textData.length>2500?'\n… vista previa limitada a 2 500 caracteres':'');
+ area.appendChild(report);
+ if(ext==='json'){
+  try{
+   const obj=JSON.parse(textData);
+   if(Array.isArray(obj.nodes)&&Array.isArray(obj.wires)){
+    const btn=document.createElement('button');btn.textContent='Restore Compatible PLC-Sim Project';
+    btn.onclick=()=>{if(confirm('¿Sustituir el proyecto actual por el contenido de '+name+'?')){try{hydrate(obj);area.textContent='Proyecto JSON restaurado: '+name}catch(e){area.textContent='Error de carga: '+e.message}}};
+    area.appendChild(btn);return;
+   }
+  }catch{ /* preview remains available */ }
+ }
+ const relevant=['txt','st','il','lad','xml','l5x','exp','scl','awl','pou','plcopen'];
+ if(!relevant.includes(ext))return;
+ let source=textData;
+ if(['xml','l5x','plcopen'].includes(ext)){
+  const chunks=[...textData.matchAll(/<Text(?:\s+[^>]*)?>\s*(?:<!\[CDATA\[([\s\S]*?)\]\]>|([\s\S]*?))\s*<\/Text>/gi)]
+   .map(m=>m[1]??m[2]??'').filter(Boolean);
+  if(chunks.length)source=chunks.join('\n').replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
+  else{
+   const stChunks=[...textData.matchAll(/<ST(?:\s+[^>]*)?>([\s\S]*?)<\/ST>/gi)].map(m=>m[1].replace(/<[^>]+>/g,'').trim()).filter(Boolean);
+   if(stChunks.length)source=stChunks.join('\n');
+  }
+ }
+ const btn=document.createElement('button');btn.textContent='Copy Extract to Ladder Editor (no execution)';
+ btn.onclick=()=>{
+  E('ladderEditor').value=source.slice(0,25000);
+  if(ext==='st'||ext==='scl'||ext==='pou')E('ladderPlatform').value='codesys';
+  if(ext==='l5x')E('ladderPlatform').value='compactlogix';
+  ladderTab('editor');
+  E('advancedTextLadder').open=true;
+  E('ladderImportFeedback').textContent='Extracto cargado para revisión, no aplicado. Solo «Aplicar y simular código» intentará validarlo; las instrucciones no reconocidas producirán errores.';
+ };
+ area.appendChild(btn);
+}
+E('uploadProjectPreview').onclick=()=>E('uploadProjectFile').click();
+E('uploadProjectFile').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{await projectReaderOpen(file)}
+ catch(error){E('projectPreview').textContent='No se pudo leer: '+error.message}
+ e.target.value='';
+};
+
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
 function hydrate(data){
  if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.wires))throw Error('El proyecto no contiene un circuito válido.');
