@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PLC-Sim Studio</title>
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Simuladores - Core Studio</title>
 <style>
 :root{font-family:Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#080e19;--side:#101b30;--card:#1b2941;--edge:#324663;--fg:#eef5ff;--mut:#90a8ca;--cyan:#35d4ff;--green:#00d78f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg)}button,select{font:inherit;cursor:pointer;color:inherit}header{height:55px;display:flex;align-items:center;gap:9px;padding:5px 12px;background:#0c1730;border-bottom:1px solid #24334d}header strong{font-size:18px;line-height:1}header small{display:block;font-size:11px;color:#91afd5}.logo{background:#2a78ed;padding:9px;border-radius:9px}.v{font-size:10px;color:#79d8ff;border:1px solid #285995;background:#132b4d;border-radius:5px;padding:3px}.push{border:1px solid #35506e;background:#1b2b46;padding:9px 13px;border-radius:9px}.run{background:#007f60;border-color:#00aa7d}.edit{background:#725010;border-color:#ad7e20}.spacer{flex:1}select{background:#192941;border:1px solid #2b4264;border-radius:8px;padding:9px;max-width:260px}.layout{height:calc(100vh - 55px);display:grid;grid-template-columns:237px 1fr}aside{background:linear-gradient(180deg,#101e35,#0d1729);border-right:2px solid #2d3f5a;overflow:auto;padding:10px 8px}.side-title{font-weight:800;font-size:13px;color:#a9c4e8;margin:6px 2px 20px}aside h4{font-size:10px;color:#7899c7;letter-spacing:.7px;margin:16px 4px 9px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{min-height:94px;border:1px solid transparent;background:transparent;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:5px}.tile:hover{border-color:var(--cyan);background:#1a273e}.tile svg{width:100px;height:55px;overflow:visible}.inspector{padding:9px;border:1px solid #344966;border-radius:9px;font-size:11px;color:#b3c7e6}.inspector label{display:block;margin-bottom:7px}.inspector input{background:#101e34;color:#fff;padding:9px;border:1px solid #4a688b;border-radius:7px;width:100%;margin-top:5px}.inspector button{margin-top:8px;padding:6px;border-radius:6px;background:#25456c;border:1px solid #46618a;color:#fff}.tile b{font-size:11px}.tile span{font:10px monospace;color:#85a5d8}main{position:relative;overflow:hidden;background:radial-gradient(circle at center,#0b1625,#070b13 78%)}svg{width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}main,main *,aside .tile,aside .tile *{user-select:none;-webkit-user-select:none}main svg text,main svg tspan{user-select:none;-webkit-user-select:none;pointer-events:none}main svg .port{pointer-events:auto}#wireLayer path{stroke:#ffc844;stroke-width:3.2;fill:none;cursor:pointer}.device .symbol{stroke:#d8eeff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}.device .symbol.on{stroke:var(--green)}.device .symbol.emph{stroke-width:3.4}.device .hit{fill:transparent;stroke:none;cursor:move}.device rect{stroke-width:2}.device text{fill:var(--fg);font-size:12px;pointer-events:none}.port{stroke:#9db1ca;stroke-width:2;fill:#0d1b2b;cursor:crosshair}.port.on{fill:var(--green);stroke:var(--green)}.port.pending{stroke:#ff57be;stroke-width:4}.selected .symbol{stroke:var(--cyan)}.selected .hit{stroke:var(--cyan);stroke-dasharray:3 4;stroke-width:1}.note{position:absolute;bottom:13px;left:15px;border:1px solid #31435e;color:#9cb5d8;background:#101c2de6;padding:9px;border-radius:9px;font-size:11px}.plc text{fill:#d8e9ff}.plc text.terminal-label{fill:#242424;font-size:10px}.plc text.terminal-user-label{fill:#005b9b;font-size:10px;font-weight:800;paint-order:stroke;stroke:#eaf8ff;stroke-width:2.5px;stroke-linejoin:round}.screw{fill:#e7edf2;stroke:#556979}.screw-inner{fill:#172435;stroke:#64788e}.wire-selected{stroke:#ff63c4!important}.device.multiselected .hit{stroke:#43ceff;stroke-width:2;stroke-dasharray:6 4}.device.multiselected .symbol{stroke:#43ceff}#wireLayer path{stroke:var(--wire-color,#ffc844)}.project-controls{display:flex;align-items:center;gap:6px}.project-controls input{width:145px;min-width:90px;color:#e9f5ff;background:#132742;border:1px solid #345478;border-radius:7px;padding:8px}.project-controls select{max-width:170px}.inspector input[type=color]{height:36px;cursor:pointer;padding:2px}.palette-caption{font-size:11px;color:#8eadd2;margin-top:6px}
 .wire-handle{fill:#ffb45c;stroke:#fff;stroke-width:2;cursor:move}.wire-blocked{stroke:#ff5675!important;stroke-dasharray:6 5}.expand-tools{margin:10px 0;padding:8px;border:1px solid #334f70;border-radius:8px}.expand-tools button{background:#204163;border:1px solid #54728d;color:#fff;border-radius:6px;padding:6px;margin:3px;cursor:pointer}.expand-tools small{color:#9cb9d9;display:block;margin-top:5px}
@@ -569,8 +569,22 @@ header>.spacer{flex:1!important}
 @keyframes mascot-actor-run{to{transform:translateY(-13px) rotate(12deg)}}
 @keyframes mascot-nibble{0%,100%{transform:scale(1)}45%{transform:scale(.15)}75%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.mascot-game-actor,.mascot-scene-actor,.mascot-prop-nibble,.mascot-prop-wire,.mascot-prop-ball,.mascot-prank-actor{animation:none!important}}
+
+.mascot-plc-board{position:fixed;z-index:75;pointer-events:none;padding:5px;border-radius:12px;background:#101d36e0;border:2px solid #d9a6ff;box-shadow:0 4px 18px #0008;animation:mascot-board-appear .35s ease}
+.mascot-plc-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.mascot-plc-square{aspect-ratio:1;background:#3a5276;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#d9e6ff;font:9px Arial;overflow:visible}
+.mascot-plc-square:nth-child(odd){background:#655078}
+.mascot-plc-piece{width:90%!important;height:90%!important;max-height:36px;animation:mascot-soft-breathe .55s ease-in-out infinite alternate}
+@keyframes mascot-board-appear{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.mascot-workspace-cart{position:fixed;bottom:7px;left:50%;transform:translateX(-50%);z-index:190;display:flex;align-items:end;justify-content:center;gap:0;max-width:calc(100vw - 15px);min-height:58px;padding:4px 16px 11px;background:linear-gradient(135deg,#30264fdd,#16445cdd);border:2px solid #a78aff;border-radius:18px 18px 12px 12px;box-shadow:0 8px 30px #0009;overflow:visible}
+.mascot-cart-base{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);font-size:16px;pointer-events:none}
+.mascot-workspace-cart .mascot-in-cart{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:44px!important;min-width:38px!important;max-width:44px!important;flex:0 1 44px!important;display:flex!important;animation:mascot-soft-breathe 2.5s ease-in-out infinite alternate}
+.mascot-workspace-cart .mascot-in-cart>svg,.mascot-workspace-cart .mascot-in-cart .fluid-mascot-art,.mascot-workspace-cart .mascot-in-cart .fluid-mascot-art svg{width:39px!important;height:39px!important;max-width:39px!important;max-height:39px!important}
+.mascot-workspace-cart .companion-bedding{display:none!important}
+@media(max-width:550px){.mascot-workspace-cart{padding:4px 5px 11px}.mascot-workspace-cart .mascot-in-cart{width:34px!important;min-width:30px!important;max-width:34px!important}.mascot-workspace-cart .mascot-in-cart>svg,.mascot-workspace-cart .mascot-in-cart .fluid-mascot-art svg{width:30px!important;height:30px!important}}
+@media(prefers-reduced-motion:reduce){.mascot-plc-piece,.mascot-workspace-cart .mascot-in-cart{animation:none!important}}
 </style>
-<header><span class="logo">⚙</span><div><strong>PLC-Sim Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><details id="mainOverflow" class="main-overflow"><summary aria-label="Abrir menú de herramientas" title="Herramientas y apartados"><span aria-hidden="true">⋮</span><span class="menu-summary-text">Menú</span></summary><div class="main-overflow-panel"><div class="menu-panel-head"><div><b>Centro de herramientas</b><small>Organiza tu proyecto y el espacio de trabajo</small></div><span>✦ PLC Studio</span></div><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details></div></details><input type="file" id="file" accept=".json" hidden></header>
+<header><span class="logo">⚙</span><div><strong>Simuladores - Core Studio</strong><small>Esquemas Eléctricos · Ladder</small></div><span class="v">24V DC</span><label class="language-picker"><span data-i18n="language">Idioma</span><select id="uiLanguage" aria-label="Application language"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option></select></label><button class="push run" id="simulate" data-i18n="simulate">▶ Simular</button><button class="push edit" id="edit" data-i18n="edit">■ Editar</button><span class="spacer"></span><details id="mainOverflow" class="main-overflow"><summary aria-label="Abrir menú de herramientas" title="Herramientas y apartados"><span aria-hidden="true">⋮</span><span class="menu-summary-text">Menú</span></summary><div class="main-overflow-panel"><div class="menu-panel-head"><div><b>Centro de herramientas</b><small>Organiza tu proyecto y el espacio de trabajo</small></div><span>✦ PLC Studio</span></div><label>Ejemplo: <select id="examples"><option value="start">Arranque y Paro</option><option value="sensors">Sensores PNP</option><option value="empty">Lienzo vacío</option></select></label><div class="project-controls"><input id="projectName" aria-label="Nombre del proyecto" value="Proyecto sin título"><button class="push" id="newProject" title="Crear proyecto nuevo" data-i18n="new">＋ Nuevo</button><button class="push" id="saveLocal" title="Guardar proyecto en este navegador" data-i18n="save">💾 Guardar</button><select id="savedProjects" aria-label="Proyectos guardados"><option value="">Mis proyectos</option></select><button class="push" id="deleteLocal" title="Eliminar proyecto guardado">🗑</button></div><button class="push" id="save" title="Exportar archivo JSON">↓ JSON</button><button class="push" id="load" title="Importar archivo JSON">↑ JSON</button><details class="header-more"><summary>⚙ Vista y herramientas</summary><div class="header-more-items"><button class="push" id="phoneMode" title="Alternar vista móvil">📱 Móvil</button><button class="push" id="zoomOut" title="Alejar">−</button><button class="push" id="zoomValue" title="Ajustar a pantalla">100%</button><button class="push" id="zoomIn" title="Acercar">+</button></div></details><button class="push" id="showScenarios" data-i18n="scenes">Scenes</button><details class="header-more companion-menu"><summary>🐾 Mascotas</summary><div class="header-more-items"><button class="push" id="showTutor">🦊</button><button class="push" id="showAntonio">🦆</button><button class="push" id="showJoan">🐧</button><button class="push" id="sleepPillow" title="Acostar a todas las mascotas sobre el PLC" aria-label="Dormir mascotas sobre el PLC">🛏️</button><button class="push" id="wakeBell" title="Tocar campana para despertar mascotas" aria-label="Despertar mascotas">🔔</button><button class="push" id="showPetHouse" title="Abrir casita de mascotas" aria-label="Abrir casita interactiva">🏠</button><button class="push" id="showNagi">🦝</button><button class="push" id="showTranny">🦀</button><button class="push" id="showLeonardo" title="Leonardo · hidráulica">🐕</button><button class="push" id="showBryan" title="Bryan · neumática">🐈</button><button class="push" id="showMay" title="May · tutor de fluidos">🦁</button></div></details><button class="push" id="openFluid" title="Editor de diagramas neumáticos e hidráulicos" aria-label="Abrir editor neumático e hidráulico">💨 Fluidos</button><button class="push" id="showLadder" title="Generar y visualizar diagrama escalera" data-i18n="ladder">▤ Programa escalera</button><button class="push" id="ladderFocusTop" title="Abrir Ladder como espacio principal">▣ Ladder Full View</button><button class="push" id="diagnose" data-i18n="check">⚠ Revisar</button><details class="header-more"><summary>🛠 Edición</summary><div class="header-more-items"><button class="push" id="rotL" title="Girar -90 grados">↶ 90°</button><button class="push" id="rotR" title="Girar +90 grados">↷ 90°</button><button class="push" id="del">⌫</button></div></details></div></details><input type="file" id="file" accept=".json" hidden></header>
 <section id="fluidStudio" hidden role="region" aria-label="Espacio de trabajo neumático e hidráulico">
 <div class="fluid-head"><strong>💨 Fluid Studio · Neumática e hidráulica</strong><button id="fluidSave" title="Exportar diagrama JSON">↓ JSON</button><button id="fluidLoad" title="Importar diagrama JSON">↑ JSON</button><input type="file" id="fluidFile" accept=".json" hidden><button id="fluidClose" aria-label="Volver al esquema eléctrico" title="Volver al esquema eléctrico">↩ Esquema</button></div>
 <div class="fluid-companions"><button id="fluidLeonardo" title="Leonardo · Hidráulica" aria-label="Leonardo · Hidráulica">🐕</button><button id="fluidBryan" title="Bryan · Neumática" aria-label="Bryan · Neumática">🐈</button><button id="fluidMay" title="May · Autoaprendizaje" aria-label="May · Autoaprendizaje">🦁</button></div><div id="fluidLearning" class="fluid-learning" hidden aria-live="polite"></div><div class="fluid-tools"><label>Tipo de circuito <select id="fluidMode"><option value="pneumatic">💨 Neumático</option><option value="hydraulic">💧 Hidráulico</option></select></label><button id="fluidConnect" aria-pressed="true" title="Conectar puertos: clic-clic o arrastrar de un puerto a otro">🔗 Cablear: ON</button><button id="fluidCancel" title="Cancelar conexión (Esc)">✕ Cancelar</button><button id="fluidDelete">⌫ Eliminar seleccionado</button><button id="fluidClear">Vaciar</button><button id="fluidArrange">✨ Acomodar</button></div>
@@ -4057,6 +4071,7 @@ function companionPLCSpot(){
 }
 function companionSleepNow(force=false){
  if(companionSleep.sleeping)return;
+ mascotAwakePlayStop();
  if(!force&&!companionCanSleep())return;
  const plc=companionPLCSpot()||{left:{x:Math.max(80,window.innerWidth*.35),y:Math.max(150,window.innerHeight*.58)},width:Math.min(550,window.innerWidth*.65)};
  const details=[
@@ -4077,7 +4092,6 @@ function companionSleepNow(force=false){
  }
  if(!count)return;
  companionSleep.sleeping=true;
- mascotIdleBoardStart(plc);
  E('auraSpeech').hidden=true;E('antonioSpeech').hidden=true;E('joanSpeech').hidden=true;E('nagiSpeech').hidden=true;E('trannySpeech').hidden=true;
  for(const id of ['leonardoPet','bryanPet','mayPet'])E(id).querySelector('.fluid-mascot-bubble').hidden=true;
 }
@@ -4090,6 +4104,7 @@ function companionWake(){
   el.classList.remove('companion-sleeping');if(p.wasTucked)el.classList.add('companion-working-tucked');
  }
  companionSleep.positions.clear();companionSleep.sleeping=false;
+ mascotAwakePlayStart();
 }
 function companionRegisterActivity(){
  companionSleep.lastActivity=Date.now();
@@ -4140,7 +4155,7 @@ const projectReaderExtensions=new Set(['json','txt','st','il','lad','xml','l5x',
 const projectReaderBinary=new Set(['acd','rss','dvp','zip','ap14','ap15','ap16','ap17','ap18','tsproj','projectarchive']);
 function projectReaderIdentify(file,textSample){
  const ext=String(file.name||'').split('.').pop().toLowerCase();
- if(ext==='json')return 'PLC-Sim Studio JSON or generic JSON';
+ if(ext==='json')return 'Simuladores - Core Studio JSON or generic JSON';
  if(ext==='l5x')return 'Rockwell Logix Designer / Studio 5000 L5X (XML exchange)';
  if(ext==='project'||ext==='projectarchive')return 'CODESYS project or project archive';
  if(ext==='scl'||ext==='awl')return 'Siemens text source (SCL/AWL)';
@@ -4463,6 +4478,85 @@ function mascotChaseMoment(){
 }
 setInterval(()=>{if(Math.random()<.5)mascotCircuitPrank();else mascotChaseMoment()},24000);
 
+
+/* Active mascots: play directly over the PLC, never in a separate game box.
+   Only temporary DOM overlays and visual transforms are changed. */
+let mascotAwakeTimer=null,mascotAwakeOverlay=null,mascotAwakeBusy=false;
+function mascotAwakePlayStop(){
+ if(mascotAwakeTimer){clearInterval(mascotAwakeTimer);mascotAwakeTimer=null}
+ if(mascotAwakeOverlay){mascotAwakeOverlay.remove();mascotAwakeOverlay=null}
+ mascotAwakeBusy=false;
+}
+function mascotAwakePlayStart(){
+ mascotAwakePlayStop();
+ if(companionSleep.sleeping)return;
+ mascotAwakeTimer=setInterval(()=>{
+  if(companionSleep.sleeping||document.hidden||E('fluidStudio')?.hidden===false||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(mascotAwakeBusy)return;
+  const plc=companionPLCSpot();if(!plc)return;
+  const mode=Math.floor(Math.random()*4);
+  if(mode===0){mascotPLCSnakes(plc);return}
+  if(mode===1){mascotCircuitPrank();return}
+  if(mode===2){mascotChaseMoment();return}
+  mascotPlayMoment();
+ },17000);
+}
+function mascotPLCSnakes(plc){
+ if(mascotAwakeBusy||companionSleep.sleeping)return;
+ const svg=E('canvas');if(!svg||svg.getBoundingClientRect().width<100)return;
+ const participants=['bryanPet','nagiRaccoon','auraFox','antonioDuck','joanPenguin','trannyCrab','leonardoPet','mayPet'].filter(id=>{const el=E(id);return el&&!el.classList.contains('companion-working-tucked')&&!el.classList.contains('aura-hidden')&&!el.classList.contains('nagi-hidden')&&!el.classList.contains('hide-duck')});
+ if(participants.length<2)return;
+ const chosen=participants.slice(0,2+Math.floor(Math.random()*Math.min(4,participants.length-1)));
+ mascotAwakeBusy=true;
+ const overlay=document.createElement('div');overlay.className='mascot-plc-board';overlay.setAttribute('aria-label','Serpientes y escaleras sobre el PLC');
+ const size=Math.min(270,Math.max(150,plc.width*.55));overlay.style.width=size+'px';
+ overlay.style.left=Math.max(5,Math.min(innerWidth-size-5,plc.left.x+plc.width/2-size/2))+'px';
+ overlay.style.top=Math.max(65,Math.min(innerHeight-150,plc.left.y-8))+'px';
+ const grid=document.createElement('div');grid.className='mascot-plc-grid';overlay.append(grid);
+ for(let i=20;i>=1;i--){const cell=document.createElement('div');cell.className='mascot-plc-square';cell.dataset.n=i;cell.textContent=i===20?'🏆':i===5||i===13?'🪜':i===9||i===17?'🐍':String(i);grid.append(cell)}
+ document.body.append(overlay);mascotAwakeOverlay=overlay;
+ let step=0;const positions=chosen.map(()=>1);
+ const play=()=>{
+  if(!overlay.isConnected||companionSleep.sleeping)return;
+  const idx=step%chosen.length;positions[idx]=Math.min(20,positions[idx]+1+Math.floor(Math.random()*4));
+  if(positions[idx]===5)positions[idx]=11;if(positions[idx]===17)positions[idx]=8;
+  for(const cell of grid.children){
+   const n=Number(cell.dataset.n);cell.replaceChildren();
+   const at=chosen.filter((_,i)=>positions[i]===n);
+   if(at.length){for(const id of at){const art=E(id)?.querySelector('svg');if(art){const actor=art.cloneNode(true);actor.classList.add('mascot-plc-piece');cell.append(actor)}}}
+   else cell.textContent=n===20?'🏆':n===5||n===13?'🪜':n===9||n===17?'🐍':String(n);
+  }
+  step++;
+ };
+ play();const timer=setInterval(play,1250);
+ setTimeout(()=>{clearInterval(timer);overlay.remove();if(mascotAwakeOverlay===overlay)mascotAwakeOverlay=null;mascotAwakeBusy=false},11000);
+}
+/* When changing workspaces, tuck the actual SVG mascots into a small bottom cart. */
+let mascotCart=null,mascotCartSaved=new Map();
+function mascotCartSet(open){
+ const ids=['auraFox','antonioDuck','joanPenguin','nagiRaccoon','trannyCrab','leonardoPet','bryanPet','mayPet'];
+ if(open){
+  mascotAwakePlayStop();
+  if(mascotCart)return;
+  const cart=document.createElement('div');cart.className='mascot-workspace-cart';cart.setAttribute('aria-label','Carrito de mascotas');
+  const base=document.createElement('div');base.className='mascot-cart-base';base.textContent='🛒';cart.append(base);
+  for(const id of ids){
+   const el=E(id);if(!el)continue;
+   mascotCartSaved.set(id,{left:el.style.left,top:el.style.top,right:el.style.right,bottom:el.style.bottom,tucked:el.classList.contains('companion-working-tucked')});
+   el.classList.remove('companion-working-tucked');el.classList.add('mascot-in-cart');
+   el.style.left='';el.style.right='';el.style.top='';el.style.bottom='';
+   cart.append(el);
+  }
+  document.body.append(cart);mascotCart=cart;
+ }else{
+  if(mascotCart){
+   for(const id of ids){const el=E(id),saved=mascotCartSaved.get(id);if(!el||!saved)continue;document.body.append(el);el.classList.remove('mascot-in-cart');el.style.left=saved.left;el.style.right=saved.right;el.style.top=saved.top;el.style.bottom=saved.bottom;if(saved.tucked)el.classList.add('companion-working-tucked')}
+   mascotCart.remove();mascotCart=null;mascotCartSaved.clear();
+  }
+  if(!companionSleep.sleeping)mascotAwakePlayStart();
+ }
+}
+
 /* Gentle spontaneous mascot play: temporary visual movement only, no position overrides. */
 const mascotPlayIds=['auraFox','antonioDuck','joanPenguin','nagiRaccoon','trannyCrab','leonardoPet','bryanPet','mayPet'];
 let mascotPlayBusy=false;
@@ -4479,7 +4573,7 @@ function mascotPlayMoment(){
  const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();sparkle.style.left=Math.max(12,Math.min(innerWidth-70,(ar.left+br.left)/2))+'px';sparkle.style.top=Math.max(15,Math.min(innerHeight-90,Math.min(ar.top,br.top)-28))+'px';document.body.append(sparkle);
  setTimeout(()=>{a.classList.remove('mascot-playing','mascot-chasing');b.classList.remove('mascot-playing','mascot-chasing');sparkle.remove();mascotPlayBusy=false},3200);
 }
-function mascotPlayInit(){window.setInterval(()=>{if(Math.random()<.8)mascotPlayMoment()},14000)}
+function mascotPlayInit(){window.setInterval(()=>{if(Math.random()<.8)mascotPlayMoment()},14000);setTimeout(()=>mascotAwakePlayStart(),5500)}
 
 /* Optional private generative model through local Ollama. No cloud token,
    remote prompt injection actions, or background data transmission. */
@@ -4694,6 +4788,7 @@ function reset(){nodes=[];edges=[];selected=null;pending=null;nextId=1;render();
 const fluidLessons={bryan:{title:'🐈 Bryan · Neumática',intro:'El aire comprimido alimenta válvulas y cilindros. Aprende a identificar las vías, posiciones y escapes.',steps:['Añade compresor y unidad FRL para preparar el aire.','Coloca una válvula 3/2 para cilindro simple o 5/2 para cilindro doble.','Une los puertos por puntos; identifica alimentación P, salidas A/B y escapes R/S.','Comprueba conexiones y posiciones antes de usar equipos reales.']},leonardo:{title:'🐕 Leonardo · Hidráulica',intro:'El fluido a presión mueve actuadores. Una instalación real requiere control de presión, retorno y protección.',steps:['Añade depósito y bomba hidráulica.','Coloca válvula de alivio para representar protección contra sobrepresión.','Agrega distribuidora 4/3 y cilindro de doble efecto.','Dibuja alimentación, retorno al tanque y líneas A/B; verifica el circuito real con un profesional.']},may:{title:'🦁 May · Autoaprendizaje',intro:'Aprende por etapas con ejercicios guiados y preguntas de repaso. No se requiere IA ni conexión externa.',steps:['Reconoce símbolos de potencia, control y actuadores.','Compara una válvula 3/2, 5/2 y 4/3: vías y posiciones.','Construye un circuito básico y explica cómo circula el fluido.','Exporta tu diagrama y revisa si cada conexión tiene sentido.']}};
 
 function fluidWorkspace(open){
+ mascotCartSet(open);
  const fluid=$('fluidStudio'),electric=$('electricLayout'),ladder=$('ladderPanel');
  if(open){fluid.hidden=false;electric.hidden=true;if(ladder)ladder.hidden=true;$('openFluid').setAttribute('aria-pressed','true');$('openFluid').textContent='💨 Fluidos ✓';palette();render();status('Espacio de fluidos activo. 🐕 🐈 🦁 te acompañan aquí.')}
  else{fluid.hidden=true;electric.hidden=false;$('openFluid').setAttribute('aria-pressed','false');$('openFluid').textContent='💨 Fluidos'}
