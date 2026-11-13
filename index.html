@@ -928,7 +928,7 @@ const routed=routeWire(w);w.unroutable=!routed;
  if(routed)w.lastRoute=routed.d;
  const p=S('path',{d:routed?.d||w.lastRoute||'',style:'--wire-color:'+(w.color||'#ffc844'),class:(chosen?.kind==='wire'&&chosen.id===w.id?'wire-selected':'')+(w.unroutable?' wire-blocked':'')+(typeof antonioState!=='undefined'&&antonioState.prankedWire===w.id?' antonio-prank-wire':'')},wl);p.setAttribute('data-wire-id',w.id);
 const hit=S('path',{d:routed?.d||w.lastRoute||'',style:'stroke:transparent;stroke-width:18px;fill:none;pointer-events:stroke;cursor:pointer'},wl);
- const selectWire=e=>{e.stopPropagation();e.preventDefault();if(simulation)return;w.lastClickPos=pointer(e);multi.clear();chosen={kind:'wire',id:w.id};E('wireColor').value=w.color||'#ffc844';refreshInspector();draw();showMenu(e,w,'wire')};
+ const selectWire=e=>{e.stopPropagation();e.preventDefault();if(simulation)return;w.lastClickPos=pointer(e);if(wirePointMode){splitWireAt(w,w.lastClickPos.x,w.lastClickPos.y);E('junctionInstructions').textContent='Se ha creado un punto eléctrico en el cable; pulsa sus bornes para ramificar.';return}multi.clear();chosen={kind:'wire',id:w.id};E('wireColor').value=w.color||'#ffc844';refreshInspector();draw();showMenu(e,w,'wire')};
  p.onpointerdown=selectWire;hit.onpointerdown=selectWire;
 if(chosen?.kind==='wire'&&chosen.id===w.id){
  const manual=Array.isArray(w.waypoints)?w.waypoints:[];
@@ -972,7 +972,7 @@ canvas.setPointerCapture(e.pointerId);draw();
 canvas.onpointermove=e=>{if(pan){manualZoom=true;const box=canvas.getBoundingClientRect();view.x=pan.view.x-(e.clientX-pan.x)*view.w/box.width;view.y=pan.view.y-(e.clientY-pan.y)*view.h/box.height;updateView();return}const p=pointer(e);if(wireDrag&&!simulation){const w=wires.find(x=>x.id===wireDrag.id);if(w){if(!Array.isArray(w.waypoints))w.waypoints=[];w.waypoints[wireDrag.index]=[Math.round(p.x/10)*10,Math.round(p.y/10)*10];draw()}return}if(drag&&!simulation){const dx=Math.round((p.x-drag.p.x)/10)*10,dy=Math.round((p.y-drag.p.y)/10)*10;for(const original of groupDrag||[]){const n=find(original.id);if(n){n.x=original.x+dx;n.y=original.y+dy}}drag.moved||=Math.abs(p.x-drag.p.x)+Math.abs(p.y-drag.p.y)>5;draw()}if(first){const n=find(first.id);if(n)rub.setAttribute('d',route(ports(n)[first.i],[p.x,p.y]))}};
 canvas.onpointerup=e=>{if(pressedButton){const n=find(pressedButton.id);if(n)n.on=false;pressedButton=null;draw();return}if(pan){pan=null;return}if(wireDrag){wireDrag=null;draw();return}if(drag?.moved&&auraDropOnFox(e,drag)){drag=null;groupDrag=null;return}if(drag&&!drag.moved&&multi.size<2){const n=find(drag.id);if(n)showMenu(e,n,'node')}drag=null;groupDrag=null};
 canvas.onpointerdown=e=>{e.preventDefault();
- if(placingJunction&&!simulation){const at=pointer(e);const n=newJunction(at.x,at.y);placingJunction=false;chosen={kind:'node',id:n.id};refreshInspector();draw();E('junctionInstructions').textContent='Unión '+n.id+' creada. Conecta varios terminales al punto.';return}
+ if((placingJunction||wirePointMode)&&!simulation){const at=pointer(e);const n=newJunction(at.x,at.y);placingJunction=false;chosen={kind:'node',id:n.id};refreshInspector();draw();E('junctionInstructions').textContent='Unión '+n.id+' creada. Clic en el punto y luego en un borne para conectarlo; repite para ramificar.';return}
  if(e.button===1||e.shiftKey){e.preventDefault();pan={x:e.clientX,y:e.clientY,view:{...view}};canvas.setPointerCapture(e.pointerId);return}closeMenu();chosen=null;multi.clear();refreshInspector();draw()};
 let manualZoom=false,fitPending=false,lastCanvasWidth=0,lastCanvasHeight=0;
 function updateView(){canvas.setAttribute('viewBox',[view.x,view.y,view.w,view.h].join(' '));E('zoomValue').textContent=Math.round(1200/view.w*100)+'%'}
@@ -1118,7 +1118,7 @@ function expansionStatus(){
  E('expansionInfo').textContent='PLC: '+(10+(plc?.extraInputs||0))+' entradas / '+(6+(plc?.extraOutputs||0))+' salidas · +24 V: '+(p?.points||7)+' puntos · 0 V: '+(z?.points||7)+' puntos.';
 }
 function icon(tgt,kind){const d=types[kind],b=document.createElement('button');b.className='tile';const art=document.createElementNS(NS,'svg');art.setAttribute('viewBox','-10 -14 146 103');art.style.width='100%';art.style.height='65px';
-if(kind==='junction'){const dot=document.createElementNS(NS,'circle');dot.setAttribute('cx','63');dot.setAttribute('cy','45');dot.setAttribute('r','8');dot.setAttribute('fill','#ffbf75');art.appendChild(dot)}else drawSymbol(art,kind,false,false);const label=document.createElement('span');label.textContent=d[0];b.append(art,label);b.title=d[0]+' · '+d[1];b.onclick=()=>{if(simulation){alert('Activa Editar para agregar componentes.');return}if(kind==='junction'){placingJunction=true;E('junctionInstructions').textContent='Haz clic en un espacio libre del circuito para colocar el punto de unión. Esc cancela.';return}
+if(kind==='junction'){const dot=document.createElementNS(NS,'circle');dot.setAttribute('cx','63');dot.setAttribute('cy','45');dot.setAttribute('r','8');dot.setAttribute('fill','#ffbf75');art.appendChild(dot)}else drawSymbol(art,kind,false,false);const label=document.createElement('span');label.textContent=d[0];b.append(art,label);b.title=d[0]+' · '+d[1];b.onclick=()=>{if(simulation){alert('Activa Editar para agregar componentes.');return}if(kind==='junction'){wirePointMode=false;placingJunction=true;E('junctionInstructions').textContent='Haz clic en un espacio libre del circuito para colocar el punto de unión. Esc cancela.';return}
  const n=A(kind,430+Math.floor(Math.random()*300),235+Math.floor(Math.random()*100));chosen={kind:'node',id:n.id};draw()};tgt.appendChild(b)}
 ['no','nc','selector','selectorNC','selector3','limit','rollerNC','rollerLever','ind','opt','cap','emergency','pressure','level','breaker'].forEach(k=>icon(E('sensors'),k));['green','red','amber','blue','white','relay','buzzer','solenoid','motorLoad','fuse'].forEach(k=>icon(E('loads'),k));['timer','tofBlock','ctuBlock','ctdBlock','cmpBlock'].forEach(k=>icon(E('timers'),k));icon(E('junctions'),'junction');
 E('addInput').onclick=()=>changePLC('input',1);E('dropInput').onclick=()=>changePLC('input',-1);
@@ -3936,6 +3936,22 @@ E('uploadProjectFile').onchange=async e=>{
  try{await projectReaderOpen(file)}
  catch(error){E('projectPreview').textContent='No se pudo leer: '+error.message}
  e.target.value='';
+};
+
+
+let wirePointMode=false;
+E('pointMode').onclick=()=>{
+ if(simulation){E('junctionInstructions').textContent='Activa Edit Mode para añadir puntos eléctricos.';return}
+ wirePointMode=!wirePointMode;placingJunction=false;
+ E('pointMode').classList.toggle('selected',wirePointMode);
+ E('junctionInstructions').textContent=wirePointMode?'WIRE POINTS ACTIVADOS: clic libre crea un nodo; clic sobre un cable lo divide en dos cables unidos. Conecta desde cualquier borne al punto y vuelve a ramificar. Esc para salir.':'WIRE POINTS desactivado. Puedes seguir usando Junction desde la paleta.';
+};
+E('routeAll').onclick=()=>{
+ if(simulation){E('junctionInstructions').textContent='Cambia a Edit Mode para limpiar rutas.';return}
+ const count=wires.filter(w=>w.waypoints?.length||Number.isFinite(w.bendX)).length;
+ if(count&&!confirm('¿Eliminar '+count+' quiebre(s) manual(es)? Se recalcularán las rutas, sin cambiar conexiones.'))return;
+ for(const wire of wires){wire.waypoints=[];delete wire.bendX;delete wire.bendY}
+ draw();E('junctionInstructions').textContent='Rutas recalculadas. Los puntos eléctricos y el circuito permanecen conectados.';
 };
 
 function snapshot(){return {version:8,nodes:JSON.parse(JSON.stringify(nodes)),wires:JSON.parse(JSON.stringify(wires)),ladder:ladderPlan?JSON.parse(JSON.stringify(ladderPlan)):null,graphicLadder:JSON.parse(JSON.stringify(graphicLadder)),scene:JSON.parse(JSON.stringify({template:sceneState.template,objects:sceneState.objects,virtual:sceneState.virtual,enabled:sceneState.enabled,autoSensor:sceneState.autoSensor})),name:E('projectName').value.trim()||'Proyecto sin título'}}
